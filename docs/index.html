@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiteKit - Local AI Resource Mapping SDK</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-book logo-icon"></i>
+                <span class="brand-name">CiteKit</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#guide">Guide</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="examples.html">Examples</a></li>
+                <li><a href="mcp.html">MCP</a></li>
+                <li><a href="https://github.com/citekit/citekit" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">
+                Local AI Resource Mapping
+                <span class="gradient-text">Made Simple</span>
+            </h1>
+            <p class="hero-subtitle">
+                Let AI agents access specific parts of files—PDF pages, video clips, audio segments—without sending
+                entire documents to the cloud.
+            </p>
+            <div class="hero-actions">
+                <a href="#quick-start" class="btn btn-primary">Get Started</a>
+                <a href="https://pypi.org/project/citekit" class="btn btn-secondary" target="_blank">View on PyPI</a>
+            </div>
+            <div class="code-preview">
+                <div class="code-tabs">
+                    <button class="tab active" data-lang="python">Python</button>
+                    <button class="tab" data-lang="javascript">JavaScript</button>
+                </div>
+                <div class="code-content" data-lang="python">
+                    <pre><code><span class="keyword">from</span> citekit <span class="keyword">import</span> CiteKitClient
+
+client = CiteKitClient()
+
+<span class="comment"># Ingest a file</span>
+map = <span class="keyword">await</span> client.ingest(<span class="string">"research.pdf"</span>)
+
+<span class="comment"># Resolve specific content</span>
+evidence = <span class="keyword">await</span> client.resolve(<span class="string">"research.intro.definition"</span>)
+<span class="builtin">print</span>(evidence.output_path)  <span class="comment"># mini-PDF with just that section</span></code></pre>
+                </div>
+                <div class="code-content hidden" data-lang="javascript">
+                    <pre><code><span class="keyword">import</span> { CiteKitClient } <span class="keyword">from</span> <span class="string">'citekit'</span>;
+
+<span class="keyword">const</span> client = <span class="keyword">new</span> CiteKitClient();
+
+<span class="comment">// Ingest a file</span>
+<span class="keyword">const</span> map = <span class="keyword">await</span> client.ingest(<span class="string">"research.pdf"</span>);
+
+<span class="comment">// Resolve specific content</span>
+<span class="keyword">const</span> evidence = <span class="keyword">await</span> client.resolve(<span class="string">"research.intro.definition"</span>);
+console.log(evidence.output_path);  <span class="comment">// mini-PDF with just that section</span></code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why CiteKit?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                    <h3>Local-First</h3>
+                    <p>All file processing happens on your machine. No cloud storage. Your data stays private.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>Precise Extraction</h3>
+                    <p>Get exact PDF pages, video clips, or image crops—not generic summaries.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                    <h3>AI-Powered</h3>
+                    <p>Uses LLMs to generate structured maps of your content automatically.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-cubes"></i></div>
+                    <h3>Multi-Modal</h3>
+                    <p>Supports PDFs, videos, audio, and images out of the box.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-plug"></i></div>
+                    <h3>MCP Compatible</h3>
+                    <p>Works with Claude, Cline, and other MCP-compatible AI agents.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>Zero Config</h3>
+                    <p>Install and start using in seconds. No complex setup required.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section class="quick-start" id="quick-start">
+        <div class="container">
+            <h2 class="section-title">Quick Start</h2>
+
+            <div class="install-section">
+                <h3>Installation</h3>
+                <div class="install-grid">
+                    <div class="install-card">
+                        <h4>Python</h4>
+                        <pre><code>pip install citekit</code></pre>
+                    </div>
+                    <div class="install-card">
+                        <h4>JavaScript</h4>
+                        <pre><code>npm install citekit</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="usage-section">
+                <h3>Basic Usage</h3>
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Set your API key</h4>
+                        <pre><code>export GEMINI_API_KEY=your_key_here</code></pre>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Ingest a file</h4>
+                        <pre><code>citekit ingest my_document.pdf</code></pre>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>List available content</h4>
+                        <pre><code>citekit list</code></pre>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Resolve specific content</h4>
+                        <pre><code>citekit resolve my_document.section1.intro</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Released under the MIT License.</p>
+            <p>Copyright © 2026 CiteKit Team</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

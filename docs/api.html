@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - CiteKit</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .api-section {
+            max-width: 900px;
+            margin: 96px auto;
+            padding: 0 24px;
+        }
+
+        .api-section h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .api-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 64px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .api-section h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            color: var(--color-brand);
+        }
+
+        .api-section p {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .api-section pre {
+            background: var(--color-background-soft);
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+            overflow-x: auto;
+            border: 1px solid var(--color-border);
+        }
+
+        .api-section code {
+            background: var(--color-background-mute);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: var(--font-family-mono);
+        }
+
+        .api-section pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+        }
+
+        .param-table th,
+        .param-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .param-table th {
+            background: var(--color-background-soft);
+            font-weight: 600;
+        }
+
+        .param-table code {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="index.html"
+                    style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit;">
+                    <span class="logo">📚</span>
+                    <span class="brand-name">CiteKit</span>
+                </a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html#guide">Guide</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="examples.html">Examples</a></li>
+                <li><a href="mcp.html">MCP</a></li>
+                <li><a href="https://github.com/citekit/citekit" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="api-section">
+        <h1>API Reference</h1>
+        <p>Complete API documentation for CiteKit Python and JavaScript SDKs.</p>
+
+        <h2>Python API</h2>
+
+        <h3>CiteKitClient</h3>
+        <p>The main client for interacting with CiteKit.</p>
+
+        <pre><code><span class="keyword">from</span> citekit <span class="keyword">import</span> CiteKitClient
+
+client = CiteKitClient(
+    api_key=<span class="string">"your_gemini_key"</span>,  <span class="comment"># Optional, defaults to GEMINI_API_KEY env</span>
+    storage_dir=<span class="string">".resource_maps"</span>,  <span class="comment"># Where maps are stored</span>
+    output_dir=<span class="string">".citekit_output"</span>  <span class="comment"># Where resolved files go</span>
+)</code></pre>
+
+        <h4>Parameters</h4>
+        <table class="param-table">
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>api_key</code></td>
+                <td>str | None</td>
+                <td><code>None</code></td>
+                <td>Gemini API key. If not provided, uses <code>GEMINI_API_KEY</code> environment variable.</td>
+            </tr>
+            <tr>
+                <td><code>storage_dir</code></td>
+                <td>str</td>
+                <td><code>".resource_maps"</code></td>
+                <td>Directory to store generated resource maps.</td>
+            </tr>
+            <tr>
+                <td><code>output_dir</code></td>
+                <td>str</td>
+                <td><code>".citekit_output"</code></td>
+                <td>Directory to save resolved content (mini-PDFs, clips, crops).</td>
+            </tr>
+        </table>
+
+        <h3>client.ingest()</h3>
+        <p>Analyze a file and generate a structured resource map.</p>
+
+        <pre><code>map = <span class="keyword">await</span> client.ingest(
+    resource_path=<span class="string">"document.pdf"</span>,
+    resource_type=<span class="string">"document"</span>  <span class="comment"># "document" | "video" | "audio" | "image"</span>
+)</code></pre>
+
+        <h4>Parameters</h4>
+        <table class="param-table">
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>resource_path</code></td>
+                <td>str</td>
+                <td>Path to the file to ingest.</td>
+            </tr>
+            <tr>
+                <td><code>resource_type</code></td>
+                <td>str</td>
+                <td>Type of resource: <code>"document"</code>, <code>"video"</code>, <code>"audio"</code>, or
+                    <code>"image"</code>.
+                </td>
+            </tr>
+        </table>
+
+        <h4>Returns</h4>
+        <p><code>ResourceMap</code> - A structured map containing nodes, each representing a concept or section.</p>
+
+        <h3>client.resolve()</h3>
+        <p>Extract specific content from a resource based on a node ID.</p>
+
+        <pre><code>evidence = <span class="keyword">await</span> client.resolve(
+    resource_id=<span class="string">"my_video"</span>,
+    node_id=<span class="string">"intro.definition"</span>
+)</code></pre>
+
+        <h4>Parameters</h4>
+        <table class="param-table">
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>resource_id</code></td>
+                <td>str</td>
+                <td>ID of the resource (from the map).</td>
+            </tr>
+            <tr>
+                <td><code>node_id</code></td>
+                <td>str</td>
+                <td>Dot-separated node identifier (e.g., <code>"section1.intro"</code>).</td>
+            </tr>
+        </table>
+
+        <h4>Returns</h4>
+        <p><code>ResolvedEvidence</code> - Contains the path to the extracted content and metadata.</p>
+
+        <h3>client.list_maps()</h3>
+        <p>List all ingested resource IDs.</p>
+
+        <pre><code>resource_ids = client.list_maps()
+<span class="comment"># Returns: ["my_video", "research_paper"]</span></code></pre>
+
+        <h4>Returns</h4>
+        <p><code>list[str]</code> - List of resource IDs.</p>
+
+        <h3>client.get_structure()</h3>
+        <p>Get the full structure (map) of a resource.</p>
+
+        <pre><code>structure = client.get_structure(<span class="string">"my_video"</span>)
+<span class="comment"># Returns dict with nodes, locations, etc.</span></code></pre>
+
+        <h4>Parameters</h4>
+        <table class="param-table">
+            <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>resource_id</code></td>
+                <td>str</td>
+                <td>ID of the resource.</td>
+            </tr>
+        </table>
+
+        <h4>Returns</h4>
+        <p><code>dict</code> - JSON-serializable map structure.</p>
+
+        <h2>JavaScript API</h2>
+
+        <h3>CiteKitClient</h3>
+        <p>The main client for Node.js applications.</p>
+
+        <pre><code><span class="keyword">import</span> { CiteKitClient } <span class="keyword">from</span> <span class="string">'citekit'</span>;
+
+<span class="keyword">const</span> client = <span class="keyword">new</span> CiteKitClient({
+    apiKey: <span class="string">'your_gemini_key'</span>,  <span class="comment">// Optional, defaults to GEMINI_API_KEY env</span>
+    storageDir: <span class="string">'.resource_maps'</span>,
+    outputDir: <span class="string">'.citekit_output'</span>
+});</code></pre>
+
+        <h3>client.ingest()</h3>
+        <p>Same functionality as Python SDK.</p>
+
+        <pre><code><span class="keyword">const</span> map = <span class="keyword">await</span> client.ingest(<span class="string">"document.pdf"</span>, <span class="string">"document"</span>);</code></pre>
+
+        <h3>client.resolve()</h3>
+        <p>Same functionality as Python SDK.</p>
+
+        <pre><code><span class="keyword">const</span> evidence = <span class="keyword">await</span> client.resolve(<span class="string">"my_video"</span>, <span class="string">"intro.definition"</span>);</code></pre>
+
+        <h3>client.listMaps()</h3>
+        <p>List all resource IDs.</p>
+
+        <pre><code><span class="keyword">const</span> ids = client.listMaps();</code></pre>
+
+        <h3>client.getStructure()</h3>
+        <p>Get resource structure.</p>
+
+        <pre><code><span class="keyword">const</span> structure = client.getStructure(<span class="string">"my_video"</span>);</code></pre>
+
+        <h2>Data Models</h2>
+
+        <h3>ResourceMap</h3>
+        <pre><code>{
+  <span class="string">"resource_id"</span>: <span class="string">"my_document"</span>,
+  <span class="string">"type"</span>: <span class="string">"document"</span>,
+  <span class="string">"title"</span>: <span class="string">"My Document"</span>,
+  <span class="string">"source_path"</span>: <span class="string">"/path/to/file.pdf"</span>,
+  <span class="string">"nodes"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"intro"</span>,
+      <span class="string">"title"</span>: <span class="string">"Introduction"</span>,
+      <span class="string">"type"</span>: <span class="string">"section"</span>,
+      <span class="string">"location"</span>: {
+        <span class="string">"modality"</span>: <span class="string">"document"</span>,
+        <span class="string">"pages"</span>: [1, 2]
+      },
+      <span class="string">"summary"</span>: <span class="string">"Overview of the topic"</span>
+    }
+  ],
+  <span class="string">"created_at"</span>: <span class="string">"2026-02-14T..."</span>
+}</code></pre>
+
+        <h3>ResolvedEvidence</h3>
+        <pre><code>{
+  <span class="string">"output_path"</span>: <span class="string">".citekit_output/file_pages_1_2.pdf"</span>,
+  <span class="string">"modality"</span>: <span class="string">"document"</span>,
+  <span class="string">"address"</span>: <span class="string">"doc://my_document#pages=1-2"</span>,
+  <span class="string">"node"</span>: { <span class="comment">/* Node object */</span> },
+  <span class="string">"resource_id"</span>: <span class="string">"my_document"</span>
+}</code></pre>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Released under the MIT License.</p>
+            <p>Copyright © 2026 CiteKit Team</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

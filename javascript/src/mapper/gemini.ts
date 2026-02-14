@@ -1,0 +1,200 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { readFileSync, existsSync } from "node:fs";
+import { basename, extname } from "node:path";
+import { createRequire } from "node:module";
+
+// pdf-parse is a CJS module, best imported via require in ESM
+const require = createRequire(import.meta.url);
+const pdf = require("pdf-parse");
+
+import { MapperProvider } from "./base.js";
+import type { ResourceMap, Node, Location } from "../models.js";
+
+// ── Prompt Templates ────────────────────────────────────────────────────────
+
+const DOCUMENT_PROMPT = `\
+You are a structure analyzer. Given the text content of a document, produce a JSON map \
+that identifies the key concepts, sections, definitions, examples, and diagrams.
+
+Each node must have:
+- "id": a dot-separated identifier (e.g. "chapter1.derivatives.definition")
+- "title": a short human-readable title
+- "type": one of "section", "definition", "example", "explanation", "diagram", "theorem", "exercise", "summary"
+- "location": { "modality": "document", "pages": [list of 1-indexed page numbers] }
+- "summary": a 1-2 sentence summary of what this section covers
+
+Rules:
+- Be thorough — capture ALL distinct concepts, not just top-level sections.
+- Page numbers are 1-indexed.
+- Keep summaries concise but informative.
+- IDs should be hierarchical and descriptive.
+
+Return ONLY a JSON array of nodes. No markdown, no explanation.
+
+Document title: {title}
+
+--- DOCUMENT TEXT (page-delimited) ---
+{text}
+`;
+
+const VIDEO_PROMPT = `\
+You are a video structure analyzer. Given metadata about a video, identify key segments.
+
+Video duration: {duration} seconds
+Filename: {filename}
+
+Each node must have:
+- "id": a descriptive dot-separated identifier
+- "title": a short human-readable title
+- "type": one of "introduction", "explanation", "example", "demonstration", "summary", "transition"
+- "location": { "modality": "video", "start": <seconds>, "end": <seconds> }
+- "summary": brief description of what this segment covers
+
+Rules:
+- Segments should be meaningful chunks, not arbitrary splits.
+- start/end are in seconds.
+- Cover the entire video duration.
+
+Return ONLY a JSON array of nodes. No markdown, no explanation.
+`;
+
+export class GeminiMapper implements MapperProvider {
+    private genAI: GoogleGenerativeAI;
+    private model: any;
+
+    constructor(apiKey: string, modelName: string = "gemini-2.0-flash") {
+        this.genAI = new GoogleGenerativeAI(apiKey);
+        this.model = this.genAI.getGenerativeModel({ model: modelName });
+    }
+
+    async generateMap(
+        resourcePath: string,
+        resourceType: string,
+        resourceId?: string
+    ): Promise<ResourceMap> {
+        if (!existsSync(resourcePath)) {
+            throw new Error(`Resource not found: ${resourcePath}`);
+        }
+
+        const id = resourceId || basename(resourcePath, extname(resourcePath));
+        let nodes: Node[] = [];
+
+        if (resourceType === "document") {
+            nodes = await this.mapDocument(resourcePath);
+        } else if (resourceType === "video") {
+            nodes = await this.mapVideo(resourcePath);
+        } else {
+            // Fallback or TODO for image/audio
+            throw new Error(`Resource type '${resourceType}' not fully implemented in JS port yet.`);
+        }
+
+        return {
+            resource_id: id,
+            type: resourceType,
+            title: id.replace(/[_-]/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+            source_path: resourcePath,
+            nodes: nodes,
+            created_at: new Date().toISOString()
+        };
+    }
+
+    private async mapDocument(path: string): Promise<Node[]> {
+        const dataBuffer = readFileSync(path);
+
+        // Use pdf-parse to extract text. Note: pdf-parse merges pages by default.
+        // To get basic page info we might need a custom render callback, but 
+        // for MVP we'll just extract all text and let Gemini infer or use a simple split.
+        // Actually, pdf-parse provides page count but text is merged.
+        // We can use a pager render callback to insert delimiters.
+
+        const options = {
+            pagerender: (pageData: any) => {
+                return `--- PAGE ${pageData.pageIndex + 1} ---\n` +
+                    pageData.getTextContent().items.map((i: any) => i.str).join(" ");
+            }
+        }
+
+        // TypeScript workaround for pdf-parse types if needed, but import * as pdf works usually.
+        // @ts-ignore
+        const data = await pdf(dataBuffer, options);
+
+        const prompt = DOCUMENT_PROMPT
+            .replace("{title}", basename(path))
+            .replace("{text}", data.text);
+
+        return this.callGemini(prompt);
+    }
+
+    private async mapVideo(path: string): Promise<Node[]> {
+        // We need duration. We can use fluent-ffmpeg to probe.
+        const { ffprobe } = await import("fluent-ffmpeg");
+
+        const duration = await new Promise<number>((resolve, reject) => {
+            ffprobe(path, (err, metadata) => {
+                if (err) return reject(err);
+                resolve(metadata.format.duration || 0);
+            });
+        });
+
+        const prompt = VIDEO_PROMPT
+            .replace("{duration}", duration.toString())
+            .replace("{filename}", basename(path));
+
+        return this.callGemini(prompt);
+    }
+
+    private async callGemini(prompt: string): Promise<Node[]> {
+        const result = await this.model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        return this.parseNodesResponse(text);
+    }
+
+    private parseNodesResponse(text: string): Node[] {
+        let cleaned = text.trim();
+
+        // Regex to extract JSON array [ ... ]
+        const match = cleaned.match(/\[.*\]/s);
+        if (match) {
+            cleaned = match[0];
+        }
+
+        // Remove markdown fences
+        if (cleaned.startsWith("```")) {
+            cleaned = cleaned.replace(/^```[a-z]*\n/, "").replace(/\n```$/, "");
+        }
+
+        // Fix trailing commas: remove comma before ] or }
+        cleaned = cleaned.replace(/,\s*([\]}])/g, "$1");
+
+        // Fix object comma separation: } { -> }, {
+        cleaned = cleaned.replace(/}\s*{/g, "}, {");
+
+        // Attempt verify/repair brackets
+        const openBrackets = (cleaned.match(/\[/g) || []).length - (cleaned.match(/\]/g) || []).length;
+        const openBraces = (cleaned.match(/{/g) || []).length - (cleaned.match(/}/g) || []).length;
+
+        if (openBraces > 0) {
+            cleaned = cleaned.replace(/,+$/, "");
+            cleaned += "}".repeat(openBraces);
+        }
+        if (openBrackets > 0) {
+            cleaned = cleaned.replace(/,+$/, "");
+            cleaned += "]".repeat(openBrackets);
+        }
+
+        try {
+            const rawNodes = JSON.parse(cleaned);
+            return rawNodes.map((raw: any) => ({
+                id: raw.id,
+                title: raw.title,
+                type: raw.type || "section",
+                location: raw.location,
+                summary: raw.summary
+            }));
+        } catch (e) {
+            console.error("DEBUG: Failed JSON parse. Raw:", cleaned);
+            throw new Error(`Failed to parse Gemini JSON: ${e}`);
+        }
+    }
+}
