@@ -15,6 +15,9 @@ const client = new CiteKitClient({
 });
 ```
 
+> [!WARNING]
+> **Vercel Execution Limits**: Ingestion (mapping) can take 15–30 seconds for large files. Standard Vercel Hobby plans have a 10s timeout. Consider using Background Jobs or upgrading to Pro if you ingest large files dynamically.
+
 ### Bundle Size & Optional Dependencies
 CiteKit follows a "pay-for-what-you-use" model for dependencies. Large libraries like `sharp`, `fluent-ffmpeg`, and `pdf-lib` are lazy-loaded. 
 - You do **not** need to install them if you only use CiteKit for mapping/ingestion.

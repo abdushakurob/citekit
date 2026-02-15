@@ -26,14 +26,13 @@ pip install citekit
 
 **1. Ingest a file**
 ```bash
-# Video
-python -m citekit.cli ingest video.mp4 --type video
-
-# Image
-python -m citekit.cli ingest chart.png --type image
+# Video with custom concurrency and retries
+python -m citekit.cli ingest video.mp4 --type video --concurrency 2 --retries 5
 ```
 
-*Supported types*: `video`, `audio`, `document`, `image`.
+*   `--type`, `-t`: One of `video`, `audio`, `document`, `image`.
+*   `--concurrency`, `-c`: Max parallel mapper calls (default: 5).
+*   `--retries`, `-r`: Max API retries (default: 3).
 
 **2. List resources**
 ```bash
@@ -42,8 +41,15 @@ python -m citekit.cli list
 
 **3. Resolve (Extract) content**
 ```bash
-python -m citekit.cli resolve <node_id>
+# Physical extraction (default)
+python -m citekit.cli resolve lecture.intro
+
+# Virtual resolution (metadata only)
+python -m citekit.cli resolve lecture.intro --virtual
 ```
+
+*   `--resource`, `-res`: Optional resource ID (if not provided in rid.nid format).
+*   `--virtual`: If set, returns only timestamps/pages without file extraction.
 
 **4. Start MCP Server**
 ```bash

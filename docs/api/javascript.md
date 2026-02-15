@@ -13,6 +13,7 @@ const client = new CiteKitClient({
     baseDir?: string;       // Defaults to '.', set to os.tmpdir() for serverless
     storageDir?: string;    // Defaults to '.resource_maps'
     outputDir?: string;     // Defaults to '.citekit_output'
+    maxRetries?: number;    // Defaults to 3
 });
 ```
 
@@ -87,6 +88,9 @@ import { createAgentContext } from 'citekit';
 
 const context = createAgentContext(maps, 'markdown');
 ```
+
+> [!IMPORTANT]
+> Always pass an **array** of maps, even for a single resource: `createAgentContext([map])`.
 
 ---
 

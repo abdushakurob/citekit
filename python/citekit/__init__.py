@@ -7,7 +7,7 @@ from citekit.mapper.base import MapperProvider
 from citekit.mapper.gemini import GeminiMapper
 from citekit.aggregator import create_agent_context
 
-__version__ = "0.1.4"
+__version__ = "0.1.6"
 
 __all__ = [
     "ResourceMap",

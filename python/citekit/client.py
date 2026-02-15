@@ -38,8 +38,16 @@ class CiteKitClient:
         storage_dir: str = ".resource_maps",
         output_dir: str = ".citekit_output",
         concurrency_limit: int = 5,
+        api_key: str | None = None,
+        model: str = "gemini-2.0-flash",
+        max_retries: int = 3,
     ):
         self._mapper = mapper
+        if self._mapper is None and (api_key or os.environ.get("GEMINI_API_KEY")):
+            from citekit.mapper.gemini import GeminiMapper
+            key = api_key or os.environ.get("GEMINI_API_KEY")
+            self._mapper = GeminiMapper(api_key=key, model=model, max_retries=max_retries)
+
         base_path = Path(base_dir)
         self._storage_dir = base_path / storage_dir
         self._output_dir = base_path / output_dir

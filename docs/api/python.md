@@ -21,6 +21,9 @@ client = CiteKitClient(
 *   `storage_dir`: Relative path for maps.
 *   `output_dir`: Relative path for extracted files.
 *   `concurrency_limit`: Max parallel mapper calls.
+*   `api_key`: Gemini API key (optional if `mapper` is provided or env is set).
+*   `model`: Gemini model name (default: `"gemini-2.0-flash"`).
+*   `max_retries`: Number of retries for API failures (default: `3`).
 
 ---
 
@@ -101,6 +104,9 @@ from citekit import create_agent_context
 
 context = create_agent_context([map1, map2], format="markdown")
 ```
+
+> [!IMPORTANT]
+> Always pass a **list** of maps, even for a single resource: `create_agent_context([map])`.
 
 ---
 

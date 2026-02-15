@@ -22,10 +22,12 @@ def main():
 @main.command()
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--type", "-t", help="Resource type (document, video, audio, image). If omitted, inferred from extension.")
+@click.option("--concurrency", "-c", default=5, help="Max parallel mapper calls.")
+@click.option("--retries", "-r", default=3, help="Max retries for API failures.")
 @async_command
-async def ingest(path, type):
+async def ingest(path, type, concurrency, retries):
     """Ingest a file and generate a resource map."""
-    client = CiteKitClient()
+    client = CiteKitClient(concurrency_limit=concurrency, max_retries=retries)
     
     if not type:
         ext = Path(path).suffix.lower()
@@ -53,15 +55,31 @@ async def ingest(path, type):
 
 @main.command()
 @click.argument("node_id")
+@click.option("--resource", "-res", help="Resource ID (optional if node_id is unique).")
+@click.option("--virtual", is_flag=True, help="Virtual resolution (metadata only).")
 @async_command
-async def resolve(node_id):
+async def resolve(node_id, resource, virtual):
     """Resolve a node ID to its value (file chunk)."""
     client = CiteKitClient()
     
     click.echo(f"📎 Resolving node: {node_id}")
     try:
-        evidence = await client.resolve(node_id)
-        click.echo(f"✅ Output: {evidence.output_path}")
+        # We need to support the case where node_id is a full address or separate
+        if "." in node_id and not resource:
+            rid, nid = node_id.split(".", 1)
+        else:
+            rid, nid = resource, node_id
+
+        if not rid:
+            # Try to find which resource contains this node
+            click.echo("⚠️ Resource ID missing. Use --resource or rid.nid format.")
+            sys.exit(1)
+
+        evidence = await client.resolve(rid, nid, virtual=virtual)
+        if virtual:
+            click.echo("✅ Virtual resolution successful.")
+        else:
+            click.echo(f"✅ Output: {evidence.output_path}")
         click.echo(f"   Modality: {evidence.modality}")
         click.echo(f"   Address: {evidence.address}")
     except Exception as e:

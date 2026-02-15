@@ -37,6 +37,8 @@ export interface CiteKitClientOptions {
     apiKey?: string;
     /** Gemini Model (default: "gemini-2.0-flash") */
     model?: string;
+    /** Max retries for Gemini API calls. Default: 3 */
+    maxRetries?: number;
 }
 
 export class CiteKitClient {
@@ -65,7 +67,7 @@ export class CiteKitClient {
         // Initialize mapper
         // Note: For this MVP port, we assume GeminiMapper is the default.
         if (apiKey) {
-            this.mapper = new GeminiMapper(apiKey, options.model);
+            this.mapper = new GeminiMapper(apiKey, options.model, options.maxRetries);
         } else {
             // Mock mapper that throws
             this.mapper = {

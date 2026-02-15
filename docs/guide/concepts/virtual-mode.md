@@ -81,3 +81,15 @@ If an agent needs to cite 50 different parts of a book, generating 50 mini-PDFs 
 
 ### 3. Frontend Clipping
 In a React app, use the virtual resolved timestamps to set the `currentTime` of a `<video>` tag.
+
+---
+
+## Best Practices: The "Virtual Pointer" Protocol
+
+When storing resolved evidence in your database, we recommend prefixing virtual addresses to distinguish them from physical file URLs.
+
+> [!TIP]
+> **Observation**: Using a `virtual://` prefix helps your frontend logic instantly decide whether to fetch a file or just seek to a timestamp.
+>
+> 1. **Physical**: `https://cdn.example.com/resolved/clip_1.mp4`
+> 2. **Virtual**: `virtual://video/original#t=180,210`
