@@ -54,4 +54,11 @@ npm install citekit
 npm install -g citekit
 ```
 
+## Real-World Examples
+
+- [**Research App (Node.js)**](/guide/examples/research-app) - Build a CLI that extracts methodology sections from PDFs.
+- [**Video Search Engine (Python)**](/guide/examples/video-search-cli) - Build a tool to semantic search your video library.
+- [**Study Companion (MCP)**](/guide/examples/study-companion) - Connect Claude Desktop to your local lectures.
+- [**Hybrid RAG (Diagram-Aware)**](/guide/examples/rag-fusion) - Use CiteKit to provide visual evidence for text-based RAG.
+
 [Get Started Now →](/guide/getting-started)

@@ -58,6 +58,15 @@ export default withMermaid(defineConfig({
                         { text: 'Deployment Guide', link: '/guide/deployment' },
                         { text: 'Troubleshooting', link: '/guide/troubleshooting' }
                     ]
+                },
+                {
+                    text: 'Real-World Examples',
+                    items: [
+                        { text: 'Research App (Node.js)', link: '/guide/examples/research-app' },
+                        { text: 'Video Search CLI (Python)', link: '/guide/examples/video-search-cli' },
+                        { text: 'Study Companion (MCP)', link: '/guide/examples/study-companion' },
+                        { text: 'Hybrid RAG (Diagrams)', link: '/guide/examples/rag-fusion' }
+                    ]
                 }
             ],
             '/integration/': [
