@@ -2,11 +2,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { readFileSync, existsSync } from "node:fs";
 import { basename, extname } from "node:path";
-import { createRequire } from "node:module";
-
-// pdf-parse is a CJS module, best imported via require in ESM
-const require = createRequire(import.meta.url);
-const pdf = require("pdf-parse");
 
 import { MapperProvider } from "./base.js";
 import type { ResourceMap, Node, Location } from "../models.js";
@@ -14,7 +9,7 @@ import type { ResourceMap, Node, Location } from "../models.js";
 // ── Prompt Templates ────────────────────────────────────────────────────────
 
 const DOCUMENT_PROMPT = `\
-You are a structure analyzer. Given the text content of a document, produce a JSON map \
+You are a structure analyzer. Analyze the attached document to produce a JSON map \
 that identifies the key concepts, sections, definitions, examples, and diagrams.
 
 Each node must have:
@@ -33,9 +28,6 @@ Rules:
 Return ONLY a JSON array of nodes. No markdown, no explanation.
 
 Document title: {title}
-
---- DOCUMENT TEXT (page-delimited) ---
-{text}
 `;
 
 const VIDEO_PROMPT = `\
@@ -100,30 +92,10 @@ export class GeminiMapper implements MapperProvider {
     }
 
     private async mapDocument(path: string): Promise<Node[]> {
-        const dataBuffer = readFileSync(path);
-
-        // Use pdf-parse to extract text. Note: pdf-parse merges pages by default.
-        // To get basic page info we might need a custom render callback, but 
-        // for MVP we'll just extract all text and let Gemini infer or use a simple split.
-        // Actually, pdf-parse provides page count but text is merged.
-        // We can use a pager render callback to insert delimiters.
-
-        const options = {
-            pagerender: (pageData: any) => {
-                return `--- PAGE ${pageData.pageIndex + 1} ---\n` +
-                    pageData.getTextContent().items.map((i: any) => i.str).join(" ");
-            }
-        }
-
-        // TypeScript workaround for pdf-parse types if needed, but import * as pdf works usually.
-        // @ts-ignore
-        const data = await pdf(dataBuffer, options);
-
         const prompt = DOCUMENT_PROMPT
-            .replace("{title}", basename(path))
-            .replace("{text}", data.text);
+            .replace("{title}", basename(path));
 
-        return this.callGemini(prompt);
+        return this.callGeminiWithFile(path, prompt, "application/pdf");
     }
 
     private async mapVideo(path: string): Promise<Node[]> {

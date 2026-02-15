@@ -1,4 +1,3 @@
-import ffmpeg from "fluent-ffmpeg";
 import { join } from "node:path";
 import { Resolver } from "./base.js";
 import type { ResolvedEvidence } from "../models.js";
@@ -11,6 +10,17 @@ export class VideoResolver implements Resolver {
         location: any,
         outputDir: string
     ): Promise<ResolvedEvidence> {
+        let ffmpeg;
+        try {
+            const mod = await import("fluent-ffmpeg");
+            ffmpeg = mod.default;
+        } catch (e) {
+            throw new Error(
+                "The 'fluent-ffmpeg' package is required for video resolution. " +
+                "Please install it with: npm install fluent-ffmpeg"
+            );
+        }
+
         if (location.start === undefined || location.end === undefined) {
             throw new Error(`Node ${nodeId} missing start/end times.`);
         }

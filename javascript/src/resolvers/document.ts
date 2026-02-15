@@ -1,4 +1,3 @@
-import { PDFDocument } from "pdf-lib";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { Resolver } from "./base.js";
@@ -12,6 +11,17 @@ export class DocumentResolver implements Resolver {
         location: any,
         outputDir: string
     ): Promise<ResolvedEvidence> {
+        let PDFDocument;
+        try {
+            const mod = await import("pdf-lib");
+            PDFDocument = mod.PDFDocument;
+        } catch (e) {
+            throw new Error(
+                "The 'pdf-lib' package is required for document resolution. " +
+                "Please install it with: npm install pdf-lib"
+            );
+        }
+
         if (!location.pages || location.pages.length === 0) {
             throw new Error(`Node ${nodeId} has no pages specified.`);
         }
