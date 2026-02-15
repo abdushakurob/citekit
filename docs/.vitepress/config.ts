@@ -4,7 +4,7 @@ import { withMermaid } from 'vitepress-plugin-mermaid'
 export default withMermaid(defineConfig({
     title: 'CiteKit',
     description: 'Local-first AI resource mapping SDK for multimodal agents',
-    base: '/',
+    base: '/citekit/',
 
     markdown: {
         math: true
