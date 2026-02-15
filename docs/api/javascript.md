@@ -9,8 +9,10 @@ import { CiteKitClient } from 'citekit';
 
 const client = new CiteKitClient({
     apiKey?: string;        // Defaults to process.env.GEMINI_API_KEY
-    modelName?: string;     // Defaults to 'gemini-1.5-flash'
-    baseDir?: string;       // Defaults to process.cwd()
+    model?: string;         // Defaults to 'gemini-2.0-flash'
+    baseDir?: string;       // Defaults to '.', set to os.tmpdir() for serverless
+    storageDir?: string;    // Defaults to '.resource_maps'
+    outputDir?: string;     // Defaults to '.citekit_output'
 });
 ```
 
@@ -52,17 +54,43 @@ Extracts a specific node from the source file.
 ```typescript
 async resolve(
     resourceId: string, 
-    nodeId: string
+    nodeId: string,
+    options?: { virtual?: boolean }
 ): Promise<ResolvedEvidence>
 ```
 
-*   `resourceId`: The ID of the resource.
-*   `nodeId`: The ID of the node to extract.
-*   **Returns**: `Promise<ResolvedEvidence>` containing `output_path`.
+*   `resource_id`: The ID of the resource.
+*   `node_id`: The ID of the node to extract.
+*   `options.virtual`: If `true`, returns metadata only (timestamps/pages) without physical file extraction. Required for environments without FFmpeg.
+*   **Returns**: `Promise<ResolvedEvidence>`.
 
 ---
 
-## interfaces
+## Utilities
+
+### `GeminiMapper`
+
+```typescript
+import { GeminiMapper } from 'citekit';
+
+const mapper = new GeminiMapper(
+    apiKey, 
+    "gemini-2.0-flash", 
+    3 // maxRetries
+);
+```
+
+### `createAgentContext`
+
+```typescript
+import { createAgentContext } from 'citekit';
+
+const context = createAgentContext(maps, 'markdown');
+```
+
+---
+
+## Data Models
 
 ### `ResourceMap`
 ```typescript
@@ -88,6 +116,17 @@ interface Node {
 }
 ```
 
+### `ResolvedEvidence`
+```typescript
+interface ResolvedEvidence {
+    output_path?: string;   // Path to file. Undefined if virtual: true.
+    modality: string;
+    address: string;        // URI-style address, e.g. doc://book#pages=12-13
+    node: Node;
+    resource_id: string;
+}
+```
+
 ### `Location`
 ```typescript
 interface Location {
@@ -98,7 +137,7 @@ interface Location {
     // For Documents (1-indexed page numbers)
     pages?: number[];
     
-    // For Images ([x, y, width, height])
-    bbox?: number[];
+    // For Images [x1, y1, x2, y2] (0.0 - 1.0)
+    bbox?: [number, number, number, number];
 }
 ```

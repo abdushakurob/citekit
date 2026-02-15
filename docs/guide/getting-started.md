@@ -4,12 +4,13 @@ This guide covers the installation and basic usage of the CiteKit SDK.
 
 ## Prerequisites
 
-1.  **FFmpeg**: Required for video/audio processing.
+1.  **FFmpeg** (Optional): Required for *physical* video/audio processing.
     -   **Windows**: [Download build](https://gyan.dev/ffmpeg/builds/) and add to PATH.
     -   **macOS**: `brew install ffmpeg`
     -   **Linux**: `sudo apt install ffmpeg`
     
-    *Note: FFmpeg is only required for Video and Audio. PDF and Image support works out of the box.*
+    > [!NOTE]
+    > If you only need **Virtual Resolution** (metadata/timestamps) or are running in an environment where you cannot install binaries, FFmpeg is **NOT** required. See [Virtual Resolution](/guide/concepts/virtual-mode).
 
 2.  **Gemini API Key**: Required for the ingestion phase.
     -   Get a key from [Google AI Studio](https://makersuite.google.com/app/apikey).

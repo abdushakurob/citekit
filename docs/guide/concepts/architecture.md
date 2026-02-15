@@ -28,8 +28,10 @@ graph TD
     App[Agent App] -->|Request Node| F[CiteKit Resolver]
     F -->|Read| E
     F -->|Read| A
-    F -->|Extract Buffer| G[Evidence File]
+    F -->|Physical Mode| G[Evidence File]
+    F -->|Virtual Mode| H[Metadata Only]
     G -->|Return Path| App
+    H -->|Return JSON| App
     end
 ```
 
@@ -77,7 +79,10 @@ This map allows an agent to "read" the entire structure of a 50-page document in
 
 ## 3. The Resolution Engine
 
-The resolution engine is completely local and offline. It uses specialized libraries to extract byte-perfect segments based on the map's coordinates.
+The resolution engine is completely local and offline. It supports two distinct modes:
+
+### Physical Resolution
+Uses specialized libraries to extract byte-perfect segments based on the map's coordinates into new files.
 
 | Modality | Backend Engine | Operation |
 | :--- | :--- | :--- |
@@ -86,13 +91,16 @@ The resolution engine is completely local and offline. It uses specialized libra
 | **Audio** | `ffmpeg` | Trims audio streams to specified timestamps. |
 | **Image** | `Pillow` / `sharp` | Crops images to specified bounding boxes. |
 
+### Virtual Resolution (Zero-Binary)
+Skips the extraction entirely and returns the **conceptual coordinates** (timestamps, page numbers, or bounding boxes) along with a virtual address. This mode has **zero external binary dependencies** (no FFmpeg needed) and is ideal for serverless environments.
+
 ## Data Flow
 
 1.  **Developer** calls `client.ingest("video.mp4")`.
 2.  **CiteKit** generates `video.json` map.
-3.  **Agent** reads `video.json` and decides it needs the "Demo" section (Node ID: `demo_1`).
-4.  **Agent** calls `client.resolve("video", "demo_1")`.
-5.  **CiteKit** executes: `ffmpeg -ss 120 -to 180 -i video.mp4 -c copy out.mp4`.
-6.  **Agent** receives `./.citekit_output/out.mp4` containing only the relevant 60 seconds.
+3.  **Agent** reads `video.json` and decides it needs the "Demo" section.
+4.  **Agent** calls `client.resolve("video", "demo", { virtual: true })`.
+5.  **CiteKit** identifies timestamps: `180.5` to `210.0`.
+6.  **Agent** receives the metadata directly, using it to point an LLM (GenAI File API) at the original file's specific segment.
 
 *The same flow applies to Images (Metadata -> Crop) and PDFs (TOC -> Page Extraction).*

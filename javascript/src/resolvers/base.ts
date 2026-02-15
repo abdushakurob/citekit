@@ -6,6 +6,7 @@ export interface Resolver {
         nodeId: string,
         sourcePath: string,
         location: any,
-        outputDir: string
+        outputDir: string,
+        options?: { virtual?: boolean }
     ): Promise<ResolvedEvidence>;
 }

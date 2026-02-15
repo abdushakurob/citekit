@@ -8,8 +8,19 @@ export class ImageResolver implements Resolver {
         nodeId: string,
         sourcePath: string,
         location: any,
-        outputDir: string
+        outputDir: string,
+        options?: { virtual?: boolean }
     ): Promise<ResolvedEvidence> {
+        // Virtual Resolution: Return BBox metadata without Sharp
+        if (options?.virtual) {
+            return {
+                modality: "image",
+                address: `img://${resourceId}#bbox=${location.bbox.join(",")}`,
+                node: { id: nodeId, location: location } as any,
+                resource_id: resourceId
+            };
+        }
+
         let sharp;
         try {
             const mod = await import("sharp");

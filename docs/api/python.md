@@ -8,15 +8,19 @@ The `citekit` package exports a main client class `CiteKitClient`.
 from citekit import CiteKitClient
 
 client = CiteKitClient(
-    api_key: str | None = None,
-    model_name: str = "gemini-1.5-flash",
-    dirs: DirectoryConfig | None = None
+    mapper: MapperProvider | None = None,
+    base_dir: str = ".",
+    storage_dir: str = ".resource_maps",
+    output_dir: str = ".citekit_output",
+    concurrency_limit: int = 5
 )
 ```
 
-*   `api_key`: Gemini API key. Defaults to `os.environ["GEMINI_API_KEY"]`.
-*   `model_name`: LLM model to use for ingestion. Defaults to `gemini-1.5-flash`.
-*   `dirs`: Custom directory paths for storage.
+*   `mapper`: The analysis provider (e.g., `GeminiMapper`).
+*   `base_dir`: The root directory for storage. Set to `tempfile.gettempdir()` for serverless.
+*   `storage_dir`: Relative path for maps.
+*   `output_dir`: Relative path for extracted files.
+*   `concurrency_limit`: Max parallel mapper calls.
 
 ---
 
@@ -55,16 +59,48 @@ def get_structure(self, resource_id: str) -> ResourceMap
 Extracts a specific node from the source file.
 
 ```python
-async def resolve(
+def resolve(
     self, 
     resource_id: str, 
-    node_id: str
+    node_id: str,
+    virtual: bool = False
 ) -> ResolvedEvidence
 ```
 
 *   `resource_id`: The ID of the resource.
-*   `node_id`: The ID of the node to extract (found in the map).
-*   **Returns**: `ResolvedEvidence` object containing `output_path`.
+*   `node_id`: The ID of the node to extract.
+*   `virtual`: If `True`, returns metadata only without physical extraction.
+*   **Returns**: `ResolvedEvidence` object.
+
+---
+
+## Utilities
+
+### `GeminiMapper`
+
+The default analyzer using Google Gemini.
+
+```python
+from citekit import GeminiMapper
+
+mapper = GeminiMapper(
+    api_key="...", 
+    model="gemini-2.0-flash",
+    max_retries=3
+)
+```
+
+*   `max_retries`: Number of times to retry on API failures (e.g., 429). Uses exponential backoff.
+
+### `create_agent_context`
+
+Aggregates multiple ResourceMaps into a single string for LLM context.
+
+```python
+from citekit import create_agent_context
+
+context = create_agent_context([map1, map2], format="markdown")
+```
 
 ---
 
@@ -92,6 +128,16 @@ class Node(BaseModel):
     children: List[Node] = []
 ```
 
+### `ResolvedEvidence`
+```python
+class ResolvedEvidence(BaseModel):
+    output_path: str | None
+    modality: str
+    address: str
+    node: Node
+    resource_id: str
+```
+
 ### `Location`
 ```python
 class Location(BaseModel):
@@ -102,6 +148,6 @@ class Location(BaseModel):
     # For Documents
     pages: List[int] | None = None
     
-    # For Images
-    bbox: List[int] | None = None
+    # For Images [x1, y1, x2, y2]
+    bbox: Tuple[float, float, float, float] | None = None
 ```

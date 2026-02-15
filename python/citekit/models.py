@@ -61,7 +61,7 @@ class ResourceMap(BaseModel):
 class ResolvedEvidence(BaseModel):
     """Result of resolving a node — the extracted evidence."""
 
-    output_path: str = Field(..., description="Path to the extracted file (mini-PDF, clip, crop, etc.)")
+    output_path: str | None = Field(None, description="Path to the extracted file (mini-PDF, clip, crop, etc.). Optional for virtual resolution.")
     modality: str
     address: str = Field(..., description="URI-style address, e.g. doc://book#pages=12-13")
     node: Node

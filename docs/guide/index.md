@@ -39,7 +39,7 @@ CiteKit answers this by **mapping the file structure first**, letting the agent 
 
 1.  **Ingest**: You pass a file to CiteKit. It uses a Multimodal LLM (Gemini 1.5) *once* to generate a structural map.
 2.  **Store**: The map is saved locally (JSON).
-3.  **Resolve**: When an agent wants "Section 3.1", CiteKit instantly extracts those pages/seconds from the original file on your disk.
+3.  **Resolve**: When an agent wants "Section 3.1", CiteKit instantly extracts those pages/seconds from the original file on your disk (or returns metadata via [**Virtual Resolution**](/guide/concepts/virtual-mode)).
 
 ## Installation
 

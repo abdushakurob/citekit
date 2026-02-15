@@ -52,12 +52,14 @@ Return ONLY a JSON array of nodes. No markdown, no explanation.
 `;
 
 export class GeminiMapper implements MapperProvider {
+    private maxRetries: number;
     private genAI: GoogleGenerativeAI;
     private model: any;
 
-    constructor(apiKey: string, modelName: string = "gemini-2.0-flash") {
+    constructor(apiKey: string, modelName: string = "gemini-2.0-flash", maxRetries: number = 3) {
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({ model: modelName });
+        this.maxRetries = maxRetries;
     }
 
     async generateMap(
@@ -145,20 +147,36 @@ export class GeminiMapper implements MapperProvider {
                 }
             }
 
-            // Generate content
-            const result = await this.model.generateContent([
-                prompt,
-                {
-                    fileData: {
-                        fileUri: uploadResult.file.uri,
-                        mimeType: uploadResult.file.mimeType,
-                    },
-                },
-            ]);
+            // 2. Generate Content
+            let lastErr: any;
+            for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+                try {
+                    const result = await this.model.generateContent([
+                        prompt,
+                        {
+                            fileData: {
+                                fileUri: uploadResult.file.uri,
+                                mimeType: uploadResult.file.mimeType,
+                            },
+                        },
+                    ]);
 
-            const response = await result.response;
-            const text = response.text();
-            return this.parseNodesResponse(text);
+                    const response = await result.response;
+                    const text = response.text();
+                    return this.parseNodesResponse(text);
+                } catch (e: any) {
+                    lastErr = e;
+                    if (attempt < this.maxRetries) {
+                        const wait = Math.pow(2, attempt) * 1000;
+                        console.warn(`WARNING: Mapping failed (attempt ${attempt + 1}/${this.maxRetries + 1}). Retrying in ${wait}ms... Error: ${e.message || e}`);
+                        await new Promise(r => setTimeout(r, wait));
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            throw lastErr;
 
         } finally {
             // Cleanup

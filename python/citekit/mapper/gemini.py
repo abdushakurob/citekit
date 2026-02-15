@@ -96,9 +96,10 @@ class GeminiMapper(MapperProvider):
         model: The Gemini model to use (default: "gemini-2.0-flash").
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-2.0-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash", max_retries: int = 3):
         self._client = genai.Client(api_key=api_key)
         self._model = model
+        self._max_retries = max_retries
 
     async def generate_map(
         self,
@@ -200,27 +201,40 @@ class GeminiMapper(MapperProvider):
                     raise ValueError(f"Video processing failed: {file_obj.error.message}")
 
             # 2. Generate Content
-            response = self._client.models.generate_content(
-                model=self._model,
-                contents=[
-                    genai_types.Content(
-                        parts=[
-                            genai_types.Part(text=prompt),
-                            genai_types.Part(
-                                file_data=genai_types.FileData(
-                                    file_uri=file_obj.uri,
-                                    mime_type=file_obj.mime_type
-                                )
-                            ),
-                        ]
+            import time
+            last_err = None
+            for attempt in range(self._max_retries + 1):
+                try:
+                    response = self._client.models.generate_content(
+                        model=self._model,
+                        contents=[
+                            genai_types.Content(
+                                parts=[
+                                    genai_types.Part(text=prompt),
+                                    genai_types.Part(
+                                        file_data=genai_types.FileData(
+                                            file_uri=file_obj.uri,
+                                            mime_type=file_obj.mime_type
+                                        )
+                                    ),
+                                ]
+                            )
+                        ],
+                        config=genai_types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                        ),
                     )
-                ],
-                config=genai_types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                ),
-            )
+                    return self._parse_nodes_response(response.text)
+                except Exception as e:
+                    last_err = e
+                    if attempt < self._max_retries:
+                        wait = 2 ** attempt # Exponential backoff
+                        print(f"WARNING: Mapping failed (attempt {attempt+1}/{self._max_retries+1}). Retrying in {wait}s... Error: {e}")
+                        time.sleep(wait)
+                    else:
+                        break
             
-            return self._parse_nodes_response(response.text)
+            raise last_err
 
         finally:
             # 3. Cleanup

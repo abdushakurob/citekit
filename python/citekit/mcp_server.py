@@ -82,6 +82,10 @@ def create_server(
                             "type": "string",
                             "description": "The node ID to resolve (e.g. 'derivatives.definition').",
                         },
+                        "virtual": {
+                            "type": "boolean",
+                            "description": "If True, returns only metadata (timestamps/pages) without physical extraction. Useful for serverless/AI usage.",
+                        },
                     },
                     "required": ["resource_id", "node_id"],
                 },
@@ -111,8 +115,9 @@ def create_server(
         elif name == "resolve":
             resource_id = arguments["resource_id"]
             node_id = arguments["node_id"]
+            virtual = arguments.get("virtual", False)
             try:
-                evidence = client.resolve(resource_id, node_id)
+                evidence = client.resolve(resource_id, node_id, virtual=virtual)
                 return [TextContent(
                     type="text",
                     text=json.dumps(evidence.model_dump(mode="json"), indent=2),

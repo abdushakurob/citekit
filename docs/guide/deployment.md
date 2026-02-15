@@ -2,9 +2,9 @@
 
 Deploying an application that uses CiteKit requires careful consideration of the **Runtime Environment**, specifically regarding FFmpeg availability.
 
-## Serverless / Vercel
+## Serverless & Constrained Runtimes
 
-CiteKit is designed to work seamlessly in serverless environments like Vercel and AWS Lambda.
+CiteKit is designed to work seamlessly in restricted environments like AWS Lambda, Vercel, or other serverless functions.
 
 ### Read-only Filesystems
 Most serverless runtimes have a read-only filesystem except for the `/tmp` directory. To avoid errors, use the `baseDir` option:
@@ -22,6 +22,19 @@ CiteKit follows a "pay-for-what-you-use" model for dependencies. Large libraries
 
 ### Zero Browser Dependencies
 We have removed all browser-centric libraries (like `pdf-parse`) to eliminate `DOMMatrix` or `Canvas` related errors that typically plague PDF processing in Node.js environments.
+
+### The "Virtual Mode" Solution (Binary-Free)
+
+If you are running in an environment where you cannot or do not want to install FFmpeg, you can still use CiteKit for video and audio by using **Virtual Resolution**.
+
+Instead of creating a physical clip, CiteKit returns the exact timestamp metadata. You can then pass these timestamps to your LLM API (like Gemini's `startOffset`) or use them in your frontend video player.
+
+```javascript
+// Serverless-safe resolution
+const evidence = await client.resolve(vid, node, { virtual: true });
+
+console.log(evidence.node.location.start); // e.g., 180.5
+```
 
 ## Docker (Recommended)
 

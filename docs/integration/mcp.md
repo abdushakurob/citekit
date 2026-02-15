@@ -82,7 +82,9 @@ Once connected, the AI will have access to these tools:
 
 1.  **`listResources`**: Lists all generated maps in your `.resource_maps` directory.
 2.  **`getStructure`**: Returns the full JSON structure of a specific map, including all chapters, sections, and timestamps.
-3.  **`resolve`**: Extracts a specific node (clip/page) and returns its local path for the agent to "see".
+3.  **`resolve`**: Extracts a specific node (clip/page).
+    -   **Physical (Default)**: Returns a local path to the extracted file.
+    -   **Virtual**: Returns only the metadata (timestamps/pages) without extraction. Pass `"virtual": true` in arguments.
 
 ---
 

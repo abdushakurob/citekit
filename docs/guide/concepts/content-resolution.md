@@ -2,11 +2,16 @@
 
 **Resolution** is the process of extracting a specific segment from a source file based on a `ResourceNode`.
 
-## The Principle: "Just-in-Time Extraction"
+## Modes of Resolution
 
-CiteKit does not pre-chunk your files. Pre-chunking (like in traditional RAG) is lossy and rigid. Instead, CiteKit keeps the original high-fidelity file and extracts *exact* segments only when an Agent requests them.
+CiteKit supports two modes of resolution depending on your environment:
 
-## Mechanism by Modality
+1.  **Physical Resolution** (Default): Extracts a new file (clip, mini-PDF, crop) to your disk. Requires local binaries like FFmpeg.
+2.  **Virtual Resolution**: Returns only the metadata (timestamps, pages, bounding boxes) without creating a file. **Perfect for serverless and direct AI model consumption.**
+
+See the [Virtual Resolution Guide](/guide/concepts/virtual-mode) for more.
+
+## Mechanism by Modality (Physical)
 
 ### 1. Video & Audio (FFmpeg)
 

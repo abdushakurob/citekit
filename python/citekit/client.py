@@ -34,13 +34,15 @@ class CiteKitClient:
     def __init__(
         self,
         mapper: MapperProvider | None = None,
+        base_dir: str = ".",
         storage_dir: str = ".resource_maps",
         output_dir: str = ".citekit_output",
         concurrency_limit: int = 5,
     ):
         self._mapper = mapper
-        self._storage_dir = Path(storage_dir)
-        self._output_dir = Path(output_dir)
+        base_path = Path(base_dir)
+        self._storage_dir = base_path / storage_dir
+        self._output_dir = base_path / output_dir
         self._storage_dir.mkdir(parents=True, exist_ok=True)
         self._output_dir.mkdir(parents=True, exist_ok=True)
         
@@ -50,10 +52,10 @@ class CiteKitClient:
 
         # Initialize resolvers
         self._resolvers = {
-            "document": DocumentResolver(output_dir=output_dir),
-            "video": VideoResolver(output_dir=output_dir),
-            "audio": AudioResolver(output_dir=output_dir),
-            "image": ImageResolver(output_dir=output_dir),
+            "document": DocumentResolver(output_dir=str(self._output_dir)),
+            "video": VideoResolver(output_dir=str(self._output_dir)),
+            "audio": AudioResolver(output_dir=str(self._output_dir)),
+            "image": ImageResolver(output_dir=str(self._output_dir)),
         }
 
     # ── Ingestion ────────────────────────────────────────────────────────────
@@ -165,15 +167,16 @@ class CiteKitClient:
 
     # ── Resolution ───────────────────────────────────────────────────────────
 
-    def resolve(self, resource_id: str, node_id: str) -> ResolvedEvidence:
+    def resolve(self, resource_id: str, node_id: str, virtual: bool = False) -> ResolvedEvidence:
         """Resolve a node into extracted evidence.
 
         Args:
             resource_id: The resource to look up.
             node_id: The node ID within that resource.
+            virtual: If True, returns only metadata without physical extraction.
 
         Returns:
-            ResolvedEvidence with the path to the extracted file.
+            ResolvedEvidence with the path to the extracted file (or None if virtual).
         """
         resource_map = self.get_map(resource_id)
         node = resource_map.get_node(node_id)
@@ -185,18 +188,26 @@ class CiteKitClient:
                 f"Available nodes: {available}"
             )
 
-        # Pick the right resolver
+        # Build the URI address
+        address = build_address(resource_id, node.location)
         modality = node.location.modality
-        resolver = self._resolvers.get(modality)
 
+        # 1. Virtual Resolution: Early Return
+        if virtual:
+            return ResolvedEvidence(
+                output_path=None,
+                modality=modality,
+                address=address,
+                node=node,
+                resource_id=resource_id,
+            )
+
+        # 2. Physical Resolution
+        resolver = self._resolvers.get(modality)
         if resolver is None:
             raise ValueError(f"No resolver for modality: {modality}")
 
-        # Resolve
         output_path = resolver.resolve(node, resource_map.source_path)
-
-        # Build the URI address
-        address = build_address(resource_id, node.location)
 
         return ResolvedEvidence(
             output_path=output_path,

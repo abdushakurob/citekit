@@ -23,6 +23,13 @@ Try running the FFmpeg command manually to see the error details. CiteKit prints
 **Fix**:
 Check your .env file or environment variables. Ensure the key has permissions for "Generative Language API".
 
+### "429 Too Many Requests"
+**Cause**: You have hit the Gemini API rate limits (RPM or RPD).
+**Fix**:
+- **Exponential Backoff**: CiteKit now supports automatic retries. Ensure `maxRetries` is set in your mapper.
+- **Pay-as-you-go**: If using the Free Tier, wait for your quota to reset or upgrade in Google AI Studio.
+- **Concurrency**: Reduce the `concurrency_limit` in `CiteKitClient` (default: 5) to lower the parallel request volume.
+
 ### "Model not found"
 **Cause**: The requested model (e.g., `gemini-1.5-flash`) is not available in your region or account tier.
 **Fix**:

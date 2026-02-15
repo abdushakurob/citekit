@@ -56,8 +56,8 @@ export interface ResourceMap {
 
 /** Result of resolving a node. */
 export interface ResolvedEvidence {
-    /** Path to the extracted file (mini-PDF, clip, crop, etc.) */
-    output_path: string;
+    /** Path to the extracted file (mini-PDF, clip, crop, etc.). Optional for virtual resolution. */
+    output_path?: string;
     modality: string;
     /** URI-style address, e.g. doc://book#pages=12-13 */
     address: string;

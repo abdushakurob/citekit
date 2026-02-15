@@ -5,8 +5,9 @@ from citekit.client import CiteKitClient
 from citekit.address import parse_address, build_address
 from citekit.mapper.base import MapperProvider
 from citekit.mapper.gemini import GeminiMapper
+from citekit.aggregator import create_agent_context
 
-__version__ = "0.1.0"
+__version__ = "0.1.4"
 
 __all__ = [
     "ResourceMap",
@@ -18,4 +19,5 @@ __all__ = [
     "build_address",
     "MapperProvider",
     "GeminiMapper",
+    "create_agent_context",
 ]

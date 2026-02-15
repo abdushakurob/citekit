@@ -61,7 +61,21 @@ The `location` object is polymorphic.
 **BoundingBox (Image)**
 ```json
 {
-  "bbox": [10, 10, 100, 100]
+  "bbox": [0.1, 0.1, 0.9, 0.9]
 }
 ```
-*Format: [x, y, width, height]*
+*Format: [x1, y1, x2, y2] (Normalized 0.0 - 1.0)*
+
+## Resolved Evidence
+
+The object returned by `client.resolve()`.
+
+```json
+{
+  "output_path": "string (optional)",
+  "modality": "string",
+  "address": "string (URI)",
+  "node": { "Object": "Ref back to node" },
+  "resource_id": "string"
+}
+```

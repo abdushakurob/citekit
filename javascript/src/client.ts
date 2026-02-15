@@ -228,7 +228,7 @@ export class CiteKitClient {
     /**
      * Resolve a node to evidence using the appropriate resolver.
      */
-    async resolve(resourceId: string, nodeId: string): Promise<ResolvedEvidence> {
+    async resolve(resourceId: string, nodeId: string, options?: { virtual?: boolean }): Promise<ResolvedEvidence> {
         const map = this.getMap(resourceId);
         const node = map.nodes.find((n) => n.id === nodeId);
 
@@ -254,7 +254,8 @@ export class CiteKitClient {
             nodeId,
             map.source_path,
             node.location,
-            this.outputDir
+            this.outputDir,
+            options
         );
     }
 }

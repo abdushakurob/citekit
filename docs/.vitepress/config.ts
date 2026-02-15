@@ -48,7 +48,8 @@ export default withMermaid(defineConfig({
                         { text: 'Architecture', link: '/guide/concepts/architecture' },
                         { text: 'Ingestion Process', link: '/guide/concepts/ingestion' },
                         { text: 'Resource Maps', link: '/guide/concepts/resource-mapping' },
-                        { text: 'Content Resolution', link: '/guide/concepts/content-resolution' }
+                        { text: 'Content Resolution', link: '/guide/concepts/content-resolution' },
+                        { text: 'Virtual Resolution (Serverless)', link: '/guide/concepts/virtual-mode' }
                     ]
                 },
                 {
@@ -74,7 +75,8 @@ export default withMermaid(defineConfig({
                     text: 'Integration',
                     items: [
                         { text: 'MCP (Claude/Cline)', link: '/integration/mcp' },
-                        { text: 'Agent Frameworks', link: '/integration/agents' }
+                        { text: 'Agent Frameworks', link: '/integration/agents' },
+                        { text: 'Virtual Resolution', link: '/guide/concepts/virtual-mode' }
                     ]
                 }
             ],
@@ -85,7 +87,8 @@ export default withMermaid(defineConfig({
                         { text: 'Python SDK', link: '/api/python' },
                         { text: 'JavaScript SDK', link: '/api/javascript' },
                         { text: 'CLI Reference', link: '/api/cli' },
-                        { text: 'Data Models', link: '/api/models' }
+                        { text: 'Data Models', link: '/api/models' },
+                        { text: 'Virtual Resolution', link: '/guide/concepts/virtual-mode' }
                     ]
                 }
             ]

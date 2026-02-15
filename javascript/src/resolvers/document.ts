@@ -9,8 +9,19 @@ export class DocumentResolver implements Resolver {
         nodeId: string,
         sourcePath: string,
         location: any,
-        outputDir: string
+        outputDir: string,
+        options?: { virtual?: boolean }
     ): Promise<ResolvedEvidence> {
+        // Virtual Resolution: Return page metadata without PDF manipulation
+        if (options?.virtual) {
+            return {
+                modality: "document",
+                address: `doc://${resourceId}#pages=${location.pages.join(",")}`,
+                node: { id: nodeId, location: location } as any,
+                resource_id: resourceId
+            };
+        }
+
         let PDFDocument;
         try {
             const mod = await import("pdf-lib");

@@ -64,6 +64,10 @@ function createServer(storageDir?: string, outputDir?: string): Server {
                             type: "string",
                             description: "The node ID to resolve.",
                         },
+                        virtual: {
+                            type: "boolean",
+                            description: "If true, returns only metadata (timestamps/pages) without physical extraction. Useful for serverless/AI usage.",
+                        },
                     },
                     required: ["resource_id", "node_id"],
                 },
@@ -103,8 +107,8 @@ function createServer(storageDir?: string, outputDir?: string): Server {
             }
 
             if (name === "resolve") {
-                const { resource_id, node_id } = args as Record<string, string>;
-                const evidence = client.resolve(resource_id, node_id);
+                const { resource_id, node_id, virtual } = args as any;
+                const evidence = await client.resolve(resource_id, node_id, { virtual: !!virtual });
                 return {
                     content: [
                         {

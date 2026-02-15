@@ -8,8 +8,19 @@ export class VideoResolver implements Resolver {
         nodeId: string,
         sourcePath: string,
         location: any,
-        outputDir: string
+        outputDir: string,
+        options?: { virtual?: boolean }
     ): Promise<ResolvedEvidence> {
+        // Virtual Resolution: Return metadata without FFmpeg
+        if (options?.virtual) {
+            return {
+                modality: "video",
+                address: `video://${resourceId}#t=${location.start},${location.end}`,
+                node: { id: nodeId, location: location } as any,
+                resource_id: resourceId
+            };
+        }
+
         let ffmpeg;
         try {
             const mod = await import("fluent-ffmpeg");

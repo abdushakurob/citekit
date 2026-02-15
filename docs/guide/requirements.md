@@ -20,12 +20,15 @@ CiteKit is tested and supported on:
 
 ## External Dependencies
 
-### FFmpeg
+### FFmpeg (Optional)
 
 **Why is it needed?**
-CiteKit uses FFmpeg to slice video and audio files locally. Without it, you cannot resolve video/audio nodes.
+CiteKit uses FFmpeg to slice video and audio files locally (**Physical Resolution**). Without it, you cannot resolve video/audio into new clip files.
 
-> **Note**: FFmpeg is **NOT** required for PDF or Image processing. Those work out of the box with `pip install citekit` or `npm install citekit`.
+**When is it NOT needed?**
+-   **Virtual Resolution**: If you only need timestamps/metadata.
+-   **Modality**: If you only use PDFs or Images.
+-   **Serverless**: Use [Virtual Mode](/guide/concepts/virtual-mode) for zero-binary deployments.
 
 **Requirement:**
 *   **FFmpeg 4.0+**
