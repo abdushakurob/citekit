@@ -24,6 +24,11 @@ import type { Resolver } from "./resolvers/base.js";
 // ────────────────────────────────────────────────────────────────────────────
 
 export interface CiteKitClientOptions {
+    /**
+     * Base directory for all CiteKit storage.
+     * Useful for serverless environments (e.g. set to os.tmpdir()).
+     */
+    baseDir?: string;
     /** Directory where resource maps are stored. Default: ".resource_maps" */
     storageDir?: string;
     /** Directory for resolved output files. Default: ".citekit_output" */
@@ -41,8 +46,9 @@ export class CiteKitClient {
     private resolvers: Record<string, Resolver>;
 
     constructor(options: CiteKitClientOptions = {}) {
-        this.storageDir = options.storageDir ?? ".resource_maps";
-        this.outputDir = options.outputDir ?? ".citekit_output";
+        const baseDir = options.baseDir ?? ".";
+        this.storageDir = join(baseDir, options.storageDir ?? ".resource_maps");
+        this.outputDir = join(baseDir, options.outputDir ?? ".citekit_output");
 
         const apiKey = options.apiKey ?? process.env.GEMINI_API_KEY;
         if (!apiKey) {

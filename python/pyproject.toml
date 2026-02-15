@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "citekit"
-version = "0.1.2"
+version = "0.1.3"
 description = "A local SDK that lets AI agents open specific parts of files instead of sending entire documents."
 readme = "README.md"
 requires-python = ">=3.10"

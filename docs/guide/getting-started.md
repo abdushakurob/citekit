@@ -91,3 +91,8 @@ main();
 
 -   **Architecture**: Understand how CiteKit works under the hood in [Core Concepts](/guide/concepts/architecture).
 -   **API Reference**: View the full [Python](/api/python) or [JavaScript](/api/javascript) API docs.
+-   **Deployment**: Learn how to configure CiteKit for [Vercel and AWS Lambda](/guide/deployment).
+
+> [!TIP]
+> **Running on Vercel or AWS Lambda?**
+> Set the `baseDir` to `/tmp` in your `CiteKitClient` configuration to support the read-only filesystem!

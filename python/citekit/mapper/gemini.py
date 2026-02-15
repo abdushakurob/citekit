@@ -16,7 +16,7 @@ from citekit.models import Location, Node, ResourceMap
 # ── Prompt templates ─────────────────────────────────────────────────────────
 
 _DOCUMENT_PROMPT = """\
-You are a structure analyzer. Given the text content of a document, produce a JSON map \
+You are a structure analyzer. Analyze the attached document to produce a JSON map \
 that identifies the key concepts, sections, definitions, examples, and diagrams.
 
 Each node must have:
@@ -35,9 +35,6 @@ Rules:
 Return ONLY a JSON array of nodes. No markdown, no explanation.
 
 Document title: {title}
-
---- DOCUMENT TEXT (page-delimited) ---
-{text}
 """
 
 _IMAGE_PROMPT = """\
@@ -138,21 +135,9 @@ class GeminiMapper(MapperProvider):
     # ── Private methods ──────────────────────────────────────────────────────
 
     async def _map_document(self, path: Path) -> list[Node]:
-        """Extract text from PDF and send to Gemini for structure analysis."""
-        import fitz  # PyMuPDF
-
-        doc = fitz.open(str(path))
-        pages_text = []
-        for i, page in enumerate(doc, start=1):
-            text = page.get_text()
-            if text.strip():
-                pages_text.append(f"--- PAGE {i} ---\n{text}")
-        doc.close()
-
-        full_text = "\n\n".join(pages_text)
-        prompt = _DOCUMENT_PROMPT.format(title=path.stem, text=full_text)
-
-        return await self._call_gemini_for_nodes(prompt)
+        """Upload PDF to Gemini and ask for structure analysis."""
+        prompt = _DOCUMENT_PROMPT.format(title=path.stem)
+        return await self._call_gemini_with_file(path, prompt, mime_type="application/pdf")
 
     async def _map_image(self, path: Path) -> list[Node]:
         """Send image to Gemini for region analysis."""
@@ -365,8 +350,9 @@ def _guess_image_mime(path: Path) -> str:
 def _guess_mime_type(path: Path) -> str:
     """Guess MIME type for video/audio."""
     ext = path.suffix.lower()
+    if ext == ".pdf": return "application/pdf"
     if ext in (".mp4", ".m4v", ".mov"): return "video/mp4"
-    if ext in (".mp3", ".wav", ".aac", ".m4a"): return "audio/mp4" # Gemini is flexible, but audio/mp3 works too
+    if ext in (".mp3", ".wav", ".aac", ".m4a"): return "audio/mp4"
     if ext in (".png", ".jpg", ".jpeg"): return "image/jpeg"
     return "application/octet-stream"
 

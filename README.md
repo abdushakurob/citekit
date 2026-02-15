@@ -17,8 +17,11 @@ CiteKit enables AI agents to access specific parts of files—PDF pages, video c
   - **SHA-256 Hashing & Caching**: Never re-process the same file twice.
   - **Concurrency Control**: Built-in queueing to manage API rate limits.
 - **Precise Extraction**: Get exact PDF pages, video clips (stream-copied), or image crops.
+- **Serverless Friendly**:
+  - **Zero Browser Dependencies**: Removed `pdf-parse` to avoid `DOMMatrix` errors in Vercel/Lambda.
+  - **Configurable `baseDir`**: Support for read-only filesystems (e.g., `/tmp`).
+  - **Lazy Resolution**: Internal dependencies (`sharp`, `ffmpeg`) are optional and lazy-loaded.
 - **MCP Compatible**: Works native with Claude Desktop and Cline.
-- **Zero Config**: Smart defaults for immediate usage.
 
 ## Installation
 

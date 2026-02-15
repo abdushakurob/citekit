@@ -1,4 +1,3 @@
-import sharp from "sharp";
 import { join } from "node:path";
 import { Resolver } from "./base.js";
 import type { ResolvedEvidence } from "../models.js";
@@ -11,6 +10,17 @@ export class ImageResolver implements Resolver {
         location: any,
         outputDir: string
     ): Promise<ResolvedEvidence> {
+        let sharp;
+        try {
+            const mod = await import("sharp");
+            sharp = mod.default;
+        } catch (e) {
+            throw new Error(
+                "The 'sharp' package is required for image resolution. " +
+                "Please install it with: npm install sharp"
+            );
+        }
+
         if (!location.bbox || location.bbox.length !== 4) {
             throw new Error(`Node ${nodeId} missing valid bbox.`);
         }

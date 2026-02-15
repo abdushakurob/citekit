@@ -2,20 +2,26 @@
 
 Deploying an application that uses CiteKit requires careful consideration of the **Runtime Environment**, specifically regarding FFmpeg availability.
 
-## The Serverless Challenge
+## Serverless / Vercel
 
-Most "Serverless" environments (AWS Lambda, Vercel Functions, Netlify Functions) have limitations:
-1.  **No FFmpeg**: Not installed by default.
-2.  **Timeouts**: Execution limits (10-60s) may interrupt video processing.
-3.  **Ephemeral Storage**: Limited disk space.
+CiteKit is designed to work seamlessly in serverless environments like Vercel and AWS Lambda.
 
-### Compatibility Table
+### Read-only Filesystems
+Most serverless runtimes have a read-only filesystem except for the `/tmp` directory. To avoid errors, use the `baseDir` option:
 
-| Platform | Ingestion (Gemini) | Resolution (FFmpeg) |
-| :--- | :--- | :--- |
-| **Vercel / Netlify** | Yes | No (usually) |
-| **AWS Lambda** | Yes | Requires Layer |
-| **Docker / VPS** | Yes | Yes |
+```javascript
+const client = new CiteKitClient({
+  baseDir: require('os').tmpdir()
+});
+```
+
+### Bundle Size & Optional Dependencies
+CiteKit follows a "pay-for-what-you-use" model for dependencies. Large libraries like `sharp`, `fluent-ffmpeg`, and `pdf-lib` are lazy-loaded. 
+- You do **not** need to install them if you only use CiteKit for mapping/ingestion.
+- They are only required if you explicitly call `resolve()` on specific modalities.
+
+### Zero Browser Dependencies
+We have removed all browser-centric libraries (like `pdf-parse`) to eliminate `DOMMatrix` or `Canvas` related errors that typically plague PDF processing in Node.js environments.
 
 ## Docker (Recommended)
 
