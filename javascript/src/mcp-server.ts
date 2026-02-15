@@ -137,10 +137,13 @@ function createServer(storageDir?: string, outputDir?: string): Server {
 
 // ── Main ────────────────────────────────────────────────────────────────────
 
-async function main() {
+export async function runMcpServer() {
     const server = createServer();
     const transport = new StdioServerTransport();
     await server.connect(transport);
 }
 
-main().catch(console.error);
+// Only run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    runMcpServer().catch(console.error);
+}

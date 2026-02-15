@@ -38,6 +38,9 @@ export interface Node {
 
     /** 1-2 sentence summary. */
     summary?: string;
+
+    /** Nested nodes. */
+    children?: Node[];
 }
 
 /** Structured map of a resource — the first output of ingestion. */
@@ -46,6 +49,7 @@ export interface ResourceMap {
     type: "document" | "video" | "audio" | "image";
     title: string;
     source_path: string;
+    metadata?: Record<string, string | number | null>;
     nodes: Node[];
     created_at: string; // ISO 8601
 }

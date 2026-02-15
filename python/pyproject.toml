@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "citekit"
-version = "0.1.0"
+version = "0.1.2"
 description = "A local SDK that lets AI agents open specific parts of files instead of sending entire documents."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "CiteKit Team" }]
+authors = [{ name = "Abdushakurob" }]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",

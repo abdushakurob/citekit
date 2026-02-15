@@ -37,6 +37,16 @@ export class ImageResolver implements Resolver {
         const filename = `${resourceId}_crop_${left}_${top}.png`;
         const outputPath = join(outputDir, filename);
 
+        if (require("node:fs").existsSync(outputPath)) {
+            return {
+                output_path: outputPath,
+                modality: "image",
+                address: `image://${resourceId}#rect=${x1},${y1},${x2},${y2}`,
+                node: { id: nodeId, location: location } as any,
+                resource_id: resourceId
+            };
+        }
+
         await image
             .extract({ left, top, width: cropWidth, height: cropHeight })
             .toFile(outputPath);

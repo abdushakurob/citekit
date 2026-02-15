@@ -182,19 +182,72 @@ class GeminiMapper(MapperProvider):
         return self._parse_nodes_response(response.text)
 
     async def _map_video(self, path: Path) -> list[Node]:
-        """Get video metadata and ask Gemini to suggest segments."""
+        """Upload video to Gemini and ask for segments."""
         duration = _get_media_duration(path)
         prompt = _VIDEO_PROMPT.format(duration=duration, filename=path.name)
-        return await self._call_gemini_for_nodes(prompt)
+        return await self._call_gemini_with_file(path, prompt, mime_type=_guess_mime_type(path))
 
     async def _map_audio(self, path: Path) -> list[Node]:
-        """Get audio metadata and ask Gemini to suggest segments."""
+        """Upload audio to Gemini and ask for segments."""
         duration = _get_media_duration(path)
         prompt = _AUDIO_PROMPT.format(duration=duration, filename=path.name)
-        return await self._call_gemini_for_nodes(prompt)
+        return await self._call_gemini_with_file(path, prompt, mime_type=_guess_mime_type(path))
+
+    async def _call_gemini_with_file(self, path: Path, prompt: str, mime_type: str) -> list[Node]:
+        """Upload file, generate content, and cleanup."""
+        # 1. Upload File
+        print(f"DEBUG: Uploading {path.name} to Gemini File API...")
+        # Note: The new google-genai SDK uses client.files.upload
+        try:
+            # Sync upload for now (SDK might be sync)
+            file_obj = self._client.files.upload(file=path, config={"mime_type": mime_type})
+            print(f"DEBUG: Uploaded as {file_obj.name}")
+
+            # Wait for processing if video
+            if mime_type.startswith("video"):
+                import time
+                while file_obj.state.name == "PROCESSING":
+                    print("DEBUG: Waiting for video processing...")
+                    time.sleep(2)
+                    file_obj = self._client.files.get(name=file_obj.name)
+                
+                if file_obj.state.name == "FAILED":
+                    raise ValueError(f"Video processing failed: {file_obj.error.message}")
+
+            # 2. Generate Content
+            response = self._client.models.generate_content(
+                model=self._model,
+                contents=[
+                    genai_types.Content(
+                        parts=[
+                            genai_types.Part(text=prompt),
+                            genai_types.Part(
+                                file_data=genai_types.FileData(
+                                    file_uri=file_obj.uri,
+                                    mime_type=file_obj.mime_type
+                                )
+                            ),
+                        ]
+                    )
+                ],
+                config=genai_types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                ),
+            )
+            
+            return self._parse_nodes_response(response.text)
+
+        finally:
+            # 3. Cleanup
+            if 'file_obj' in locals() and file_obj:
+                print(f"DEBUG: Deleting remote file {file_obj.name}")
+                try:
+                    self._client.files.delete(name=file_obj.name)
+                except Exception as e:
+                    print(f"WARNING: Failed to delete remote file: {e}")
 
     async def _call_gemini_for_nodes(self, prompt: str) -> list[Node]:
-        """Send a text prompt to Gemini and parse the node list response."""
+        """Send a text-only prompt to Gemini."""
         response = self._client.models.generate_content(
             model=self._model,
             contents=prompt,
@@ -306,7 +359,16 @@ def _guess_image_mime(path: Path) -> str:
         ".gif": "image/gif",
         ".webp": "image/webp",
         ".bmp": "image/bmp",
+        ".bmp": "image/bmp",
     }.get(ext, "image/png")
+
+def _guess_mime_type(path: Path) -> str:
+    """Guess MIME type for video/audio."""
+    ext = path.suffix.lower()
+    if ext in (".mp4", ".m4v", ".mov"): return "video/mp4"
+    if ext in (".mp3", ".wav", ".aac", ".m4a"): return "audio/mp4" # Gemini is flexible, but audio/mp3 works too
+    if ext in (".png", ".jpg", ".jpeg"): return "image/jpeg"
+    return "application/octet-stream"
 
 
 def _get_media_duration(path: Path) -> float:

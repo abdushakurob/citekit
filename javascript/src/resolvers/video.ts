@@ -21,6 +21,17 @@ export class VideoResolver implements Resolver {
         const filename = `${resourceId}_clip_${start}_${location.end}.mp4`;
         const outputPath = join(outputDir, filename);
 
+        // Caching
+        if (require("node:fs").existsSync(outputPath)) {
+            return {
+                output_path: outputPath,
+                modality: "video",
+                address: `video://${resourceId}#t=${start},${location.end}`,
+                node: { id: nodeId, location: location } as any,
+                resource_id: resourceId
+            };
+        }
+
         return new Promise((resolve, reject) => {
             ffmpeg(sourcePath)
                 .setStartTime(start)

@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { readFileSync, existsSync } from "node:fs";
 import { basename, extname } from "node:path";
 import { createRequire } from "node:module";
@@ -126,13 +127,15 @@ export class GeminiMapper implements MapperProvider {
     }
 
     private async mapVideo(path: string): Promise<Node[]> {
-        // We need duration. We can use fluent-ffmpeg to probe.
+        // We need duration for the prompt, though we could also just upload it.
+        // Let's get duration to be safe and consistent with prompt structure.
         const { ffprobe } = await import("fluent-ffmpeg");
 
         const duration = await new Promise<number>((resolve, reject) => {
             ffprobe(path, (err, metadata) => {
-                if (err) return reject(err);
-                resolve(metadata.format.duration || 0);
+                // If ffprobe fails, we might still proceed with upload, but let's try to get it.
+                if (err) resolve(0);
+                else resolve(metadata.format.duration || 0);
             });
         });
 
@@ -140,7 +143,62 @@ export class GeminiMapper implements MapperProvider {
             .replace("{duration}", duration.toString())
             .replace("{filename}", basename(path));
 
-        return this.callGemini(prompt);
+        return this.callGeminiWithFile(path, prompt, "video/mp4");
+    }
+
+    private async callGeminiWithFile(path: string, prompt: string, mimeType: string): Promise<Node[]> {
+        const fileManager = new GoogleAIFileManager(this.genAI.apiKey);
+
+        console.log(`DEBUG: Uploading ${basename(path)} to Gemini File API...`);
+
+        let uploadResult;
+        try {
+            uploadResult = await fileManager.uploadFile(path, {
+                mimeType: mimeType,
+                displayName: basename(path),
+            });
+            console.log(`DEBUG: Uploaded as ${uploadResult.file.name}`);
+
+            // Wait for processing if video
+            if (mimeType.startsWith("video")) {
+                let file = await fileManager.getFile(uploadResult.file.name);
+                while (file.state === "PROCESSING") {
+                    console.log("DEBUG: Waiting for video processing...");
+                    await new Promise(r => setTimeout(r, 2000));
+                    file = await fileManager.getFile(uploadResult.file.name);
+                }
+
+                if (file.state === "FAILED") {
+                    throw new Error("Video processing failed.");
+                }
+            }
+
+            // Generate content
+            const result = await this.model.generateContent([
+                prompt,
+                {
+                    fileData: {
+                        fileUri: uploadResult.file.uri,
+                        mimeType: uploadResult.file.mimeType,
+                    },
+                },
+            ]);
+
+            const response = await result.response;
+            const text = response.text();
+            return this.parseNodesResponse(text);
+
+        } finally {
+            // Cleanup
+            if (uploadResult && uploadResult.file) {
+                console.log(`DEBUG: Deleting remote file ${uploadResult.file.name}`);
+                try {
+                    await fileManager.deleteFile(uploadResult.file.name);
+                } catch (e) {
+                    console.warn(`WARNING: Failed to delete remote file: ${e}`);
+                }
+            }
+        }
     }
 
     private async callGemini(prompt: string): Promise<Node[]> {

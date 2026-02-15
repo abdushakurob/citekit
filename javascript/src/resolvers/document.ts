@@ -34,6 +34,17 @@ export class DocumentResolver implements Resolver {
         const filename = `${resourceId}_pages_${pageStr}.pdf`;
         const outputPath = join(outputDir, filename);
 
+        // Caching
+        if (require("node:fs").existsSync(outputPath)) {
+            return {
+                output_path: outputPath,
+                modality: "document",
+                address: `doc://${resourceId}#pages=${location.pages[0]}-${location.pages[location.pages.length - 1]}`,
+                node: { id: nodeId, location: location } as any,
+                resource_id: resourceId
+            };
+        }
+
         writeFileSync(outputPath, outputBytes);
 
         return {

@@ -10,12 +10,15 @@ CiteKit enables AI agents to access specific parts of files—PDF pages, video c
 
 ## Features
 
-- **Local-First**: All file processing happens on your machine. No cloud storage required.
-- **Multi-Modal**: Supports PDFs, videos (mp4/mov), audio (mp3/wav), and images.
-- **AI-Powered Mapping**: Uses LLMs (Gemini) to automatically generate structured content maps.
-- **Precise Extraction**: Get exact PDF pages as mini-PDFs, video clips (stream-copied), or image crops.
-- **MCP Compatible**: Works with Claude Desktop, Cline, and other Model Context Protocol agents.
-- **Zero Config**: Install and start using immediately—no complex setup.
+- **Local-First**: All file processing happens on your machine. No cloud storage persistence.
+- **Multi-Modal**: Supports PDF, Video (MP4/MOV), Audio (MP3/WAV), and Images (PNG/JPG).
+- **Smart Ingestion**:
+  - Uses **Gemini 1.5** via File API for handling large files (hours of video).
+  - **SHA-256 Hashing & Caching**: Never re-process the same file twice.
+  - **Concurrency Control**: Built-in queueing to manage API rate limits.
+- **Precise Extraction**: Get exact PDF pages, video clips (stream-copied), or image crops.
+- **MCP Compatible**: Works native with Claude Desktop and Cline.
+- **Zero Config**: Smart defaults for immediate usage.
 
 ## Installation
 
@@ -198,7 +201,7 @@ citekit/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/citekit.git
+git clone https://github.com/abdushakurob/citekit.git
 cd citekit
 
 # Python development
@@ -260,8 +263,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-org/citekit/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/citekit/discussions)
+- **Issues**: [GitHub Issues](https://github.com/abdushakurob/citekit/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/abdushakurob/citekit/discussions)
 - **Documentation**: [docs/index.html](docs/index.html)
 
 ## Acknowledgments
@@ -274,4 +277,4 @@ Built with:
 
 ---
 
-**Made with ❤️ for developers building AI agents**
+**Made for developers building AI agents**

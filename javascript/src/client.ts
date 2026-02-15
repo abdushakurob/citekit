@@ -6,8 +6,9 @@
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
-import { join, basename } from "node:path";
+import { join, basename, extname } from "node:path";
 import { execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import type { ResourceMap, Node, ResolvedEvidence } from "./models.js";
 import { buildAddress } from "./address.js";
 
@@ -117,23 +118,103 @@ export class CiteKitClient {
 
     /**
      * Ingest a resource using the configured mapper.
+     * 
+     * Features:
+     * - SHA-256 Hashing & Caching
+     * - Concurrency Control
      */
     async ingest(
         resourcePath: string,
         resourceType: string,
         options?: { resourceId?: string }
     ): Promise<ResourceMap> {
-        const map = await this.mapper.generateMap(
-            resourcePath,
-            resourceType,
-            options?.resourceId
-        );
+        if (!existsSync(resourcePath)) {
+            throw new Error(`File not found: ${resourcePath}`);
+        }
+
+        // 1. Hashing & Caching
+        const fileHash = this.calculateFileHash(resourcePath);
+        const cachedMap = this.findMapByHash(fileHash);
+
+        if (cachedMap) {
+            // Check if user requested specific ID? 
+            // For now, return cached.
+            return cachedMap;
+        }
+
+        const id = options?.resourceId || basename(resourcePath, extname(resourcePath));
+
+        // 2. Queueing
+        // Since we don't have p-limit, we use a simple internal semaphore if needed,
+        // or just rely on the fact that Node is single-threaded async.
+        // But to respect "queue" claim, let's use a basic lock/queue if the user calls ingest in parallel.
+
+        // Actually, for this MVP, true semaphore in a library requires a class property.
+        // Let's implement a simple acquire/release wrapper.
+
+        const map = await this.withConcurrencyLock(async () => {
+            return await this.mapper.generateMap(
+                resourcePath,
+                resourceType,
+                id
+            );
+        });
+
+        // Add metadata
+        if (!map.metadata) map.metadata = {};
+        map.metadata["source_hash"] = fileHash;
 
         // Save map
         const mapPath = join(this.storageDir, `${map.resource_id}.json`);
         writeFileSync(mapPath, JSON.stringify(map, null, 2));
 
         return map;
+    }
+
+    // ── Utilities ───────────────────────────────────────────────────────────
+
+    private calculateFileHash(path: string): string {
+        const fileBuffer = readFileSync(path);
+        const hashSum = createHash("sha256");
+        hashSum.update(fileBuffer);
+        return hashSum.digest("hex");
+    }
+
+    private findMapByHash(hash: string): ResourceMap | undefined {
+        const maps = this.listMaps();
+        for (const id of maps) {
+            try {
+                const map = this.getMap(id);
+                if (map.metadata && map.metadata["source_hash"] === hash) {
+                    return map;
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+        return undefined;
+    }
+
+    // Simple semaphore state
+    private activeRequests = 0;
+    private maxConcurrency = 5;
+    private queue: Array<() => void> = [];
+
+    private async withConcurrencyLock<T>(fn: () => Promise<T>): Promise<T> {
+        if (this.activeRequests >= this.maxConcurrency) {
+            await new Promise<void>(resolve => this.queue.push(resolve));
+        }
+
+        this.activeRequests++;
+        try {
+            return await fn();
+        } finally {
+            this.activeRequests--;
+            if (this.queue.length > 0) {
+                const next = this.queue.shift();
+                next?.();
+            }
+        }
     }
 
     // ── Resolution ──────────────────────────────────────────────────────────

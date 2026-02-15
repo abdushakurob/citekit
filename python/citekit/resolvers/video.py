@@ -36,6 +36,10 @@ class VideoResolver(Resolver):
         output_name = f"{source.stem}_clip_{start_str}-{end_str}{source.suffix}"
         output_path = self._output_dir / output_name
 
+        # Caching: If file exists, return immediately
+        if output_path.exists():
+            return str(output_path)
+
         # Try stream copy first (fast, no re-encoding)
         try:
             self._extract_clip(source, output_path, start, duration, copy=True)

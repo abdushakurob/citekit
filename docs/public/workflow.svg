@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+  <!-- Style -->
+  <style>
+    .box { fill: #f8f9fa; stroke: #42b883; stroke-width: 2; rx: 8; }
+    .text { font-family: sans-serif; font-size: 14px; fill: #333; text-anchor: middle; dominant-baseline: middle; }
+    .label { font-family: sans-serif; font-size: 12px; fill: #666; text-anchor: middle; }
+    .arrow { stroke: #666; stroke-width: 2; marker-end: url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+    </marker>
+  </defs>
+
+  <!-- Node 1: Ingest -->
+  <rect x="50" y="80" width="120" height="60" class="box" />
+  <text x="110" y="100" class="text" font-weight="bold">Ingest File</text>
+  <text x="110" y="120" class="text" font-size="12">Video / PDF / Audio</text>
+
+  <!-- Arrow 1 -->
+  <line x1="170" y1="110" x2="250" y2="110" class="arrow" />
+  <text x="210" y="100" class="label">Gemini API</text>
+
+  <!-- Node 2: Map -->
+  <rect x="250" y="80" width="120" height="60" class="box" />
+  <text x="310" y="100" class="text" font-weight="bold">Generate Map</text>
+  <text x="310" y="120" class="text" font-size="12">JSON Structure</text>
+
+  <!-- Arrow 2 -->
+  <line x1="370" y1="110" x2="450" y2="110" class="arrow" />
+  <text x="410" y="100" class="label">Agent Reads</text>
+
+  <!-- Node 3: Decide -->
+  <rect x="450" y="80" width="120" height="60" class="box" />
+  <text x="510" y="100" class="text" font-weight="bold">Agent Decides</text>
+  <text x="510" y="120" class="text" font-size="12">Selects Node ID</text>
+
+  <!-- Arrow 3 -->
+  <line x1="570" y1="110" x2="650" y2="110" class="arrow" />
+  <text x="610" y="100" class="label">Local Resolve</text>
+
+  <!-- Node 4: Content -->
+  <rect x="650" y="80" width="120" height="60" class="box" />
+  <text x="710" y="100" class="text" font-weight="bold">Get Content</text>
+  <text x="710" y="120" class="text" font-size="12">Exact Clip/Page</text>
+</svg>

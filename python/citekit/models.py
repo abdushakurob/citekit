@@ -32,6 +32,7 @@ class Node(BaseModel):
     type: str = Field(..., description="Node type: definition, example, explanation, diagram, etc.")
     location: Location
     summary: str | None = None
+    children: list[Node] = Field(default_factory=list)
 
 
 class ResourceMap(BaseModel):
@@ -41,6 +42,7 @@ class ResourceMap(BaseModel):
     type: Literal["document", "video", "audio", "image"]
     title: str
     source_path: str
+    metadata: dict[str, str | int | float | None] | None = None
     nodes: list[Node] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

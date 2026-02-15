@@ -25,6 +25,16 @@ class DocumentResolver(Resolver):
         if not source.exists():
             raise FileNotFoundError(f"Source document not found: {source_path}")
 
+        # Caching: Construct predicted output path
+        # Note: We need to know the output name before processing.
+        # Logic matches save block below:
+        pages_str = "-".join(str(p) for p in node.location.pages)
+        output_name = f"{source.stem}_pages_{pages_str}.pdf"
+        output_path = self._output_dir / output_name
+
+        if output_path.exists():
+            return str(output_path)
+
         # Open source PDF
         src_doc = fitz.open(str(source))
 

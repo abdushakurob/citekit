@@ -53,6 +53,10 @@ dist/
 .citekit_output/
 *.citekit_cache
 
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
+
 # Environment variables
 .env
 .env.local
@@ -82,3 +86,4 @@ citekit-*.tgz
 *.tmp
 *.temp
 .cache/
+PUBLISHING.md

@@ -35,6 +35,14 @@ class ImageResolver(Resolver):
         if x1 >= x2 or y1 >= y2:
             raise ValueError(f"Invalid bounding box: x1 must be < x2, y1 must be < y2. Got {node.location.bbox}")
 
+        # Caching
+        bbox_str = f"{x1:.1f}_{y1:.1f}_{x2:.1f}_{y2:.1f}"
+        output_name = f"{source.stem}_crop_{bbox_str}{source.suffix}"
+        output_path = self._output_dir / output_name
+
+        if output_path.exists():
+            return str(output_path)
+
         # Open and crop
         with Image.open(source) as img:
             width, height = img.size
