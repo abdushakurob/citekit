@@ -80,9 +80,14 @@ Add the following:
 
 Once connected, the AI will have access to these tools:
 
-1.  `citekit_list_resources`: Lists all generated maps in your `.resource_maps` directory.
-2.  `citekit_get_map`: Returns the full JSON structure of a specific map.
-3.  `citekit_resolve_node`: Extracts a specific node (clip/page) and returns its local path.
+1.  **`listResources`**: Lists all generated maps in your `.resource_maps` directory.
+2.  **`getStructure`**: Returns the full JSON structure of a specific map, including all chapters, sections, and timestamps.
+3.  **`resolve`**: Extracts a specific node (clip/page) and returns its local path for the agent to "see".
+
+---
+
+### See it in Action
+Check out the [**Study Tool Example**](/guide/examples/study) to see how an AI agent uses these tools to help you study a lecture video.
 
 ## Troubleshooting
 

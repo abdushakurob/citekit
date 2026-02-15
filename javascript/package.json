@@ -54,7 +54,7 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/citekit/citekit.git",
+        "url": "git+https://github.com/abdushakurob/citekit.git",
         "directory": "javascript"
     },
     "keywords": [
@@ -75,7 +75,7 @@
         "example": "examples"
     },
     "bugs": {
-        "url": "https://github.com/citekit/citekit/issues"
+        "url": "https://github.com/abdushakurob/citekit/issues"
     },
-    "homepage": "https://github.com/citekit/citekit#readme"
+    "homepage": "https://github.com/abdushakurob/citekit#readme"
 }
