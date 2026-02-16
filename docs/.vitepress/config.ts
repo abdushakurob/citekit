@@ -57,7 +57,8 @@ export default withMermaid(defineConfig({
                     items: [
                         { text: 'System Requirements', link: '/guide/requirements' },
                         { text: 'Deployment Guide', link: '/guide/deployment' },
-                        { text: 'Troubleshooting', link: '/guide/troubleshooting' }
+                        { text: 'Troubleshooting', link: '/guide/troubleshooting' },
+                        { text: 'Changelog', link: '/changelog' }
                     ]
                 },
                 {
