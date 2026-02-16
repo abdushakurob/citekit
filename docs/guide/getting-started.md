@@ -30,6 +30,14 @@ pip install citekit
 npm install citekit
 ```
 
+> [!IMPORTANT]
+> **JavaScript Peer Dependencies**: CiteKit keeps its core lightweight by making modality-specific tools optional. Install based on your needs:
+> - **Documents**: `npm install pdf-lib`
+> - **Video/Audio**: `npm install fluent-ffmpeg` (also requires FFmpeg system install)
+> - **Images**: `npm install sharp`
+> 
+> See [Requirements](/guide/requirements) for details.
+
 ---
 
 ## The 3-Step Lifecycle

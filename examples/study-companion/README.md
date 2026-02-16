@@ -71,6 +71,8 @@ npx citekit --version
 
 Since v0.1.8, both CLIs support all 8 commands identically.
 
+> **JavaScript Users**: Video resolution requires `npm install fluent-ffmpeg` (and FFmpeg installed system-wide).
+
 ### 2. Configure Claude Desktop
 
 Open your Claude Desktop configuration file:

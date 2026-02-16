@@ -50,6 +50,8 @@ cd citekit/examples/rag-fusion
 pip install -r requirements.txt
 ```
 
+> **Note**: Python users get all resolution dependencies automatically. If using JavaScript, install `npm install pdf-lib` for document resolution.
+
 ### 2. Configure API Key
 
 Set your Gemini API key:

@@ -59,6 +59,8 @@ Choose Python or JavaScript based on your stack preferences.
 - `ffmpeg` installed (for video extraction)
 - A video player: `mpv` (recommended) or `vlc`
 
+> **JavaScript Users**: If using Node.js, also install: `npm install fluent-ffmpeg` (peer dependency for video resolution)
+
 ## Get the Example (Git)
 
 ```bash

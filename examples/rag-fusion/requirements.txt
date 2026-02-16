@@ -1,1 +1,1 @@
-citekit>=0.1.7
+citekit>=0.1.8

@@ -1,2 +1,2 @@
-citekit>=0.1.7
+citekit>=0.1.8
 click>=8.0.0

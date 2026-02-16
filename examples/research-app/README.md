@@ -29,6 +29,8 @@ cd citekit/examples/research-app
 npm install
 ```
 
+> **Note**: This example requires `pdf-lib` for document resolution. It's included in package.json dependencies.
+
 ### 2. Configure API Key
 
 Copy the example environment file and add your Gemini API key:

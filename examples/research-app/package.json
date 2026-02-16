@@ -11,7 +11,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "citekit": "^0.1.7",
-    "dotenv": "^16.0.0"
+    "citekit": "^0.1.8",
+    "dotenv": "^16.0.0",
+    "pdf-lib": "^1.17.1"
   }
 }
