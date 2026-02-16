@@ -92,4 +92,4 @@ When storing resolved evidence in your database, we recommend prefixing virtual 
 > **Observation**: Using a `virtual://` prefix helps your frontend logic instantly decide whether to fetch a file or just seek to a timestamp.
 >
 > 1. **Physical**: `https://cdn.example.com/resolved/clip_1.mp4`
-> 2. **Virtual**: `virtual://video/original#t=180,210`
+> 2. **Virtual**: `virtual://video://original#t=180,210`
