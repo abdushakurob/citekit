@@ -39,7 +39,6 @@ export default withMermaid(defineConfig({
                     text: 'Introduction',
                     items: [
                         { text: 'Overview', link: '/guide/' },
-                        { text: 'The Mental Model (Stability)', link: '/guide/mental-model' },
                         { text: 'The Modern Stack', link: '/guide/modern-stack' },
                         { text: 'Quick Start', link: '/guide/getting-started' },
                     ]
@@ -97,14 +96,52 @@ export default withMermaid(defineConfig({
             ],
             '/api/': [
                 {
-                    text: 'API Reference',
+                    text: 'Python SDK',
+                    collapsed: false,
                     items: [
-                        { text: 'Python SDK', link: '/api/python' },
-                        { text: 'JavaScript SDK', link: '/api/javascript' },
-                        { text: 'CLI Reference', link: '/api/cli' },
-                        { text: 'Data Models', link: '/api/models' },
-                        { text: 'MCP Protocol', link: '/api/mcp' },
-                        { text: 'Virtual Resolution', link: '/api/virtual' }
+                        { text: 'Introduction', link: '/api/python' },
+                        { text: 'CiteKitClient', link: '/api/python/client' },
+                        { text: 'Mappers', link: '/api/python/mappers' },
+                        { text: 'Resolvers & Adapters', link: '/api/python/resolvers' },
+                        { text: 'Data Models', link: '/api/models#python-models' }
+                    ]
+                },
+                {
+                    text: 'JavaScript SDK',
+                    collapsed: false,
+                    items: [
+                        { text: 'Introduction', link: '/api/javascript' },
+                        { text: 'CiteKitClient', link: '/api/javascript/client' },
+                        { text: 'Mappers', link: '/api/javascript/mappers' },
+                        { text: 'Resolvers', link: '/api/javascript/resolvers' },
+                        { text: 'Core Interfaces', link: '/api/models#js-interfaces' }
+                    ]
+                },
+                {
+                    text: 'CLI Reference',
+                    collapsed: true,
+                    items: [
+                        { text: 'Overview', link: '/api/cli/' },
+                        { text: 'ingest', link: '/api/cli/ingest' },
+                        { text: 'resolve & inspect', link: '/api/cli/resolve' },
+                        { text: 'Resource Management', link: '/api/cli/manage' },
+                        { text: 'Adapters', link: '/api/cli/adapt' }
+                    ]
+                },
+                {
+                    text: 'MCP Protocol',
+                    collapsed: true,
+                    items: [
+                        { text: 'Overview', link: '/api/mcp/' },
+                        { text: 'Tool Reference', link: '/api/mcp/tools' },
+                        { text: 'Configuration', link: '/api/mcp/config' }
+                    ]
+                },
+                {
+                    text: 'Global Reference',
+                    items: [
+                        { text: 'ResourceMap Schema', link: '/api/models' },
+                        { text: 'Virtual Address Format', link: '/api/virtual' }
                     ]
                 }
             ]

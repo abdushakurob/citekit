@@ -1,97 +1,81 @@
 # Data Models
 
-The common data structures shared between Python, TypeScript, and the JSON storage.
+CiteKit uses a strict, cross-language schema to ensure that a `ResourceMap` generated in Python can be resolved by a Node.js client (and vice-versa).
 
-## The Map Schema
+## The ResourceMap Schema
 
-The Resource Map is the source of truth.
+The `ResourceMap` represents an entire indexed file. It is the primary unit of storage and portability.
 
-### JSON Structure
+### Specification
 
-```json
-{
-  "resource_id": "string (unique)",
-  "title": "string (descriptive title)",
-  "source_path": "string (absolute or relative path)",
-  "type": "string (video|audio|document|image|text)",
-  "nodes": [
-    {
-      "id": "string (unique within this map)",
-      "title": "string",
-      "summary": "string",
-      "type": "string (section|topic|scene)",
-      "location": {
-        "start": 0.0,
-        "end": 10.5
-      }
-    }
-  ]
-}
-```
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `resource_id` | `string` | Yes | Unique slug (Regex: `^[a-z0-9_-]+$`). |
+| `title` | `string` | Yes | Human-readable name. |
+| `type` | `Enum` | Yes | `video`, `audio`, `document`, `image`, `text`. |
+| `source_path` | `string` | Yes | Absolute path or URI to the source media. |
+| `nodes` | `Array<Node>` | Yes | Flat or nested list of semantic segments. |
+| `metadata` | `Object` | No | Extensible store for hashes, timestamps, etc. |
+| `created_at` | `ISO8601` | Yes | Generation timestamp in UTC. |
 
-## Common Node Types
+---
 
-The `type` field is a free-form string. However, CiteKit's default prompts encourage the LLM to use these semantic categories:
+## Coordinate Systems & Units
 
-*   **Video**: `scene`, `chapter`, `dialogue`
-*   **Audio**: `segment`, `speech`, `music`
-*   **Text**: `class`, `function`, `method`, `section`, `header`
-*   **Document**: `chapter`, `section`, `table`, `image`
-*   **Image**: `object`, `text_block`, `face`
+This is the most critical part of the CiteKit protocol. All locations must follow these absolute rules:
 
-## Location Objects
+### 📄 Document (PDF)
+- **Attribute**: `pages`
+- **Unit**: Integers
+- **Index**: **1-indexed** (to match standard PDF viewers like Acrobat or Chrome).
+- **Format**: An array of page numbers (e.g., `[1, 2, 5]`).
 
-The `location` object is polymorphic.
+### 🎬 Video / Audio
+- **Attributes**: `start`, `end`
+- **Unit**: **Seconds** (Floating point)
+- **Index**: **0-indexed** (relative to the start of the file stream).
+- **Precision**: We recommend 2 decimal places (e.g., `12.45`).
+- **Range**: `end` must be strictly greater than `start`.
 
-**TimeRange (Video/Audio)**
-```json
-{
-  "start": 120.5,
-  "end": 180.0
-}
-```
+### 📝 Text
+- **Attribute**: `lines`
+- **Unit**: Integers
+- **Index**: **1-indexed inclusive** (to match IDE line numbers).
+- **Format**: A tuple or array `[start_line, end_line]`.
+- **Note**: A single line citation should use `[10, 10]`.
 
-**PageRange (PDF)**
-```json
-{
-  "pages": [1, 2, 5, 6]
-}
-```
-*Note: Page numbers are 1-indexed to match PDF viewers.*
+### 🖼️ Image
+- **Attribute**: `bbox`
+- **Unit**: **Normalized Percentage** (`0.0` to `1.0`)
+- **Index**: **Top-Left coordinate system**.
+- **Format**: `[x1, y1, x2, y2]`
+- **Calculation**: Multiply by image width/height to get pixel values for extraction.
 
-**LineRange (Text)**
-```json
-{
-  "lines": [10, 25]
-}
-```
-*Format: [start_line, end_line] (1-indexed, inclusive)*
+---
 
-**LineRange (Text)**
-```json
-{
-  "lines": [10, 25]
-}
-```
-*Format: [start_line, end_line] (1-indexed, inclusive)*
+## The Node Schema
 
-**BoundingBox (Image)**
-```json
-{
-  "bbox": [0.1, 0.1, 0.9, 0.9]
-}
-```
-*Format: [x1, y1, x2, y2] (Normalized 0.0 - 1.0)*
+A `Node` represents a semantic unit (a chapter, a scene, an object).
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `string` | Semantic key (e.g., `intro`). Dot-notation is recommended for hierarchy. |
+| `title` | `string` | (Optional) Short title. |
+| `type` | `string` | Contextual type (e.g., `section`, `dialogue`, `button`). |
+| `location` | `Location` | The physical coordinates (see above). |
+| `summary` | `string` | (Optional) LLM-generated description for agent context. |
+| `children`| `Array<Node>`| (Optional) Nested nodes for hierarchical maps. |
+
+---
 
 ## Resolved Evidence
 
-The object returned by `client.resolve()`.
+This is the object returned after successful resolution.
 
-### JSON Structure
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `output_path` | `string` | Absolute path to the extracted file (null in virtual mode). |
-| `modality` | `string` | The resource type (video, doc, etc.). |
-| `address` | `string` | The CiteKit URI (e.g., `doc://id#pages=1`). |
-| `resource_id` | `string` | ID of the source resource. |
-| `node` | `Node` | The full node object that was resolved. |
+| `output_path` | `string`| Path to the extracted file slice. |
+| `modality` | `string`| Mirror of the source type. |
+| `address` | `string`| The standardized URI address (deterministic). |
+| `resource_id` | `string`| The parent resource identifier. |
+| `node` | `Node` | The original node definition. |
