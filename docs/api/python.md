@@ -1,162 +1,168 @@
 # Python SDK Reference
 
-The `citekit` package exports a main client class `CiteKitClient`.
-
-## Client
+The CiteKit Python SDK provides a high-level client for managing the lifecycle of multimodal resources.
 
 ```python
 from citekit import CiteKitClient
+```
 
-client = CiteKitClient(
+---
+
+## `CiteKitClient`
+
+The main entry point for CiteKit. It manages local storage, concurrency, and resolver orchestration.
+
+### Constructor
+
+```python
+def __init__(
+    self,
     mapper: MapperProvider | None = None,
     base_dir: str = ".",
     storage_dir: str = ".resource_maps",
     output_dir: str = ".citekit_output",
-    concurrency_limit: int = 5
+    concurrency_limit: int = 5,
+    api_key: str | None = None,
+    model: str = "gemini-2.0-flash",
+    max_retries: int = 3,
 )
 ```
 
-*   `mapper`: The analysis provider (e.g., `GeminiMapper`).
-*   `base_dir`: The root directory for storage. Set to `tempfile.gettempdir()` for serverless.
-*   `storage_dir`: Relative path for maps.
-*   `output_dir`: Relative path for extracted files.
-*   `concurrency_limit`: Max parallel mapper calls.
-*   `api_key`: Gemini API key (optional if `mapper` is provided or env is set).
-*   `model`: Gemini model name (default: `"gemini-2.0-flash"`).
-*   `max_retries`: Number of retries for API failures (default: `3`).
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `mapper` | `MapperProvider` | `None` | A custom mapper instance. If `None`, defaults to `GeminiMapper`. |
+| `base_dir` | `str` | `"."` | The root directory for all CiteKit operations. |
+| `storage_dir`| `str` | `".resource_maps"` | Where JSON maps are saved (relative to `base_dir`). |
+| `output_dir` | `str` | `".citekit_output"` | Where resolved clips/slices are saved (relative to `base_dir`). |
+| `concurrency_limit` | `int` | `5` | Max parallel calls to the `MapperProvider` (uses `asyncio.Semaphore`). |
+| `api_key` | `str` | `None` | Gemini API Key. If `None`, checks `GEMINI_API_KEY` env var. |
+| `model` | `str` | `"gemini-2.0-flash"` | The Gemini model to use for the default mapper. |
+| `max_retries` | `int` | `3` | Number of times to retry failed mapping attempts. |
 
----
+### Ingestion
 
-## methods
-
-### `ingest`
-
-Uploads file to LLM and generates a map.
+#### `async ingest(...)`
+Analyzes a file and generates a `ResourceMap`.
 
 ```python
 async def ingest(
-    self, 
-    source_path: str | Path, 
-    modality: str
+    self,
+    resource_path: str,
+    resource_type: str,
+    resource_id: str | None = None
 ) -> ResourceMap
 ```
 
-*   `source_path`: Path to local file.
-*   `modality`: One of `"video"`, `"audio"`, `"document"` (PDF), `"image"`, `"text"`.
-*   **Returns**: `ResourceMap` object.
+**Internal Logic:**
+1.  **Hashing**: Computes a SHA-256 hash of the file content.
+2.  **Caching**: Scans `storage_dir` for existing maps with a matching `source_hash` in metadata. If found, returns the cached map immediately.
+3.  **Concurrency Control**: Enters a semaphore. Only `concurrency_limit` maps are generated in parallel.
+4.  **Generation**: Calls `mapper.generate_map()`.
+5.  **Persistence**: Saves the resulting map as `{resource_id}.json`.
 
-### `get_structure`
+---
 
-Retrieves an existing map from local storage.
+### Resolution
 
-```python
-def get_structure(self, resource_id: str) -> ResourceMap
-```
-
-*   `resource_id`: The ID of the resource (usually filename stem).
-*   **Returns**: `ResourceMap` object.
-*   **Raises**: `FileNotFoundError` if map doesn't exist.
-
-### `resolve`
-
-Extracts a specific node from the source file.
+#### `resolve(...)`
+Converts a node into physical or virtual evidence.
 
 ```python
 def resolve(
-    self, 
-    resource_id: str, 
+    self,
+    resource_id: str,
     node_id: str,
     virtual: bool = False
 ) -> ResolvedEvidence
 ```
 
-*   `resource_id`: The ID of the resource.
-*   `node_id`: The ID of the node to extract.
-*   `virtual`: If `True`, returns metadata only without physical extraction.
-*   **Returns**: `ResolvedEvidence` object.
+**Internal Logic:**
+1.  **Lookup**: Loads the map for `resource_id`.
+2.  **Address Building**: Generates a standard URI (e.g. `doc://book#pages=1-2`).
+3.  **Virtual Flow**: If `virtual=True`, returns metadata only (no file processing).
+4.  **Physical Flow**: Selects a `Resolver` based on modality (Document, Video, etc.) and executes extraction (FFmpeg, PyMuPDF, etc.).
 
 ---
 
-## Utilities
+### Map Management
 
-### `GeminiMapper`
+#### `get_map(resource_id: str) -> ResourceMap`
+Loads a map from disk. Raises `FileNotFoundError` if missing.
 
-The default analyzer using Google Gemini.
+#### `list_maps() -> list[str]`
+Returns all ingested resource IDs (filenames in `storage_dir`).
 
-```python
-from citekit import GeminiMapper
-
-mapper = GeminiMapper(
-    api_key="...", 
-    model="gemini-2.0-flash",
-    max_retries=3
-)
-```
-
-*   `max_retries`: Number of times to retry on API failures (e.g., 429). Uses exponential backoff.
-
-### `create_agent_context`
-
-Aggregates multiple ResourceMaps into a single string for LLM context.
-
-```python
-from citekit import create_agent_context
-
-context = create_agent_context([map1, map2], format="markdown")
-```
-
-> [!IMPORTANT]
-> Always pass a **list** of maps, even for a single resource: `create_agent_context([map])`.
+#### `get_structure(resource_id: str) -> dict`
+Returns the map as a plain JSON-serializable dictionary.
 
 ---
 
-## Data Models
+## Data Models (Pydantic)
+
+CiteKit uses Pydantic for strict schema validation.
 
 ### `ResourceMap`
-```python
-class ResourceMap(BaseModel):
-    resource_id: str
-    title: str
-    source_path: str
-    type: str # "video" | "audio" | "document" | "image" | "text"
-    nodes: List[Node]
-    metadata: Dict[str, Any]
-```
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `resource_id` | `str` | Unique slug for the resource. |
+| `type` | `str` | `video`, `audio`, `document`, `image`, `text`. |
+| `title` | `str` | Human-readable title. |
+| `source_path` | `str` | Absolute path to the source file. |
+| `nodes` | `List[Node]` | The semantic tree of content. |
+| `metadata` | `dict` | Catch-all for hashes, timestamps, etc. |
 
 ### `Node`
-```python
-class Node(BaseModel):
-    id: str
-    title: str
-    summary: str
-    type: str
-    location: Location
-    children: List[Node] = []
-```
-
-### `ResolvedEvidence`
-```python
-class ResolvedEvidence(BaseModel):
-    output_path: str | None
-    modality: str
-    address: str
-    node: Node
-    resource_id: str
-```
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `str` | Dot-separated ID (e.g. `ch1.intro`). |
+| `title` | `str` | Short title. |
+| `type` | `str` | e.g., `section`, `explanation`, `clip`. |
+| `location` | `Location` | The physical coordinates. |
+| `children` | `List[Node]` | Nested sub-nodes. |
 
 ### `Location`
-```python
-class Location(BaseModel):
-    # For Video/Audio
-    start: float | None = None
-    end: float | None = None
-    
-    # For Documents
-    pages: List[int] | None = None
+| Field | Type | Modality |
+| :--- | :--- | :--- |
+| `pages` | `list[int]` | Document (1-indexed) |
+| `lines` | `tuple[int, int]` | Text (1-indexed inclusive) |
+| `start`/`end` | `float` | Video/Audio (seconds) |
+| `bbox` | `tuple[float, float, float, float]` | Image (x1, y1, x2, y2) |
 
-    # For Text/Code
-    lines: Tuple[int, int] | None = None
-    
-    # For Images [x1, y1, x2, y2]
-    bbox: Tuple[float, float, float, float] | None = None
+---
+
+## Protocols (For Contributors)
+
+### `MapperProvider`
+Any class implementing `generate_map`.
+
+```python
+class MyMapper(MapperProvider):
+    async def generate_map(
+        self, 
+        resource_path: str, 
+        resource_type: str, 
+        resource_id: str | None = None
+    ) -> ResourceMap:
+        ...
 ```
+
+### `MapAdapter`
+Any class or script implementing `adapt`.
+
+```python
+class MyAdapter(MapAdapter):
+    def adapt(self, input_data: Any, **kwargs) -> ResourceMap:
+        ...
+```
+
+---
+
+## Address Utilities
+
+CiteKit uses a URI-style protocol to point to content.
+
+#### `parse_address(address: str) -> tuple[str, Location]`
+Parses `doc://book#pages=1-2` into `('book', Location(...))`.
+
+#### `build_address(resource_id: str, location: Location) -> str`
+Converts a Python object into a string URI.

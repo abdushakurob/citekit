@@ -39,6 +39,7 @@ export default withMermaid(defineConfig({
                     text: 'Introduction',
                     items: [
                         { text: 'Overview', link: '/guide/' },
+                        { text: 'The Mental Model (Stability)', link: '/guide/mental-model' },
                         { text: 'The Modern Stack', link: '/guide/modern-stack' },
                         { text: 'Quick Start', link: '/guide/getting-started' },
                     ]
@@ -59,7 +60,10 @@ export default withMermaid(defineConfig({
                         { text: 'Ingestion Process', link: '/guide/concepts/ingestion' },
                         { text: 'Resource Maps', link: '/guide/concepts/resource-mapping' },
                         { text: 'Content Resolution', link: '/guide/concepts/content-resolution' },
-                        { text: 'Virtual Resolution (Serverless)', link: '/guide/concepts/virtual-mode' }
+                        { text: 'Virtual Resolution (Serverless)', link: '/guide/concepts/virtual-mode' },
+                        { text: 'Map Adapters', link: '/guide/adapters' },
+                        { text: 'Custom Mappers (Local LLMs)', link: '/guide/custom-mappers' },
+                        { text: 'Technical Deep Dive (Internals)', link: '/guide/technical-deep-dive' }
                     ]
                 },
                 {

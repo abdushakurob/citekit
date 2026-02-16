@@ -13,6 +13,10 @@ All notable changes to this project will be documented in this file.
 -   **Map Portability**:
     -   **Standardized Schema**: Ensured Python Pydantic models and TypeScript Interfaces match 1:1.
     -   **Validator**: Added `citekit check-map <path.json>` command to validate maps against the strict schema.
+-   **Map Adapters**:
+    -   **New Protocol**: define `MapAdapter` to convert external data (GraphRAG, LlamaIndex, CSV) into CiteKit maps.
+    -   **CLI**: Added `citekit adapt <input> --adapter <name>` command.
+    -   **Built-in Support**: Added adapters for `graphrag` and `llamaindex`.
 -   **Documentation**:
     -   Comprehensive audit to ensure "Text" modality is documented in all API references and guides.
     -   Added "Code Block" usage instructions to `getting-started.md`.

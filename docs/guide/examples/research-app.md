@@ -42,7 +42,7 @@ const client = new CiteKitClient({
 async function runResearchTask() {
     const paperPath = './papers/deep_research_v4.pdf';
     
-    console.log(`🔍 Inspecting Paper: ${path.basename(paperPath)}`);
+    console.log(`[INFO] Inspecting Paper: ${path.basename(paperPath)}`);
 
     // STEP 1: Discovery (Ingestion)
     // The file is sent to the Gemini File API ONCE to generate the map.
@@ -58,12 +58,12 @@ async function runResearchTask() {
 
     // STEP 3: Contextual Retrieval & Evidence Extraction
     for (const node of methodologyNodes) {
-        console.log(`🎯 Orchestrating Context: "${node.title}"`);
+        console.log(`[INFO] Orchestrating Context: "${node.title}"`);
         
         // This extracts the specific pages as a high-fidelity PDF slice
         const evidence = await client.resolve(map.resource_id, node.id);
         
-        console.log(`✅ Evidence extracted to: ${evidence.output_path}`);
+        console.log(`[SUCCESS] Evidence extracted to: ${evidence.output_path}`);
     }
 }
 

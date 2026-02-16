@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { Resolver } from "./base.js";
 import type { ResolvedEvidence } from "../models.js";
@@ -43,7 +44,7 @@ export class VideoResolver implements Resolver {
         const outputPath = join(outputDir, filename);
 
         // Caching
-        if (require("node:fs").existsSync(outputPath)) {
+        if (existsSync(outputPath)) {
             return {
                 output_path: outputPath,
                 modality: "video",

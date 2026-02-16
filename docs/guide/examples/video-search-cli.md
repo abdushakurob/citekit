@@ -37,7 +37,7 @@ def index(directory):
     async def _process():
         for f in files:
             path = os.path.join(directory, f)
-            print(f"📡 Mapping Structural DNA: {f}")
+            print(f"[INFO] Mapping Structural DNA: {f}")
             await client.ingest(path, "video")
 
     asyncio.run(_process())
@@ -57,7 +57,7 @@ def seek(concept):
             # (In a real Agent, an LLM would choose the node based on summaries)
             for node in map.nodes:
                 if concept.lower() in node.id.lower() or concept.lower() in (node.summary or "").lower():
-                    print(f"[FOUND] Concept Found in {rid}: {node.title}")
+                    print(f"[INFO] Concept Found in {rid}: {node.title}")
                     
                     # Resolve to a physical high-fidelity clip
                     evidence = await client.resolve(rid, node.id)

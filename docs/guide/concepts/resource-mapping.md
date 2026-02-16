@@ -68,6 +68,31 @@ interface ResourceNode {
 }
 ```
 
+## JSON Example (Text/Code)
+
+```json
+{
+  "resource_id": "utils_py",
+  "type": "text",
+  "source_path": "src/utils.py",
+  "nodes": [
+    {
+      "id": "DataProcessor",
+      "title": "class DataProcessor",
+      "type": "class",
+      "location": { "lines": [10, 50] },
+      "children": [
+        {
+          "id": "process_data",
+          "title": "def process_data",
+          "location": { "lines": [12, 25] }
+        }
+      ]
+    }
+  ]
+}
+```
+
 ## Design Philosophy
 
 ### 1. Structure over Content

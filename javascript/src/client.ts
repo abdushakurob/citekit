@@ -17,7 +17,6 @@ import { buildAddress } from "./address.js";
 import { GeminiMapper } from "./mapper/gemini.js";
 import { DocumentResolver } from "./resolvers/document.js";
 import { VideoResolver } from "./resolvers/video.js";
-import { VideoResolver } from "./resolvers/video.js";
 import { ImageResolver } from "./resolvers/image.js";
 import { TextResolver } from "./resolvers/text.js";
 import type { MapperProvider } from "./mapper/base.js";
@@ -41,6 +40,8 @@ export interface CiteKitClientOptions {
     model?: string;
     /** Max retries for Gemini API calls. Default: 3 */
     maxRetries?: number;
+    /** Custom mapper implementation (e.g. for Local LLMs). */
+    mapper?: MapperProvider;
 }
 
 export class CiteKitClient {
@@ -55,32 +56,22 @@ export class CiteKitClient {
         this.outputDir = join(baseDir, options.outputDir ?? ".citekit_output");
 
         const apiKey = options.apiKey ?? process.env.GEMINI_API_KEY;
-        if (!apiKey) {
-            // We allow client init without key, but ingest will fail if we don't have it eventually.
-            // For now, let's just warn or let the mapper throw.
-            // Actually, the mapper constructor needs it.
-            // If unavailable, we can delay mapper init? Or throw?
-            // Let's assume user must provide it if they want to ingest.
-            // But if they only want resolve(), they might not need it?
-            // Resolution logic doesn't need Gemini.
-            // So we should lazily init mapper or allow null.
-        }
 
-        // Initialize mapper
-        // Note: For this MVP port, we assume GeminiMapper is the default.
-        if (apiKey) {
+        // Initialize mapper: Prefer custom -> Gemini -> Mock
+        if (options.mapper) {
+            this.mapper = options.mapper;
+        } else if (apiKey) {
             this.mapper = new GeminiMapper(apiKey, options.model, options.maxRetries);
         } else {
             // Mock mapper that throws
             this.mapper = {
-                generateMap: async () => { throw new Error("GEMINI_API_KEY required for ingestion."); }
+                generateMap: async () => { throw new Error("GEMINI_API_KEY or custom 'mapper' required for ingestion."); }
             };
         }
 
         // Initialize resolvers
         this.resolvers = {
             "document": new DocumentResolver(),
-            "video": new VideoResolver(),
             "video": new VideoResolver(),
             "image": new ImageResolver(),
             "text": new TextResolver(),

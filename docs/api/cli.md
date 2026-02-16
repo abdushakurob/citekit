@@ -1,113 +1,111 @@
 # CLI Reference
 
-CiteKit provides Command Line Interfaces (CLIs) for both Python and Node.js.
+CiteKit provides a powerful command-line interface for managing the resource lifecycle.
 
-## Overview
+```bash
+python -m citekit.cli [COMMAND]
+```
 
-| Feature | Python CLI | Node.js CLI |
+---
+
+## Global Commands
+
+### `ingest`
+Generates a `ResourceMap` from a file.
+
+```bash
+python -m citekit.cli ingest <path> [OPTIONS]
+```
+
+| Option | Shorthand | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `--type` | `-t` | (auto) | `document`, `video`, `audio`, `image`, `text`. |
+| `--concurrency` | `-c` | `5` | Max parallel LLM calls. |
+| `--retries` | `-r` | `3` | Max API retries for rate limits or network issues. |
+
+**Pro Tip**: If you omit `--type`, CiteKit will infer it from the file extension (e.g., `.pdf` -> `document`).
+
+---
+
+### `resolve`
+Extracts a specific node into a file (Physical) or URI (Virtual).
+
+```bash
+python -m citekit.cli resolve <node_id> [OPTIONS]
+```
+
+| Option | Shorthand | Description |
 | :--- | :--- | :--- |
-| **Command** | `python -m citekit.cli` | `citekit` |
-| **Ingest Files** | Yes | No (API only) |
-| **Resolve Nodes** | Yes | No (API only) |
-| **MCP Server** | Yes (`serve`) | Yes (`serve`) |
-| **Inspect Maps** | Yes | No |
-| **Validate Maps** | Yes (`check-map`) | No |
+| `--resource` | `-res` | Required if `<node_id>` isn't in `rid.nid` format. |
+| `--virtual` | | Return metadata (URI/JSON) only. No FFmpeg/PDF work. |
 
-## Python CLI
-
-The Python CLI is a full-featured tool for managing your local CiteKit resources.
-
-### Installation
+**Example**:
 ```bash
-pip install citekit
-# This installs both the library and the CLI tool.
+python -m citekit.cli resolve lecture.intro --virtual
+# Returns: {"address": "video://lecture#t=0,120", ...}
 ```
 
-### Usage
-
-**1. Ingest a file**
-```bash
-# Video with custom concurrency and retries
-python -m citekit.cli ingest video.mp4 --type video --concurrency 2 --retries 5
-```
-
-*   `--type`, `-t`: One of `video`, `audio`, `document`, `image`, `text`.
-*   `--concurrency`, `-c`: Max parallel mapper calls (default: 5).
-*   `--retries`, `-r`: Max API retries (default: 3).
+---
 
 ### `list`
-
-Lists all ingested resources or inspects a specific resource.
+Explores yours indexed resources.
 
 ```bash
-# List all resources
-python -m citekit.cli list
-
-# List nodes in a specific resource
-python -m citekit.cli list my_video
+python -m citekit.cli list [resource_id]
 ```
 
-*   `node_id` (Optional): If provided without a resource ID, it tries to parse `resource_id.node_id`.
+-   **No ID**: Lists all IDs in `.resource_maps/`.
+-   **With ID**: Lists the semantic tree (nodes and their titles).
+
+---
 
 ### `inspect`
-
-View detailed metadata for a specific node without resolving it.
+Shows full technical metadata for a node.
 
 ```bash
-# Inspect a node
-python -m citekit.cli inspect DataProcessor --resource test_code
-
-# Shorthand
-python -m citekit.cli inspect test_code.DataProcessor
+python -m citekit.cli inspect <node_id> --resource <rid>
 ```
+Useful for checking `bbox` coordinates or page numbers without extracting.
 
-**3. Resolve (Extract) content**
-```bash
-# Physical extraction (default)
-python -m citekit.cli resolve lecture.intro
-# Virtual resolution (metadata only)
-python -m citekit.cli resolve lecture.intro --virtual
-```
-
-*   `--resource`, `-res`: Optional resource ID (if not provided in rid.nid format).
-*   `--virtual`: If set, returns only timestamps/pages without file extraction.
+---
 
 ### `check-map`
-
-Validates a JSON map against the official schema. Useful for debugging or before sharing maps.
+Validates a manual or adapted map against the schema.
 
 ```bash
 python -m citekit.cli check-map path/to/map.json
 ```
+**Performs**: Pydantic validation + logical sanity checks (e.g., "map is type video but has pages in location").
 
-**4. Start MCP Server**
+---
+
+### `adapt`
+The "Universal Receiver" command.
+
+```bash
+python -m citekit.cli adapt <input> --adapter <adapter>
+```
+
+| Option | Shorthand | Description |
+| :--- | :--- | :--- |
+| `--adapter` | `-a` | `graphrag`, `generic`, or path to a `.py` script. |
+| `--output` | `-o` | Where to save the CiteKit map. |
+
+---
+
+### `serve` (MCP)
+Starts the stdio MCP server for AI communication.
+
 ```bash
 python -m citekit.cli serve
 ```
-> **What is `serve`?**
-> This starts the **Model Context Protocol (MCP)** server over stdio. It allows AI agents (like Claude Desktop or Cline) to "talk" to CiteKit. It sits silently waiting for agent commands and is **not** meant for human interaction.
+**Internal**: Connects your local resources to the agent's brain. Not interactive.
 
-## Node.js CLI
+---
 
-The Node.js CLI is primarily designed to run the **MCP Server**.
+## Exit Codes
 
-### Installation
-```bash
-npm install -g citekit
-# Installs the `citekit` global command (MCP Server only).
-```
-
-### Usage
-
-**Start MCP Server**
-```bash
-citekit serve
-```
-> **Purpose**: Connects this machine to an AI agent via MCP. Not for human use.
-
-> **Note**: For programmatic ingestion and resolution in Node.js, use the SDK:
-> ```typescript
-> import { CiteKitClient } from 'citekit';
-> const client = new CiteKitClient();
-> await client.ingest('image.png', 'image');
-> ```
+CiteKit uses standard Unix exit codes:
+-   `0`: Success.
+-   `1`: Failure (File not found, API error, Invalid schema).
+-   `130`: Interrupted (Ctrl+C).

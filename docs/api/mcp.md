@@ -1,72 +1,67 @@
 # MCP Protocol Reference
 
-Technical specification for the CiteKit Model Context Protocol (MCP) server.
+CiteKit implements the **Model Context Protocol (MCP)** to allow AI agents to browse, understand, and extract multimodal evidence directly.
 
-## Overview
-
-The CiteKit MCP server allows AI agents to interact with your local resource maps and resolve content slices automatically. It implements the standard [Model Context Protocol](https://modelcontextprotocol.io/).
+---
 
 ## Tools
 
+The CiteKit MCP server exposes the following tools to the agent:
+
 ### `listResources`
-Lists all available resource map IDs currently ingested in the storage directory.
+Returns a list of all resource IDs currently available in the local CiteKit index.
+-   **Input**: `{}`
+-   **Output**: `{"resources": ["lecture_vid", "book_pdf", ...]}`
 
-**Arguments**: None.
+### `getStructure`
+Retrieves the full semantic map (JSON) of a specific resource.
+-   **Input**: `{"resource_id": "string"}`
+-   **Output**: The full `ResourceMap` schema.
+-   **Agent Usage**: Agents call this first to "see" what is inside a file without downloading it.
 
-**Response**:
+### `getNode`
+Fetches metadata for a specific node ID.
+-   **Input**: `{"resource_id": "string", "node_id": "string"}`
+-   **Output**: The single `Node` object.
+-   **Agent Usage**: Used for fast verification of a specific concept's location.
+
+### `resolve`
+The "Resolution" tool. Converts a node into evidence.
+-   **Input**: 
+    -   `resource_id`: (Required)
+    -   `node_id`: (Required)
+    -   `virtual`: (Optional, default: `False`)
+-   **Output**: `ResolvedEvidence` object (contains absolute path to clip/slice).
+-   **Agent Usage**: The final step. The agent takes the `output_path` and attaches it to the current chat context as grounded evidence.
+
+---
+
+## Internal Protocol Flow
+
+1.  **Discovery**: User asks "What happens at 5 minutes in the video?".
+2.  **Mapping**: Agent looks at `listResources`.
+3.  **Selection**: Agent calls `getStructure(lecture_vid)`.
+4.  **Pinpointing**: Agent finds a node with `id: "recursion_demo"` and `location: {start: 300, end: 360}`.
+5.  **Resolution**: Agent calls `resolve(lecture_vid, "recursion_demo")`.
+6.  **Grounding**: CiteKit extracts the 60s clip, returns the path, and the agent "sees" the video.
+
+---
+
+## Configuration
+
+### Claude Desktop
+Add this to your `claude_desktop_config.json`:
+
 ```json
 {
-  "resources": ["lecture_1", "calculus_ch2"]
+  "mcpServers": {
+    "citekit": {
+      "command": "python",
+      "args": ["-m", "citekit.cli", "serve"]
+    }
+  }
 }
 ```
 
----
-
-### `getStructure`
-Retrieves the full structural index for a specific resource ID.
-
-**Arguments**:
-- `resource_id` (string): The ID of the resource to inspect.
-
-**Response**:
-Returns the full [Resource Map JSON](/api/models).
-
----
-
-### `resolve`
-Converts a node ID into extracted evidence (physical file or virtual pointer).
-
-**Arguments**:
-- `resource_id` (string): The parent resource ID.
-- `node_id` (string): The ID of the node to resolve.
-- `virtual` (boolean, optional): If `true`, CiteKit will skip physical file extraction and return metadata only.
-
-**Response**:
-Returns a [ResolvedEvidence](/api/models#resolved-evidence) object.
-
-**Virtual Resolve Response**:
-When `virtual: true` is provided, the tool returns:
-- `modality`: string
-- `address`: string (e.g., `video://lecture#t=180,210`)
-- `node`: The node metadata object.
-- `output_path`: `null` (Physical file skipping)
-
----
-
-## Server Initialization
-
-The server can be started using the `serve` command in both Python and Node.js.
-
-### Python
-```bash
-python -m citekit.cli serve --storage-dir .resource_maps --output-dir .citekit_output
-```
-
-### Node.js
-```bash
-npx citekit serve
-```
-
-## Security & Environment
-
-The MCP server requires the `GEMINI_API_KEY` to be passed as an environment variable for mapping tasks. It does **not** expose your API key to the client; all mapping logic happens server-side.
+### Cursor / Cline / Roo Code
+See the [MCP Integration Guide](/integration/mcp) for specific IDE setup.

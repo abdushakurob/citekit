@@ -47,7 +47,6 @@ async def modern_hybrid_query(query: str, vector_db):
             node_id="fig_7_topology"
         )
         
-        # Reasoning Phase: High-fidelity multimodal response
         return await call_multimodal_model(
             prompt=f"Based on the spec: {text_chunk}",
             image_path=evidence.output_path

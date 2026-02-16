@@ -1,110 +1,102 @@
 # JavaScript/TypeScript SDK Reference
 
-The `citekit` package exports a main client class `CiteKitClient`.
-
-## Client
+The CiteKit JavaScript SDK is written in TypeScript and provides a modern, asynchronous API for managing multimodal resources.
 
 ```typescript
 import { CiteKitClient } from 'citekit';
-
-const client = new CiteKitClient({
-    apiKey?: string;        // Defaults to process.env.GEMINI_API_KEY
-    model?: string;         // Defaults to 'gemini-2.0-flash'
-    baseDir?: string;       // Defaults to '.', set to os.tmpdir() for serverless
-    storageDir?: string;    // Defaults to '.resource_maps'
-    outputDir?: string;     // Defaults to '.citekit_output'
-    maxRetries?: number;    // Defaults to 3
-});
 ```
 
 ---
 
-## Methods
+## `CiteKitClient`
 
-### `ingest`
+The primary class for interacting with CiteKit in Node.js environments.
 
-Uploads file to LLM and generates a map.
+### Constructor Options
+
+```typescript
+interface CiteKitClientOptions {
+    baseDir?: string;      // Base directory for all files (Default: ".")
+    storageDir?: string;   // Map storage path (Default: ".resource_maps")
+    outputDir?: string;    // Clippings output path (Default: ".citekit_output")
+    apiKey?: string;       // Gemini API Key
+    model?: string;        // Gemini Model (Default: "gemini-2.0-flash")
+    maxRetries?: number;   // Mapping retries (Default: 3)
+    mapper?: MapperProvider; // Custom mapper implementation
+}
+
+const client = new CiteKitClient(options);
+```
+
+---
+
+### Ingestion
+
+#### `async ingest(...)`
+Analyzes a file and produces a `ResourceMap`.
 
 ```typescript
 async ingest(
-    sourcePath: string, 
-    modality: 'video' | 'audio' | 'document' | 'image' | 'text'
+    resourcePath: string,
+    resourceType: string,
+    options?: { resourceId?: string }
 ): Promise<ResourceMap>
 ```
 
-*   `sourcePath`: Path to local file.
-*   `modality`: Type of media.
-*   **Returns**: `Promise<ResourceMap>`.
+**Technical Features:**
+*   **Hashing**: Uses `node:crypto` (SHA-256) to index content.
+*   **Deduplication**: Automatically skip LLM calls if a map with the same hash exists in `storageDir`.
+*   **Concurrency Locking**: Uses an internal `queue` and `activeRequests` counter (Semaphore pattern) to limit parallel API calls to **5** by default.
 
-### `getStructure`
+---
 
-Retrieves an existing map from local storage.
+### Resolution
 
-```typescript
-getStructure(resourceId: string): ResourceMap
-```
-
-*   `resourceId`: The ID of the resource.
-*   **Returns**: `ResourceMap` object.
-*   **Throws**: Error if map doesn't exist.
-
-### `resolve`
-
-Extracts a specific node from the source file.
+#### `async resolve(...)`
+Converts a node ID into physical or virtual evidence.
 
 ```typescript
 async resolve(
     resourceId: string, 
-    nodeId: string,
+    nodeId: string, 
     options?: { virtual?: boolean }
 ): Promise<ResolvedEvidence>
 ```
 
-*   `resource_id`: The ID of the resource.
-*   `node_id`: The ID of the node to extract.
-*   `options.virtual`: If `true`, returns metadata only (timestamps/pages) without physical file extraction. Required for environments without FFmpeg.
-*   **Returns**: `Promise<ResolvedEvidence>`.
+**Technical Features:**
+*   **Virtual Mode**: Returns a URI address immediately without touching FFmpeg or PDF tools.
+*   **Physical Mode**: 
+    -   **Documents**: Uses `pdf-lib` to slice PDF pages.
+    -   **Video**: Uses `fluent-ffmpeg` to extract clips.
+    -   **Text**: Uses native Node.js streams to slice line ranges.
 
 ---
 
-## Utilities
+### Map Management
 
-### `GeminiMapper`
+#### `getMap(resourceId: string): ResourceMap`
+Loads a map from disk. Synchonous.
 
-```typescript
-import { GeminiMapper } from 'citekit';
+#### `listMaps(): string[]`
+Returns IDs of all locally stored maps.
 
-const mapper = new GeminiMapper(
-    apiKey, 
-    "gemini-2.0-flash", 
-    3 // maxRetries
-);
-```
-
-### `createAgentContext`
-
-```typescript
-import { createAgentContext } from 'citekit';
-
-const context = createAgentContext(maps, 'markdown');
-```
-
-> [!IMPORTANT]
-> Always pass an **array** of maps, even for a single resource: `createAgentContext([map])`.
+#### `getStructure(resourceId: string): ResourceMap`
+Alias for `getMap`, used for standardized terminology.
 
 ---
 
-## Data Models
+## Core Interfaces
 
 ### `ResourceMap`
 ```typescript
 interface ResourceMap {
     resource_id: string;
+    type: 'video' | 'audio' | 'document' | 'image' | 'text';
     title: string;
     source_path: string;
-    type: 'video' | 'audio' | 'document' | 'image' | 'text';
     nodes: Node[];
     metadata: Record<string, any>;
+    created_at: string;
 }
 ```
 
@@ -112,37 +104,58 @@ interface ResourceMap {
 ```typescript
 interface Node {
     id: string;
-    title: string;
-    summary: string;
+    title?: string;
     type: string;
     location: Location;
+    summary?: string;
     children?: Node[];
-}
-```
-
-### `ResolvedEvidence`
-```typescript
-interface ResolvedEvidence {
-    output_path?: string;   // Path to file. Undefined if virtual: true.
-    modality: string;
-    address: string;        // URI-style address, e.g. doc://book#pages=12-13
-    node: Node;
-    resource_id: string;
 }
 ```
 
 ### `Location`
 ```typescript
 interface Location {
-    // For Text (1-indexed, inclusive)
+    modality: string;
+    pages?: number[];
     lines?: [number, number];
     start?: number;
     end?: number;
-    
-    // For Documents (1-indexed page numbers)
-    pages?: number[];
-    
-    // For Images [x1, y1, x2, y2] (0.0 - 1.0)
     bbox?: [number, number, number, number];
 }
 ```
+
+---
+
+## Extension Protocols
+
+### `MapperProvider`
+Implement this to use your own LLM or service for mapping.
+
+```typescript
+interface MapperProvider {
+    generateMap(
+        resourcePath: string, 
+        resourceType: string, 
+        resourceId?: string
+    ): Promise<ResourceMap>;
+}
+```
+
+### `MapAdapter`
+Implement this to convert external JSON/Objects into CiteKit format.
+
+```typescript
+interface MapAdapter {
+    adapt(input: any, options?: any): Promise<ResourceMap>;
+}
+```
+
+---
+
+## Address Utilities
+
+#### `parseAddress(address: string): { resourceId: string, location: Location }`
+Parses strings like `video://lecture#t=10,20`.
+
+#### `buildAddress(resourceId: string, location: Location): string`
+Generates CiteKit URIs for easy grounding in LLM prompts.

@@ -12,7 +12,7 @@ CiteKit implements the **Model Context Protocol (MCP)**, allowing AI agents (lik
 
 To use CiteKit, you must add it to your MCP client's configuration file.
 
-### 🐍 Python Server (Recommended)
+### Python Server (Recommended)
 
 Does not require installing the package globally if you use `uv`.
 
@@ -39,7 +39,7 @@ Does not require installing the package globally if you use `uv`.
     }
 ```
 
-### 📦 Node.js Server
+### Node.js Server
 
 ```json
 {

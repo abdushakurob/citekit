@@ -7,3 +7,4 @@ export * from "./resolvers/document.js";
 export * from "./resolvers/video.js";
 export * from "./resolvers/image.js";
 export * from "./aggregator.js";
+export * from "./adapters.js";

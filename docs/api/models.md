@@ -87,12 +87,11 @@ The `location` object is polymorphic.
 
 The object returned by `client.resolve()`.
 
-```json
-{
-  "output_path": "string (optional)",
-  "modality": "string",
-  "address": "string (URI)",
-  "node": { "Object": "Ref back to node" },
-  "resource_id": "string"
-}
-```
+### JSON Structure
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `output_path` | `string` | Absolute path to the extracted file (null in virtual mode). |
+| `modality` | `string` | The resource type (video, doc, etc.). |
+| `address` | `string` | The CiteKit URI (e.g., `doc://id#pages=1`). |
+| `resource_id` | `string` | ID of the source resource. |
+| `node` | `Node` | The full node object that was resolved. |

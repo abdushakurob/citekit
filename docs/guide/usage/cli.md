@@ -150,8 +150,8 @@ python -m citekit.cli check-map .resource_maps/lecture_01.json
 
 **Output:**
 ```text
-🔍 Validating .resource_maps/lecture_01.json...
-✅ Map is valid.
+[INFO] Validating .resource_maps/lecture_01.json...
+[SUCCESS] Map is valid.
    Schema Version: 0.1.7
    Resource ID: lecture_01
    Nodes: 12

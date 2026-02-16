@@ -2,6 +2,21 @@
 
 All notable changes to the CiteKit project will be documented in this file.
 
+## [0.1.7] - 2026-02-16
+### Added
+- **Text & Code Support**: First-class support for `.txt`, `.md`, and `.py` files. Includes sliding window analysis and line-range resolution.
+- **Map Portability**: 
+    - **Adapters**: New `citekit adapt` command to ingest data from GraphRAG, LlamaIndex, or custom sources.
+    - **Validator**: New `citekit check-map` command to verify map schema compliance.
+    - **Standardized Schema**: Strict JSON schema alignment between Python and TypeScript SDKs.
+- **Documentation**: 
+    - Added "Map Adapters" guide.
+    - Updated all examples to remove emojis for a cleaner CLI experience.
+
+### Fixed
+- **CLI Output**: Replaced emoji prefixes with professional text labels (`[INFO]`, `[SUCCESS]`).
+- **Schema Parity**: Fixed missing `lines` field in Python `Location` model.
+
 ## [0.1.6] - 2026-02-16
 ### Added
 - **Strategic Documentation Overhaul**: Completely refactored all guides to focus on **Modern AI Architectures** (Agentic RAG, LongRAG, GraphRAG, and Context Orchestration).
@@ -11,8 +26,20 @@ All notable changes to the CiteKit project will be documented in this file.
 - **Virtual Pointer Protocol**: Official recommendation for the `virtual:` URI prefix in databases.
 
 ### Fixed
-- **Python SDK**: Added missing `os` import in `client.py` required for `/tmp` and environment variable support.
-- **Documentation**: Fixed double-protocol typo (`virtual://video://`) in examples.
+## [0.1.7] - 2026-02-16
+### Added
+- **Text & Code Support**: First-class support for `.txt`, `.md`, and `.py` files. Includes sliding window analysis and line-range resolution.
+- **Map Portability**: 
+    - **Adapters**: New `citekit adapt` command to ingest data from GraphRAG, LlamaIndex, or custom sources.
+    - **Validator**: New `citekit check-map` command to verify map schema compliance.
+    - **Standardized Schema**: Strict JSON schema alignment between Python and TypeScript SDKs.
+- **Documentation**: 
+    - Added "Map Adapters" guide.
+    - Updated all examples to remove emojis for a cleaner CLI experience.
+
+### Fixed
+- **CLI Output**: Replaced emoji prefixes with professional text labels (`[INFO]`, `[SUCCESS]`).
+- **Schema Parity**: Fixed missing `lines` field in Python `Location` model.
 
 ## [0.1.5] - 2026-02-16
 ### Added
