@@ -5,7 +5,11 @@ Converts a semantic node ID into a physical clip, slice, or virtual address.
 ## Usage
 
 ```bash
+# Python
 python -m citekit.cli resolve <node_id> [--resource <resource_id>] [--virtual]
+
+# JavaScript
+citekit resolve <node_id> [--resource <resource_id>] [--virtual]
 ```
 
 ### Node ID Formats
@@ -18,13 +22,27 @@ python -m citekit.cli resolve <node_id> [--resource <resource_id>] [--virtual]
 ### `--resource` (`-res`)
 Explicitly specify the resource ID (if not using dot notation).
 *   **Format**: `resource_id`
-*   **Example**: `python -m citekit.cli resolve --resource lecture_01 chapter_1.intro`
+*   **Example**: 
+```bash
+# Python
+python -m citekit.cli resolve --resource lecture_01 chapter_1.intro
+
+# JavaScript
+citekit resolve --resource lecture_01 chapter_1.intro
+```
 
 ### `--virtual`
 Enable virtual resolution mode (metadata-only, no extraction).
 *   **Behavior**: Skips file extraction and returns only the URI address and metadata.
 *   **Use Case**: Faster for serverless apps or when the agent only needs the citation text, not the media.
-*   **Example**: `python -m citekit.cli resolve lecture_01.chapter_1 --virtual`
+*   **Example**: 
+```bash
+# Python
+python -m citekit.cli resolve lecture_01.chapter_1 --virtual
+
+# JavaScript
+citekit resolve lecture_01.chapter_1 --virtual
+```
 
 ---
 
@@ -56,7 +74,11 @@ Enable virtual resolution mode (metadata-only, no extraction).
 
 ### Basic resolution (physical extraction):
 ```bash
+# Python
 python -m citekit.cli resolve lecture_01.intro
+
+# JavaScript
+citekit resolve lecture_01.intro
 ```
 
 **Output:**
@@ -69,7 +91,11 @@ python -m citekit.cli resolve lecture_01.intro
 
 ### Using separate resource flag:
 ```bash
+# Python
 python -m citekit.cli resolve chapter_1.definition --resource lecture_01
+
+# JavaScript
+citekit resolve chapter_1.definition --resource lecture_01
 ```
 
 **Output:**
@@ -82,7 +108,11 @@ python -m citekit.cli resolve chapter_1.definition --resource lecture_01
 
 ### Virtual resolution (no extraction):
 ```bash
+# Python
 python -m citekit.cli resolve lecture_01.intro --virtual
+
+# JavaScript
+citekit resolve lecture_01.intro --virtual
 ```
 
 **Output:**

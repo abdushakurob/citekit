@@ -4,6 +4,27 @@ In this guide, we'll build a **Video Orchestration** tool. It lets you "search" 
 
 This demonstrates using the **Python SDK** for **Temporal Content Orchestration** in modern agentic loops.
 
+## Run the Complete Example
+
+A fully implemented version of this example is available in the repository:
+
+**Location:** `examples/video-search-cli/`
+
+**Quick Start:**
+```bash
+cd examples/video-search-cli
+pip install -r requirements.txt
+export GEMINI_API_KEY="your_key_here"  # or $env:GEMINI_API_KEY on Windows
+python orchestrate_video.py index ./lectures/
+python orchestrate_video.py seek "gradient descent"
+```
+
+See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/video-search-cli) for full instructions including ffmpeg and video player setup.
+
+> **CLI Choice:** This example uses Python, but all CLI commands (`ingest`, `list`, `structure`, `resolve`, etc.) work identically in JavaScript (v0.1.8+). Choose based on your environment:
+> - **Python:** `python -m citekit <command>`
+> - **JavaScript:** `npx citekit <command>`
+
 ## The Strategy: Concept-Based Navigation
 
 Standard video search relies on "rough" transcription chunks. CiteKit enables a more sophisticated agentic workflow:

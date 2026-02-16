@@ -4,11 +4,19 @@ The CLI is the primary tool for managing your local CiteKit library. It provides
 
 ## Installation
 
-The CLI is automatically installed when you install the python package:
+The CLI is automatically installed with both Python and JavaScript packages (as of v0.1.8):
 
+**Python:**
 ```bash
 pip install citekit
 ```
+
+**JavaScript:**
+```bash
+npm install -g citekit
+```
+
+Both provide the same CLI commands. If you installed globally, use `citekit`. If you prefer no global install, you can use `npx citekit` instead.
 
 ## 1. Ingest (Map)
 
@@ -20,7 +28,11 @@ The `ingest` command serves as the bridge between your raw files and CiteKit's s
 ### Usage
 
 ```bash
+# Python
 python -m citekit.cli ingest [PATH] [OPTIONS]
+
+# JavaScript
+citekit ingest [PATH] [OPTIONS]
 ```
 
 ### Examples
@@ -28,14 +40,21 @@ python -m citekit.cli ingest [PATH] [OPTIONS]
 **Standard Ingestion**
 Detects type from extension.
 ```bash
+# Python
 python -m citekit.cli ingest lecture.mp4
+
+# JavaScript
+citekit ingest lecture.mp4
 ```
 
 **Forcing a Modality**
 Useful for non-standard extensions or specific parsing needs.
 ```bash
-# Treat a .md file as a text/code source
+# Python - Treat a .md file as a text/code source
 python -m citekit.cli ingest README.md --type text
+
+# JavaScript
+citekit ingest README.md --type text
 ```
 
 ### Options
@@ -57,7 +76,11 @@ Before you extract content, you often need to know *what* to extract. The `list`
 View all files currently managed by CiteKit in your local project.
 
 ```bash
+# Python
 python -m citekit.cli list
+
+# JavaScript
+citekit list
 ```
 
 **Output:**
@@ -73,7 +96,11 @@ found 3 resources:
 View the hierarchical structure of a specific resource. This helps you find the `node_id` you need for resolution.
 
 ```bash
+# Python
 python -m citekit.cli list lecture_01
+
+# JavaScript
+citekit list lecture_01
 ```
 
 **Output:**
@@ -90,7 +117,11 @@ Nodes in 'lecture_01':
 Drill down into a specific node to see exactly what it covers (timestamps, page numbers, summary). This is useful for debugging or verification.
 
 ```bash
+# Python
 python -m citekit.cli inspect lecture_01.chapter_1
+
+# JavaScript
+citekit inspect lecture_01.chapter_1
 ```
 
 **Output:**
@@ -109,7 +140,11 @@ Resolution is the final step where CiteKit produces a tangible file for you or y
 ### Usage
 
 ```bash
+# Python
 python -m citekit.cli resolve [RESOURCE_ID] [NODE_ID]
+
+# JavaScript
+citekit resolve [RESOURCE_ID] [NODE_ID]
 ```
 
 ### Physical Resolution (Default)
@@ -117,7 +152,11 @@ python -m citekit.cli resolve [RESOURCE_ID] [NODE_ID]
 Produces a new file containing *only* the requested content.
 
 ```bash
+# Python
 python -m citekit.cli resolve lecture_01 chapter_1
+
+# JavaScript
+citekit resolve lecture_01 chapter_1
 ```
 
 **What happens:**
@@ -131,7 +170,11 @@ python -m citekit.cli resolve lecture_01 chapter_1
 Fetches the coordinates/metadata *without* creating a file. Ideal for passing timestamps to a frontend player or calculating duration.
 
 ```bash
+# Python
 python -m citekit.cli resolve lecture_01 chapter_1 --virtual
+
+# JavaScript
+citekit resolve lecture_01 chapter_1 --virtual
 ```
 
 **Output:**
@@ -147,7 +190,11 @@ Virtual resolution successful.
 To ensure your maps are portable and compliant with the schema (especially important if you edit them manually or generate them with other tools), use the `check-map` command.
 
 ```bash
+# Python
 python -m citekit.cli check-map .resource_maps/lecture_01.json
+
+# JavaScript
+citekit check-map .resource_maps/lecture_01.json
 ```
 
 **Output:**

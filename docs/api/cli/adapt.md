@@ -5,7 +5,11 @@ The "Universal Bridge" command. It converts external data schemas (GraphRAG, Lla
 ## Usage
 
 ```bash
+# Python
 python -m citekit.cli adapt <input_path> --adapter <adapter_type> [OPTIONS]
+
+# JavaScript
+citekit adapt <input_path> --adapter <adapter_type> [OPTIONS]
 ```
 
 ## Options
@@ -46,8 +50,12 @@ Converts GraphRAG entities/communities/relationships to CiteKit nodes.
 **Example**:
 
 ```bash
-# Convert GraphRAG community detection output
+# Python - Convert GraphRAG community detection output
 python -m citekit.cli adapt entities_and_communities.parquet \
+  --adapter graphrag
+
+# JavaScript
+citekit adapt entities_and_communities.parquet \
   --adapter graphrag
 ```
 

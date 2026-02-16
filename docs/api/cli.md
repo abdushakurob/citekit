@@ -1,10 +1,16 @@
 # CLI Reference
 
-CiteKit provides a Python-based command-line interface for managing the resource lifecycle.
+CiteKit provides a command-line interface for managing the resource lifecycle, available in both Python and JavaScript (v0.1.8+).
 
 ```bash
+# Python
 python -m citekit.cli [COMMAND]
+
+# JavaScript
+citekit [COMMAND]
 ```
+
+If you prefer not to install globally, use `npx citekit [COMMAND]` instead.
 
 ---
 
@@ -14,7 +20,11 @@ python -m citekit.cli [COMMAND]
 Generates a `ResourceMap` from a file.
 
 ```bash
+# Python
 python -m citekit.cli ingest <path> [OPTIONS]
+
+# JavaScript
+citekit ingest <path> [OPTIONS]
 ```
 
 | Option | Shorthand | Default | Description |
@@ -33,7 +43,11 @@ python -m citekit.cli ingest <path> [OPTIONS]
 Extracts a specific node into a file (Physical) or URI (Virtual).
 
 ```bash
+# Python
 python -m citekit.cli resolve <node_id> [OPTIONS]
+
+# JavaScript
+citekit resolve <node_id> [OPTIONS]
 ```
 
 | Option | Shorthand | Description |
@@ -43,7 +57,11 @@ python -m citekit.cli resolve <node_id> [OPTIONS]
 
 **Example**:
 ```bash
+# Python
 python -m citekit.cli resolve lecture.intro --virtual
+
+# JavaScript
+citekit resolve lecture.intro --virtual
 ```
 
 Output:
@@ -60,7 +78,11 @@ Output:
 Explores your indexed resources.
 
 ```bash
+# Python
 python -m citekit.cli list [resource_id]
+
+# JavaScript
+citekit list [resource_id]
 ```
 
 -   **No ID**: Lists all IDs in `.resource_maps/`.
@@ -72,7 +94,11 @@ python -m citekit.cli list [resource_id]
 Shows full technical metadata for a node.
 
 ```bash
+# Python
 python -m citekit.cli inspect <node_id> --resource <rid>
+
+# JavaScript
+citekit inspect <node_id> --resource <rid>
 ```
 Useful for checking `bbox` coordinates or page numbers without extracting.
 
@@ -82,7 +108,11 @@ Useful for checking `bbox` coordinates or page numbers without extracting.
 Validates a manual or adapted map against the schema.
 
 ```bash
+# Python
 python -m citekit.cli check-map path/to/map.json
+
+# JavaScript
+citekit check-map path/to/map.json
 ```
 **Performs**: Pydantic validation + logical sanity checks (e.g., "map is type video but has pages in location").
 
@@ -92,7 +122,11 @@ python -m citekit.cli check-map path/to/map.json
 The "Universal Receiver" command.
 
 ```bash
+# Python
 python -m citekit.cli adapt <input> --adapter <adapter>
+
+# JavaScript
+citekit adapt <input> --adapter <adapter>
 ```
 
 | Option | Shorthand | Description |
@@ -106,11 +140,15 @@ python -m citekit.cli adapt <input> --adapter <adapter>
 Starts the stdio MCP server for AI communication.
 
 ```bash
+# Python
 python -m citekit.cli serve
+
+# JavaScript
+citekit serve
 ```
 **Internal**: Connects your local resources to the agent's brain. Not interactive.
 
-> **Note**: The Node.js package currently exposes only `citekit serve` (MCP). All other CLI commands are Python-only.
+> **Note**: As of v0.1.8, both Python and JavaScript packages have full CLI parity.
 
 ---
 

@@ -40,8 +40,11 @@ CiteKit follows a simple **Ingest → Map → Resolve** flow.
 The fastest way to get started is using the CLI to map your documents. The API key must be in your environment (default Gemini mapper) unless you supply a custom mapper in code.
 
 ```bash
-# General Syntax: citekit ingest <file> --type <modality>
-citekit ingest lecture.mp4 --type video
+# Python
+python -m citekit.cli ingest lecture.mp4 --type video
+
+# JavaScript
+npx citekit ingest lecture.mp4 --type video
 ```
 *This generates a JSON map in the `.resource_maps/` directory.*
 

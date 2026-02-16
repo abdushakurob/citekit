@@ -2,6 +2,27 @@
 
 In this guide, we'll build a **Hybrid Context System**. We will use a traditional Vector Database (Embeddings) for broad discovery, and CiteKit as the **High-Fidelity Orchestrator** to provide the exact visual or temporal evidence (diagrams, charts, or video segments) required for a reliable response.
 
+## Run the Complete Example
+
+A fully implemented version of this example is available in the repository:
+
+**Location:** `examples/rag-fusion/`
+
+**Quick Start:**
+```bash
+cd examples/rag-fusion
+pip install -r requirements.txt
+export GEMINI_API_KEY="your_key_here"  # or $env:GEMINI_API_KEY on Windows
+# Add a PDF as sample_document.pdf
+python hybrid_rag.py
+```
+
+See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/rag-fusion) for full instructions including production integration patterns.
+
+> **CLI Options:** While this example uses Python programmatically, you can explore documents via CLI with either:
+> - `python -m citekit <command>` (Python SDK)
+> - `npx citekit <command>` (JavaScript SDK, v0.1.8+)
+
 ## Beyond "Dumb" Retrieval
 In modern AI systems, retrieving a text chunk is often insufficient for reasoning:
 1.  **Semantic Orphanage**: A retrieved text chunk might say *"As shown in Figure 4..."*, but without the actual figure, the model is left to hallucinate details.

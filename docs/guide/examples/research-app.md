@@ -4,6 +4,45 @@ In this tutorial, we'll build an **Agentic Research** tool. It uses CiteKit to n
 
 This demonstrates the core power of CiteKit: Providing **Deterministic Evidence** for high-density research agents.
 
+## Run the Complete Example
+
+A fully implemented version of this example is available in the repository:
+
+**Location:** `examples/research-app/`
+
+**Quick Start:**
+```bash
+cd examples/research-app
+npm install
+cp .env.example .env
+# Edit .env and add your GEMINI_API_KEY
+mkdir papers
+# Add a PDF to papers/sample_paper.pdf
+npm start
+```
+
+See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/research-app) for full instructions.
+
+## CLI Usage (Optional)
+
+While this example uses the programmatic Node.js API, you can also explore with CLI commands:
+
+**JavaScript CLI:**
+```bash
+npx citekit ingest papers/deep_research_v4.pdf document
+npx citekit list  # See all ingested resources
+npx citekit structure paper_id  # View structural map
+```
+
+**Python CLI:**
+```bash
+python -m citekit ingest papers/deep_research_v4.pdf document
+python -m citekit list
+python -m citekit structure paper_id
+```
+
+Since v0.1.8, both SDKs have full CLI parity with all 8 commands.
+
 ## Why this is a "Modern" Approach
 
 Unlike traditional systems that rely on keyword search or random text chunks, an **Agentic Research** workflow uses CiteKit to:

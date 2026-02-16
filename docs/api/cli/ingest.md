@@ -5,7 +5,11 @@ Generates a `ResourceMap` by analyzing a multimodal file with a mapper (Gemini b
 ## Usage
 
 ```bash
+# Python
 python -m citekit.cli ingest <path/to/file> [OPTIONS]
+
+# JavaScript
+citekit ingest <path/to/file> [OPTIONS]
 ```
 
 ## Options
@@ -15,7 +19,14 @@ Explicitly set the resource modality. If omitted, CiteKit infers the type from t
 
 *   **Values**: `video`, `audio`, `document`, `image`, `text`, `virtual`
 *   **Default**: Auto-detect
-*   **Example**: `python -m citekit.cli ingest lecture.mp4 --type video`
+*   **Example**: 
+```bash
+# Python
+python -m citekit.cli ingest lecture.mp4 --type video
+
+# JavaScript
+citekit ingest lecture.mp4 --type video
+```
 
 ### `--concurrency` (`-c`)
 Sets the maximum number of parallel LLM calls allowed during batch ingestion.
@@ -71,7 +82,11 @@ JSON string of keyword arguments to pass when initializing a custom mapper.
 
 ### Basic ingestion (auto-detect type):
 ```bash
+# Python
 python -m citekit.cli ingest lecture.mp4
+
+# JavaScript
+citekit ingest lecture.mp4
 ```
 
 **Output:**
@@ -84,7 +99,11 @@ python -m citekit.cli ingest lecture.mp4
 
 ### Explicit type specification:
 ```bash
+# Python
 python -m citekit.cli ingest textbook.pdf --type document
+
+# JavaScript
+citekit ingest textbook.pdf --type document
 ```
 
 **Output:**

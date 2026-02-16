@@ -1,0 +1,17 @@
+{
+  "name": "citekit-research-app",
+  "version": "1.0.0",
+  "description": "Agentic Research Engine using CiteKit for deterministic evidence extraction",
+  "type": "module",
+  "main": "research_agent.js",
+  "scripts": {
+    "start": "node research_agent.js"
+  },
+  "keywords": ["citekit", "research", "agent", "pdf"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "citekit": "^0.1.7",
+    "dotenv": "^16.0.0"
+  }
+}

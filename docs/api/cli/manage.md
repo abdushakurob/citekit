@@ -11,8 +11,13 @@ Lists all resources currently stored in the `.resource_maps/` directory, with op
 ### Usage
 
 ```bash
+# Python
 python -m citekit.cli list [OPTIONS]
 python -m citekit.cli list <resource_id> [OPTIONS]
+
+# JavaScript
+citekit list [OPTIONS]
+citekit list <resource_id> [OPTIONS]
 ```
 
 ### Options
@@ -26,7 +31,11 @@ Currently no options. Basic listing only. For JSON export of a specific resource
 If no `resource_id` is provided, lists all ingested resources:
 
 ```bash
+# Python
 python -m citekit.cli list
+
+# JavaScript
+citekit list
 ```
 
 **Output (when resources exist):**
@@ -55,7 +64,11 @@ found 3 resources:
 If a `resource_id` is provided, lists all nodes in that resource in hierarchical format:
 
 ```bash
+# Python
 python -m citekit.cli list lecture_01
+
+# JavaScript
+citekit list lecture_01
 ```
 
 **Output:**

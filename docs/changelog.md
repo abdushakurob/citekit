@@ -2,9 +2,23 @@
 
 All notable changes to the CiteKit project will be documented in this file.
 
-## [0.1.8] - Unreleased
-### Planned
-- **JavaScript CLI Parity**: Implement CLI commands in the JS package (ingest, resolve, list, structure, check-map, inspect, adapt).
+## [0.1.8] - 2026-02-16
+### Added
+- **JavaScript CLI Parity**: Implemented all CLI commands in the JavaScript package (ingest, resolve, list, structure, check-map, inspect, adapt, serve) to match Python CLI functionality.
+- **Runnable Examples**: Added `examples/` folder with 4 real-world implementations:
+  - Research App (Node.js) - Agentic research engine for technical papers
+  - Study Companion (MCP) - Claude Desktop integration for lecture videos
+  - Video Search CLI (Python) - Concept-based video library navigation
+  - RAG Fusion (Python) - Hybrid vector database + CiteKit architecture
+
+### Changed
+- **CLI Scope**: JavaScript CLI now has full feature parity with Python CLI, no longer limited to MCP server only.
+- **Version**: Bumped to 0.1.8 across both SDKs.
+
+### Fixed
+- **Documentation URLs**: Changed all references from `citekit.org` to `abdushakurob.github.io/citekit`.
+- **Examples**: All example READMEs now have emojis removed and proper working code.
+- **Doc Pages**: Added "Run the Complete Example" sections to all guide example pages.
 
 ## [0.1.7] - 2026-02-16
 ### Added

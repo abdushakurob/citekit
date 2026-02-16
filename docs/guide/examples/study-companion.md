@@ -2,6 +2,24 @@
 
 In this guide, we will configure a powerful **Personal Study Agent** that can "watch" lectures with you and cite specific timestamps, using Claude Desktop and CiteKit.
 
+## Run the Complete Example
+
+A fully configured version of this example is available in the repository:
+
+**Location:** `examples/study-companion/`
+
+**Quick Start:**
+```bash
+# Install CiteKit
+pip install citekit
+# or
+npm install -g citekit
+
+# Follow the configuration guide in examples/study-companion/README.md
+```
+
+See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/study-companion) for full Claude Desktop setup instructions.
+
 ## The Goal
 We want to ask Claude:
 > "Can you find the part of the lecture where the professor explains 'Gradient Descent' and show me that clip?"
@@ -13,13 +31,21 @@ And have Claude:
 
 ## 1. Installation
 
-CiteKit comes with a built-in MCP server.
+CiteKit comes with a built-in MCP server. Choose your preferred SDK:
 
+**Python:**
 ```bash
 pip install citekit
-# or
-npm install -g citekit
+python -m citekit --version  # Verify
 ```
+
+**JavaScript:**
+```bash
+npm install -g citekit
+npx citekit --version  # Verify
+```
+
+Both provide identical MCP server and CLI functionality (v0.1.8+).
 
 ## 2. Configuration
 
@@ -46,10 +72,18 @@ Add the `citekit` server:
 ## 3. Workflow
 
 ### Step 1: Ingest your material
+
+**Python CLI:**
 ```bash
-# Analyze the video once. This builds the map.
-citekit ingest lectures/intro_to_ml.mp4 video
+python -m citekit ingest lectures/intro_to_ml.mp4 video
 ```
+
+**JavaScript CLI:**
+```bash
+npx citekit ingest lectures/intro_to_ml.mp4 video
+```
+
+Both produce the same structural map.
 
 ### Step 2: Ask Claude
 > "I want to study 'intro_to_ml'. Show me the section on 'Gradient Descent'."

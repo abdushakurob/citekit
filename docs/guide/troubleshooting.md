@@ -4,7 +4,7 @@ Common issues and how to fix them.
 
 ## Known Limitations (February 2026)
 
-- **JavaScript CLI parity**: The Node.js package currently exposes only `citekit serve` for MCP. Commands like `ingest`, `resolve`, `list`, `check-map`, `structure`, `inspect`, and `adapt` are Python-only.
+- **Map Versioning**: CiteKit does not yet handle source file mutations. Re-ingest for structural changes.
 
 ## FFmpeg Errors
 
