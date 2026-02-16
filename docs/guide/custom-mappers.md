@@ -26,6 +26,7 @@ class MyLocalMapper(MapperProvider):
         # 2. Call your Local Model (pseudo-code)
         # response = await ollama.chat(model="llama3", prompt=f"Analyze structure: {content}")
         # nodes = parse_json(response)
+        nodes = []  # Replace with parsed Node list
         
         # 3. Return a ResourceMap
         return ResourceMap(
@@ -93,7 +94,7 @@ class OllamaMapper(MapperProvider):
                 title=n["title"],
                 type=n["type"],
                 summary=n["summary"],
-                location=Location(lines=tuple(n["location"]["lines"]))
+                location=Location(modality="text", lines=tuple(n["location"]["lines"]))
             ))
 
         return ResourceMap(
@@ -207,5 +208,61 @@ console.log(`Mapped ${map.resource_id} locally!`);
 You can follow the same pattern to use `OpenAI` or `Anthropic` SDKs. Just replace the `httpx` call with the respective library's completion call.
 
 > [!TIP]
-> **Why use Gemini?**
-> By default, CiteKit uses Gemini 1.5 because of its **2M context window** and **native video/audio understanding**. Local models are great for text/code, but for long videos or 100+ page PDFs, a large-context multimodal model is highly recommended.
+> **Why use a multimodal cloud model?**
+> The default Gemini mapper is optimized for large context windows and native video/audio understanding, but you can use any provider that can return the required JSON schema. Local models are great for text/code; for long videos or 100+ page PDFs, a large-context multimodal model (Gemini, GPT-4o, etc.) is recommended.
+
+## Using Custom Mappers with the CLI
+
+The CLI also supports custom mappers via the `--mapper` and `--mapper-config` options:
+
+```bash
+# Use a custom mapper from a file
+python -m citekit.cli ingest lecture.mp4 --mapper ./my_mapper.py --mapper-config '{"model": "llama3"}'
+
+# Shorthand
+python -m citekit.cli ingest code.py -m ./ollama_mapper.py -t text
+```
+
+### How CiteKit Finds Your Mapper
+
+CiteKit looks for one of these in your `.py` file (in order):
+
+1. **A `Mapper` class** implementing `MapperProvider`:
+   ```python
+   # my_mapper.py
+   from citekit.mapper.base import MapperProvider
+   
+   class Mapper(MapperProvider):
+       async def generate_map(self, resource_path, resource_type, resource_id=None):
+           ...
+   ```
+
+2. **A `create_mapper(**kwargs)` factory function**:
+   ```python
+   # my_mapper.py
+   def create_mapper(model="llama3", **kwargs):
+       return OllamaMapper(model=model, **kwargs)
+   ```
+
+3. **A module-level `mapper` instance**:
+   ```python
+   # my_mapper.py
+   mapper = OllamaMapper(model="llama3")
+   ```
+
+### Example CLI Workflows
+
+**Text ingestion with local Llama**:
+```bash
+python -m citekit.cli ingest README.md --mapper ./ollama_mapper.py --mapper-config '{"model": "llama3"}'
+```
+
+**Video with custom model and concurrency**:
+```bash
+python -m citekit.cli ingest lecture.mp4 --mapper ./my_mapper.py -c 2 -r 3
+```
+
+**Using the default Gemini mapper** (no `--mapper` needed):
+```bash
+python -m citekit.cli ingest document.pdf --type document
+```

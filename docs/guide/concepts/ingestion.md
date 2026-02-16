@@ -1,6 +1,6 @@
 # Ingestion Process
 
-Ingestion is the phase where CiteKit transforms unstructured media into structured data. It leverages Google's Gemini 1.5 multimodal models to "watch" or "read" the file and output a strict JSON schema.
+Ingestion is the phase where CiteKit transforms unstructured media into structured data. It leverages a configured mapper (Gemini by default) to "watch" or "read" the file and output a strict JSON schema. You can also use local models by implementing a custom `MapperProvider`.
 
 ## 1. File Hashing & Caching
 
@@ -35,7 +35,7 @@ This ensures the LLM output is always machine-readable and valid.
 
 ## 3. Supported Context Windows
 
-Since CiteKit relies on Gemini 1.5, it supports massive context windows, allowing it to process:
+The default Gemini mapper supports massive context windows, allowing it to process:
 
 -   **Video**: Up to ~1 hour (Flash) or ~10 hours (Pro) depending on token usage.
 -   **Audio**: Up to 11 hours.
@@ -74,10 +74,10 @@ from citekit import CiteKitClient
 client = CiteKitClient()
 
 # High-accuracy mode (Slower, More Expensive)
-client_pro = CiteKitClient(model_name="gemini-1.5-pro")
+client_pro = CiteKitClient(model="gemini-1.5-pro")
 ```
 
-| Model | Best For | Speed | Cost |
+| Model (Gemini mapper) | Best For | Speed | Cost |
 | :--- | :--- | :--- | :--- |
 | **Flash 1.5** | Videos, broad segmentation, standard PDFs | Fast | Low |
 | **Pro 1.5** | Dense academic papers, subtle visual details | Slower | Higher |

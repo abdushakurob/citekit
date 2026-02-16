@@ -7,7 +7,7 @@
 
 /** Physical location within a resource. */
 export interface Location {
-    modality: "document" | "video" | "audio" | "image" | "text";
+    modality: "document" | "video" | "audio" | "image" | "text" | "virtual";
 
     /** Document: 1-indexed page numbers. */
     pages?: number[];
@@ -23,6 +23,9 @@ export interface Location {
 
     /** Image: normalized bounding box [x1, y1, x2, y2] (0.0–1.0). */
     bbox?: [number, number, number, number];
+
+    /** Virtual: external reference URI. */
+    virtual_address?: string;
 }
 
 /** A concept or section within a resource. */
@@ -49,7 +52,7 @@ export interface Node {
 /** Structured map of a resource — the first output of ingestion. */
 export interface ResourceMap {
     resource_id: string;
-    type: "document" | "video" | "audio" | "image" | "text";
+    type: "document" | "video" | "audio" | "image" | "text" | "virtual";
     title: string;
     source_path: string;
     metadata?: Record<string, string | number | null>;

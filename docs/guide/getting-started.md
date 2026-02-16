@@ -13,10 +13,10 @@ This guide covers the installation and core lifecycle of the CiteKit SDK.
     > [!TIP]
     > To verify, run `ffmpeg -version` in your terminal. If you see version info, you are ready.
 
-2.  **Gemini API Key**: 
-    Required only for the **Ingestion** (Mapping) phase. Resolution is 100% local.
-    -   Get a key from [Google AI Studio](https://aistudio.google.com/app/apikey).
-    -   Set it as an environment variable: `GEMINI_API_KEY`.
+2.  **Mapper API Key** (Gemini by default): 
+    Required only for the **Ingestion** (Mapping) phase. Resolution is 100% local. If you prefer local models, use a custom mapper instead (see [Custom Mappers](/guide/custom-mappers)).
+    -   Get a key from [Google AI Studio](https://aistudio.google.com/app/apikey) if you use the default Gemini mapper.
+    -   Set it as an environment variable: `GEMINI_API_KEY` (default mapper only).
 
 ## Installation
 
@@ -37,7 +37,7 @@ npm install citekit
 CiteKit follows a simple **Ingest → Map → Resolve** flow.
 
 ### 1. Ingest (CLI)
-The fastest way to get started is using the CLI to map your documents. The API key must be in your environment.
+The fastest way to get started is using the CLI to map your documents. The API key must be in your environment (default Gemini mapper) unless you supply a custom mapper in code.
 
 ```bash
 # General Syntax: citekit ingest <file> --type <modality>
@@ -52,7 +52,7 @@ Load the map into your application logic.
 ```python
 from citekit import CiteKitClient
 
-client = CiteKitClient() # Automatically reads GEMINI_API_KEY from env
+client = CiteKitClient() # Automatically reads GEMINI_API_KEY from env (Gemini default)
 resource_map = client.get_map("lecture")
 print(f"Nodes found: {len(resource_map.nodes)}")
 ```
@@ -62,7 +62,7 @@ print(f"Nodes found: {len(resource_map.nodes)}")
 import { CiteKitClient } from 'citekit';
 
 const client = new CiteKitClient();
-const resourceMap = await client.getMap('lecture');
+const resourceMap = client.getMap('lecture');
 ```
 
 ### 3. Resolve (Extract)

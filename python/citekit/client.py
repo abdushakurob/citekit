@@ -11,7 +11,6 @@ from citekit.mapper.base import MapperProvider
 from citekit.models import Location, Node, ResolvedEvidence, ResourceMap
 from citekit.resolvers.audio import AudioResolver
 from citekit.resolvers.document import DocumentResolver
-from citekit.resolvers.document import DocumentResolver
 from citekit.resolvers.image import ImageResolver
 from citekit.resolvers.text import TextResolver
 from citekit.resolvers.video import VideoResolver
@@ -177,6 +176,10 @@ class CiteKitClient:
         """Get the map as a plain dict — useful for MCP/JSON responses."""
         return self.get_map(resource_id).model_dump(mode="json")
 
+    def save_map(self, resource_map: ResourceMap) -> None:
+        """Persist a ResourceMap to local storage."""
+        self._save_map(resource_map)
+
     # ── Resolution ───────────────────────────────────────────────────────────
 
     def resolve(self, resource_id: str, node_id: str, virtual: bool = False) -> ResolvedEvidence:
@@ -205,7 +208,7 @@ class CiteKitClient:
         modality = node.location.modality
 
         # 1. Virtual Resolution: Early Return
-        if virtual:
+        if virtual or modality == "virtual":
             return ResolvedEvidence(
                 output_path=None,
                 modality=modality,

@@ -8,7 +8,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
-ResourceType = Literal["document", "video", "audio", "image", "text", "knowledge_graph", "web", "virtual"]
+ResourceType = Literal["document", "video", "audio", "image", "text", "virtual"]
 
 class Location(BaseModel):
     """Physical location within a resource that a node points to."""
@@ -27,6 +27,9 @@ class Location(BaseModel):
 
     # Image-specific (normalized 0-1 bounding box)
     bbox: tuple[float, float, float, float] | None = None
+
+    # Virtual / external references
+    virtual_address: str | None = None
 
 
 class Node(BaseModel):
@@ -53,14 +56,30 @@ class ResourceMap(BaseModel):
 
     def get_node(self, node_id: str) -> Node | None:
         """Find a node by its ID."""
-        for node in self.nodes:
-            if node.id == node_id:
-                return node
-        return None
+        def find(nodes: list[Node]) -> Node | None:
+            for node in nodes:
+                if node.id == node_id:
+                    return node
+                if node.children:
+                    found = find(node.children)
+                    if found:
+                        return found
+            return None
+
+        return find(self.nodes)
 
     def list_node_ids(self) -> list[str]:
         """Return all node IDs in this map."""
-        return [node.id for node in self.nodes]
+        ids: list[str] = []
+
+        def collect(nodes: list[Node]) -> None:
+            for node in nodes:
+                ids.append(node.id)
+                if node.children:
+                    collect(node.children)
+
+        collect(self.nodes)
+        return ids
 
 
 class ResolvedEvidence(BaseModel):

@@ -14,7 +14,7 @@ pip install citekit
 
 The `ingest` command serves as the bridge between your raw files and CiteKit's structured format. It performs two key actions:
 1.  **Hashes the file** to check if a map already exists (skipping redundant API calls).
-2.  **Uploads to Gemini** (if new) to analyze structure using multimodal understanding.
+2.  **Uploads to the mapper** (Gemini by default) to analyze structure using multimodal understanding.
 3.  **Saves JSON** to your local `.resource_maps` directory.
 
 ### Usage
@@ -34,17 +34,19 @@ python -m citekit.cli ingest lecture.mp4
 **Forcing a Modality**
 Useful for non-standard extensions or specific parsing needs.
 ```bash
-# Treat a .md file as a documentation source
-python -m citekit.cli ingest README.md --type document
+# Treat a .md file as a text/code source
+python -m citekit.cli ingest README.md --type text
 ```
 
 ### Options
 
 | Option | Shorthand | Description | Default |
 | :--- | :--- | :--- | :--- |
-| `--type` | `-t` | Force resource type (`video`, `audio`, `document`, `image`). | Auto-detect |
+| `--type` | `-t` | Force resource type (`video`, `audio`, `document`, `image`, `text`). | Auto-detect |
 | `--concurrency` | `-c` | Max parallel chunks to process. Higher = faster, but may hit rate limits. | `5` |
 | `--retries` | `-r` | Number of times to retry failed API calls. | `3` |
+| `--mapper` | `-m` | Use a custom mapper: `gemini` (default) or `/path/to/mapper.py`. | `gemini` |
+| `--mapper-config` | | JSON kwargs for custom mapper (e.g., `'{"model": "llama3"}'`). | (none) |
 
 ## 2. Inspect (Plan)
 
@@ -63,7 +65,7 @@ python -m citekit.cli list
 found 3 resources:
  - lecture_01 (video): Introduction to Algorithms
  - research_paper_v2 (document): Attention Is All You Need
- - app_codebase (document): Main Application Logic
+ - app_codebase (text): Main Application Logic
 ```
 
 ### List Nodes

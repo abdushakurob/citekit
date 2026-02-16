@@ -36,7 +36,7 @@ Add the `citekit` server:
       "command": "citekit",
       "args": ["serve"],
       "env": {
-        "GEMINI_API_KEY": "AIzaSy..."
+        "GEMINI_API_KEY": "AIzaSy..."  // Only needed for the default Gemini mapper
       }
     }
   }

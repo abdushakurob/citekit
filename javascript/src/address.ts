@@ -15,6 +15,8 @@ const SCHEME_TO_MODALITY: Record<string, Location["modality"]> = {
     video: "video",
     audio: "audio",
     image: "image",
+    text: "text",
+    virtual: "virtual",
 };
 
 const MODALITY_TO_SCHEME: Record<string, string> = {
@@ -22,6 +24,8 @@ const MODALITY_TO_SCHEME: Record<string, string> = {
     video: "video",
     audio: "audio",
     image: "image",
+    text: "text",
+    virtual: "virtual",
 };
 
 /**
@@ -50,6 +54,11 @@ export function parseAddress(address: string): {
     }
 
     const location: Location = { modality };
+
+    if (scheme === "virtual") {
+        location.virtual_address = address;
+        return { resourceId, location };
+    }
 
     if (fragment) {
         const params = Object.fromEntries(
@@ -84,6 +93,14 @@ export function parseAddress(address: string): {
             }
             location.bbox = parts as [number, number, number, number];
         }
+
+        if (params.lines) {
+            const [start, end] = params.lines.split("-").map(Number);
+            if (Number.isNaN(start) || Number.isNaN(end)) {
+                throw new Error(`lines must be numeric, got '${params.lines}'`);
+            }
+            location.lines = [start, end];
+        }
     }
 
     return { resourceId, location };
@@ -100,6 +117,10 @@ export function buildAddress(resourceId: string, location: Location): string {
     const scheme = MODALITY_TO_SCHEME[location.modality];
     if (!scheme) {
         throw new Error(`Unknown modality: ${location.modality}`);
+    }
+
+    if (location.modality === "virtual") {
+        return location.virtual_address ?? `virtual://${resourceId}`;
     }
 
     const fragments: string[] = [];
@@ -122,6 +143,10 @@ export function buildAddress(resourceId: string, location: Location): string {
 
     if (location.bbox) {
         fragments.push(`bbox=${location.bbox.join(",")}`);
+    }
+
+    if (location.lines) {
+        fragments.push(`lines=${location.lines[0]}-${location.lines[1]}`);
     }
 
     const fragment = fragments.join("&");

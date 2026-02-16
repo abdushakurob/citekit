@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, basename, extname } from "node:path";
 import type { Resolver } from "./base.js";
 import type { Location, ResolvedEvidence } from "../models.js";
+import { buildAddress } from "../address.js";
 
 export class TextResolver implements Resolver {
     async resolve(
@@ -17,8 +18,7 @@ export class TextResolver implements Resolver {
             return {
                 resource_id: resourceId,
                 modality: "text",
-                // Valid URI: text://resource_id#lines=10-20
-                address: `text://${resourceId}#lines=${location.lines?.[0]}-${location.lines?.[1]}`,
+                address: buildAddress(resourceId, location),
                 node: {
                     id: nodeId,
                     title: nodeId, // We don't have title here without the Map node object, but that's ok for evidence return
@@ -68,7 +68,7 @@ export class TextResolver implements Resolver {
             output_path: outputPath,
             resource_id: resourceId,
             modality: "text",
-            address: `text://${resourceId}#lines=${startLine}-${endLine}`,
+            address: buildAddress(resourceId, location),
             node: {
                 id: nodeId,
                 title: nodeId,

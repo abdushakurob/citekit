@@ -1,6 +1,8 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { Resolver } from "./base.js";
 import type { ResolvedEvidence } from "../models.js";
+import { buildAddress } from "../address.js";
 
 export class ImageResolver implements Resolver {
     async resolve(
@@ -15,7 +17,7 @@ export class ImageResolver implements Resolver {
         if (options?.virtual) {
             return {
                 modality: "image",
-                address: `img://${resourceId}#bbox=${location.bbox.join(",")}`,
+                address: buildAddress(resourceId, location),
                 node: { id: nodeId, location: location } as any,
                 resource_id: resourceId
             };
@@ -58,11 +60,11 @@ export class ImageResolver implements Resolver {
         const filename = `${resourceId}_crop_${left}_${top}.png`;
         const outputPath = join(outputDir, filename);
 
-        if (require("node:fs").existsSync(outputPath)) {
+        if (existsSync(outputPath)) {
             return {
                 output_path: outputPath,
                 modality: "image",
-                address: `image://${resourceId}#rect=${x1},${y1},${x2},${y2}`,
+                address: buildAddress(resourceId, location),
                 node: { id: nodeId, location: location } as any,
                 resource_id: resourceId
             };
@@ -75,7 +77,7 @@ export class ImageResolver implements Resolver {
         return {
             output_path: outputPath,
             modality: "image",
-            address: `image://${resourceId}#rect=${x1},${y1},${x2},${y2}`,
+            address: buildAddress(resourceId, location),
             node: { id: nodeId, location: location } as any,
             resource_id: resourceId
         };

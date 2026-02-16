@@ -4,7 +4,7 @@ import { Resolver } from "./base.js";
 import type { ResolvedEvidence } from "../models.js";
 import { buildAddress } from "../address.js";
 
-export class VideoResolver implements Resolver {
+export class AudioResolver implements Resolver {
     async resolve(
         resourceId: string,
         nodeId: string,
@@ -13,10 +13,9 @@ export class VideoResolver implements Resolver {
         outputDir: string,
         options?: { virtual?: boolean }
     ): Promise<ResolvedEvidence> {
-        // Virtual Resolution: Return metadata without FFmpeg
         if (options?.virtual) {
             return {
-                modality: "video",
+                modality: "audio",
                 address: buildAddress(resourceId, location),
                 node: { id: nodeId, location: location } as any,
                 resource_id: resourceId
@@ -29,9 +28,13 @@ export class VideoResolver implements Resolver {
             ffmpeg = mod.default;
         } catch (e) {
             throw new Error(
-                "The 'fluent-ffmpeg' package is required for video resolution. " +
+                "The 'fluent-ffmpeg' package is required for audio resolution. " +
                 "Please install it with: npm install fluent-ffmpeg"
             );
+        }
+
+        if (!existsSync(sourcePath)) {
+            throw new Error(`Source file not found: ${sourcePath}`);
         }
 
         if (location.start === undefined || location.end === undefined) {
@@ -41,14 +44,13 @@ export class VideoResolver implements Resolver {
         const start = location.start;
         const duration = location.end - location.start;
 
-        const filename = `${resourceId}_clip_${start}_${location.end}.mp4`;
+        const filename = `${resourceId}_audio_${start}_${location.end}.mp3`;
         const outputPath = join(outputDir, filename);
 
-        // Caching
         if (existsSync(outputPath)) {
             return {
                 output_path: outputPath,
-                modality: "video",
+                modality: "audio",
                 address: buildAddress(resourceId, location),
                 node: { id: nodeId, location: location } as any,
                 resource_id: resourceId
@@ -63,7 +65,7 @@ export class VideoResolver implements Resolver {
                 .on("end", () => {
                     resolve({
                         output_path: outputPath,
-                        modality: "video",
+                        modality: "audio",
                         address: buildAddress(resourceId, location),
                         node: { id: nodeId, location: location } as any,
                         resource_id: resourceId

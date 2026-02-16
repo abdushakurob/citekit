@@ -6,7 +6,7 @@ CiteKit is designed as a **two-phase local-first** system. It separates the expe
 
 The system consists of three main components:
 
-1.  **Ingestion Engine**: Interfaces with Multimodal LLMs (Gemini) to generate semantic maps.
+1.  **Ingestion Engine**: Interfaces with a multimodal mapper (Gemini by default) to generate semantic maps.
 2.  **Map Storage**: A local JSON-based storage for persisting content structure.
 3.  **Resolution Engine**: A local media processing layer (FFmpeg, PyMuPDF) for extracting content.
 
@@ -15,7 +15,7 @@ The system consists of three main components:
 ```mermaid
 graph TD
     subgraph "Phase 1: Ingestion (One-time)"
-    A[Source File] -->|Binary Stream| B[Google Gemini API]
+    A[Source File] -->|Binary Stream| B[Mapper API (Gemini default)]
     B -->|Analysis| C[CiteKit Mapper]
     C -->|Structured JSON| D[Resource Map]
     end
@@ -43,8 +43,8 @@ The ingestion process enables "blind" agents to understand file content.
 
 -   **Input**: A file path (PDF, MP4, MP3, JPG, PY, MD, TXT).
 -   **Process**:
-    1.  The file is uploaded to Google's GenAI File API (temporarily).
-    2.  CiteKit prompts a Gemini 1.5 model with a domain-specific schema instruction.
+    1.  The file is uploaded to the configured mapper API (temporarily).
+    2.  CiteKit prompts the mapper with a domain-specific schema instruction.
     3.  The model returns a hierarchical JSON structure representing the file's content (Topics, Chapters, Scenes).
     4.  The remote file is deleted from Google's servers (depending on retention policy, usually immediate for temp files).
 

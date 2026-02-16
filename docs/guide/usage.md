@@ -13,7 +13,7 @@ CiteKit is designed to be **isomorphic**. You can mix and match interfaces (e.g.
 
 ## 1. Ingesting Resources
 
-Ingestion is the process of analyzing a file (Video, Audio, PDF, Text) to create a **Resource Map**. This is the only step that requires the external Gemini API.
+Ingestion is the process of analyzing a file (Video, Audio, PDF, Text) to create a **Resource Map**. This is the only step that requires a mapper (Gemini by default, or a custom `MapperProvider` for local models).
 
 ::: code-group
 
@@ -22,7 +22,7 @@ Ingestion is the process of analyzing a file (Video, Audio, PDF, Text) to create
 python -m citekit.cli ingest lecture.mp4 --type video
 
 # Ingest a text file (code/docs)
-python -m citekit.cli ingest README.md --type document
+python -m citekit.cli ingest README.md --type text
 ```
 
 ```python [Python]
@@ -81,7 +81,7 @@ python -m citekit.cli inspect lecture.intro_scene
 
 ```python [Python]
 # Get the full map object
-video_map = await client.get_map("lecture")
+video_map = client.get_map("lecture")
 
 # Iterate nodes
 for node in video_map.nodes:
@@ -115,11 +115,11 @@ python -m citekit.cli resolve lecture intro_scene
 
 ```python [Python]
 # Resolve to physical file
-evidence = await client.resolve("lecture", "intro_scene")
+evidence = client.resolve("lecture", "intro_scene")
 print(f"Path: {evidence.output_path}")
 
 # Resolve to metadata only (Virtual)
-meta = await client.resolve("lecture", "intro_scene", virtual=True)
+meta = client.resolve("lecture", "intro_scene", virtual=True)
 print(f"Time range: {meta.node.location.start} - {meta.node.location.end}")
 ```
 

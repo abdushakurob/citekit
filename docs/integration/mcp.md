@@ -74,7 +74,7 @@ Add the following:
     *   **Name**: `citekit`
     *   **Command**: `citekit` (or full path)
     *   **Args**: `serve`
-    *   **Environment Variables**: `{"GEMINI_API_KEY": "..."}`
+    *   **Environment Variables**: `{"GEMINI_API_KEY": "..."}` (only required for the default Gemini mapper)
 
 ### Available Tools
 
@@ -93,4 +93,4 @@ Check out the [**Study Tool Example**](/guide/examples/study) to see how an AI a
 ## Troubleshooting
 
 *   **"Command not found"**: Ensure `citekit` is installed in your PATH, or use absolute paths to your python executable.
-*   **"Missing API Key"**: You MUST provide the `GEMINI_API_KEY` in the `env` section of the config.
+*   **"Missing API Key"**: If you ingest with the default Gemini mapper, provide `GEMINI_API_KEY` in the `env` section of the config.

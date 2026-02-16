@@ -30,7 +30,7 @@ We have removed all browser-centric libraries (like `pdf-parse`) to eliminate `D
 
 If you are running in an environment where you cannot or do not want to install FFmpeg, you can still use CiteKit for video, audio, and text by using **Virtual Resolution**.
 
-Instead of creating a physical clip, CiteKit returns the exact timestamp metadata. You can then pass these timestamps to your LLM API (like Gemini's `startOffset`) or use them in your frontend video player.
+Instead of creating a physical clip, CiteKit returns the exact timestamp metadata. You can then pass these timestamps to your LLM API (e.g., Gemini `startOffset` or other provider equivalents) or use them in your frontend video player.
 
 ```javascript
 // Serverless-safe resolution
@@ -77,7 +77,7 @@ apt-get update && apt-get install -y ffmpeg
 Ensure your production environment has the API key set:
 
 ```bash
-GEMINI_API_KEY=AIzaSy...
+GEMINI_API_KEY=AIzaSy... # Only required for the default Gemini mapper
 ```
 
 ## Storage Considerations

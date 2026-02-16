@@ -14,7 +14,7 @@ Unlike traditional systems that rely on keyword search or random text chunks, an
 ## Prerequisites
 
 -   Node.js 18+
--   A Gemini API Key.
+-   A mapper API key (Gemini by default).
 
 ## 1. Project Setup
 
@@ -45,7 +45,7 @@ async function runResearchTask() {
     console.log(`[INFO] Inspecting Paper: ${path.basename(paperPath)}`);
 
     // STEP 1: Discovery (Ingestion)
-    // The file is sent to the Gemini File API ONCE to generate the map.
+    // The file is sent to the mapper service (Gemini by default) ONCE to generate the map.
     // This is the only time the file leaves your local machine.
     const map = await client.ingest(paperPath, 'document');
     

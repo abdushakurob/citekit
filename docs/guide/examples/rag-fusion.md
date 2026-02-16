@@ -11,14 +11,14 @@ In modern AI systems, retrieving a text chunk is often insufficient for reasonin
 
 1.  **Hybrid Indexing**:
     -   **Text Part**: Embed the document text into a Vector Database.
-    -   **Structure Part**: Ingest the document into **CiteKit**. This sends the file to the Gemini API *one time* to generate a structural map.
+    -   **Structure Part**: Ingest the document into **CiteKit**. This sends the file to the configured mapper (Gemini by default) *one time* to generate a structural map.
 2.  **Multimodal Retrieval**:
     -   A user query triggers a standard Vector Search to find the relevant text.
 3.  **Context Orchestration (CiteKit)**:
     -   The agent detects that the text reference requires visual evidence.
     -   CiteKit **Resolves** the specific section/node as an image or mini-PDF instantly.
 4.  **High-Fidelity Reasoning**:
-    -   The agent sends the highly-focused "evidence package" (Text + High-Res Image) to a Multimodal LLM (e.g., Gemini 1.5).
+    -   The agent sends the highly-focused "evidence package" (Text + High-Res Image) to a Multimodal LLM (e.g., Gemini 1.5 or GPT-4o).
 
 ## Implementation (Python)
 

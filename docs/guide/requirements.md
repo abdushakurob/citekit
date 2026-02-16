@@ -1,6 +1,6 @@
 # System Requirements
 
-CiteKit is a hybrid cloud/local system. The "heavy lifting" of understanding content happens in the cloud (via Gemini API), but the "heavy lifting" of extracting content happens **locally on your machine**.
+CiteKit is a hybrid cloud/local system. The "heavy lifting" of understanding content happens in the cloud via the configured mapper (Gemini by default), but the "heavy lifting" of extracting content happens **locally on your machine**.
 
 ## Supported Operating Systems
 
@@ -41,8 +41,13 @@ ffmpeg -version
 
 ### PDF Tools
 
-*   **Python**: `pypdf` is installed automatically.
-*   **Node.js**: `pdf-lib` is installed automatically.
+*   **Python**: `pymupdf` is installed automatically.
+*   **Node.js**: `pdf-lib` is an optional peer dependency. Install it when resolving PDFs (`npm install pdf-lib`).
+
+### Image & Video Tools (Node.js)
+
+*   **Image**: `sharp` is an optional peer dependency (`npm install sharp`).
+*   **Video/Audio**: `fluent-ffmpeg` is an optional peer dependency (`npm install fluent-ffmpeg`) and requires FFmpeg installed system-wide.
 
 ## Storage
 

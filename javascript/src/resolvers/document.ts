@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { Resolver } from "./base.js";
 import type { ResolvedEvidence } from "../models.js";
+import { buildAddress } from "../address.js";
 
 export class DocumentResolver implements Resolver {
     async resolve(
@@ -16,7 +17,7 @@ export class DocumentResolver implements Resolver {
         if (options?.virtual) {
             return {
                 modality: "document",
-                address: `doc://${resourceId}#pages=${location.pages.join(",")}`,
+                address: buildAddress(resourceId, location),
                 node: { id: nodeId, location: location } as any,
                 resource_id: resourceId
             };
@@ -37,6 +38,22 @@ export class DocumentResolver implements Resolver {
             throw new Error(`Node ${nodeId} has no pages specified.`);
         }
 
+        // Generate filename similar to Python SDK: {resource}_{pages}_{p1}_{p2}.pdf
+        const pageStr = location.pages.join("_");
+        const filename = `${resourceId}_pages_${pageStr}.pdf`;
+        const outputPath = join(outputDir, filename);
+
+        // Caching
+        if (existsSync(outputPath)) {
+            return {
+                output_path: outputPath,
+                modality: "document",
+                address: buildAddress(resourceId, location),
+                node: { id: nodeId, location: location } as any,
+                resource_id: resourceId
+            };
+        }
+
         const pdfBytes = readFileSync(sourcePath);
         const srcDoc = await PDFDocument.load(pdfBytes);
         const newDoc = await PDFDocument.create();
@@ -50,28 +67,12 @@ export class DocumentResolver implements Resolver {
 
         const outputBytes = await newDoc.save();
 
-        // Generate filename similar to Python SDK: {resource}_{pages}_{p1}_{p2}.pdf
-        const pageStr = location.pages.join("_");
-        const filename = `${resourceId}_pages_${pageStr}.pdf`;
-        const outputPath = join(outputDir, filename);
-
-        // Caching
-        if (existsSync(outputPath)) {
-            return {
-                output_path: outputPath,
-                modality: "document",
-                address: `doc://${resourceId}#pages=${location.pages[0]}-${location.pages[location.pages.length - 1]}`,
-                node: { id: nodeId, location: location } as any,
-                resource_id: resourceId
-            };
-        }
-
         writeFileSync(outputPath, outputBytes);
 
         return {
             output_path: outputPath,
             modality: "document",
-            address: `doc://${resourceId}#pages=${location.pages[0]}-${location.pages[location.pages.length - 1]}`,
+            address: buildAddress(resourceId, location),
             node: { id: nodeId, location: location } as any, // Only minimal node needed? Or fetch full?
             resource_id: resourceId
         };

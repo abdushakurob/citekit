@@ -15,10 +15,11 @@ import {
     CallToolRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { CiteKitClient } from "./client.js";
+import { fileURLToPath } from "node:url";
 
 function createServer(storageDir?: string, outputDir?: string): Server {
     const server = new Server(
-        { name: "citekit", version: "0.1.0" },
+        { name: "citekit", version: "0.1.7" },
         { capabilities: { tools: {} } }
     );
 
@@ -197,6 +198,6 @@ export async function runMcpServer() {
 }
 
 // Only run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
     runMcpServer().catch(console.error);
 }

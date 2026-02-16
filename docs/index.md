@@ -15,7 +15,7 @@ hero:
 
 features:
   - title: Context Economics
-    details: Pay the "Token Tax" once. CiteKit maps your file via Gemini API once to create a structural index, then allows agents to resolve evidence 100% locally from then on.
+    details: Pay the "Token Tax" once. CiteKit maps your file via a pluggable mapper (Gemini by default) to create a structural index, then allows agents to resolve evidence 100% locally from then on.
     link: /guide/concepts/resource-mapping
   - title: High-Fidelity Extraction
     details: Extract specific segments (video clips, audio ranges, PDF pages, image crops, code blocks) locally without relying on proprietary cloud services.
@@ -59,7 +59,7 @@ video_map = await client.ingest("lecture.mp4", "video")
 
 # 2. Resolve (Extract)
 # Extracts exact clip from 10s to 20s
-evidence = await client.resolve(video_map.resource_id, "intro_scene")
+evidence = client.resolve(video_map.resource_id, "intro_scene")
 print(evidence.output_path)
 ```
 
@@ -94,6 +94,8 @@ python -m citekit.cli resolve lecture intro_scene
   }
 }
 ```
+
+> If you use a custom mapper, `GEMINI_API_KEY` is not required.
 
 :::
 

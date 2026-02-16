@@ -35,6 +35,9 @@ class AudioResolver(Resolver):
         output_name = f"{source.stem}_segment_{start_str}-{end_str}{source.suffix}"
         output_path = self._output_dir / output_name
 
+        if output_path.exists():
+            return str(output_path)
+
         # Try stream copy first
         try:
             self._extract_segment(source, output_path, start, duration, copy=True)

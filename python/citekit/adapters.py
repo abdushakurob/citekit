@@ -93,7 +93,7 @@ class GraphRAGAdapter(MapAdapter):
 
         return ResourceMap(
             resource_id=kwargs.get("resource_id", "graphrag_import"),
-            type="knowledge_graph",
+            type="virtual",
             title=resource_title,
             source_path=str(input_data) if isinstance(input_data, (str, Path)) else "virtual",
             nodes=nodes

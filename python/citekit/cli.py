@@ -21,18 +21,58 @@ def main():
 
 @main.command()
 @click.argument("path", type=click.Path(exists=True))
-@click.option("--type", "-t", help="Resource type (document, video, audio, image). If omitted, inferred from extension.")
+@click.option("--type", "-t", help="Resource type (document, video, audio, image, text). If omitted, inferred from extension.")
 @click.option("--concurrency", "-c", default=5, help="Max parallel mapper calls.")
 @click.option("--retries", "-r", default=3, help="Max retries for API failures.")
+@click.option("--mapper", "-m", help="Mapper name ('gemini') or path to a .py file exporting a custom mapper.")
+@click.option("--mapper-config", help="JSON string of kwargs for custom mapper initialization.")
 @async_command
-async def ingest(path, type, concurrency, retries):
+async def ingest(path, type, concurrency, retries, mapper, mapper_config):
     """Ingest a file and generate a resource map."""
-    client = CiteKitClient(concurrency_limit=concurrency, max_retries=retries)
+    mapper_instance = None
+    if mapper and mapper != "gemini":
+        import importlib.util
+        if not mapper.endswith(".py"):
+            click.echo("[ERROR] --mapper must be 'gemini' or a path to a .py file.", err=True)
+            sys.exit(1)
+
+        spec = importlib.util.spec_from_file_location("custom_mapper", mapper)
+        if not spec or not spec.loader:
+            click.echo(f"[ERROR] Could not load custom mapper from {mapper}", err=True)
+            sys.exit(1)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        config = {}
+        if mapper_config:
+            try:
+                config = json.loads(mapper_config)
+            except json.JSONDecodeError as e:
+                click.echo(f"[ERROR] Invalid --mapper-config JSON: {e}", err=True)
+                sys.exit(1)
+
+        if hasattr(module, "Mapper"):
+            mapper_instance = module.Mapper(**config)
+        elif hasattr(module, "create_mapper") and callable(module.create_mapper):
+            mapper_instance = module.create_mapper(**config)
+        elif hasattr(module, "mapper"):
+            mapper_instance = module.mapper
+        else:
+            click.echo("[ERROR] Custom mapper must export a Mapper class, create_mapper() factory, or mapper instance.", err=True)
+            sys.exit(1)
+
+    client = CiteKitClient(
+        mapper=mapper_instance,
+        concurrency_limit=concurrency,
+        max_retries=retries,
+    )
     
     if not type:
         ext = Path(path).suffix.lower()
-        if ext in (".pdf", ".txt", ".md"):
+        if ext in (".pdf",):
             type = "document"
+        elif ext in (".txt", ".md", ".py", ".js", ".ts", ".json", ".yaml", ".yml", ".rst"):
+            type = "text"
         elif ext in (".mp4", ".mov", ".avi", ".mkv"):
             type = "video"
         elif ext in (".mp3", ".wav", ".m4a"):
@@ -75,7 +115,7 @@ async def resolve(node_id, resource, virtual):
             click.echo("[!] Resource ID missing. Use --resource or rid.nid format.")
             sys.exit(1)
 
-        evidence = await client.resolve(rid, nid, virtual=virtual)
+        evidence = client.resolve(rid, nid, virtual=virtual)
         if virtual:
             click.echo("[SUCCESS] Virtual resolution successful.")
         else:
@@ -112,35 +152,31 @@ async def list_resources(resource_id):
         try:
             resource_map = client.get_map(resource_id)
             click.echo(f"[INFO] Nodes in '{resource_id}':")
-            # Flatten nodes for display if needed, but for now just top-level
-            for node in resource_map.nodes:
-                click.echo(f" - {node.id} ({node.type}): {node.title}")
-                if node.children:
-                    for child in node.children:
-                        click.echo(f"   └─ {child.id} ({child.type}): {child.title}")
+            def print_nodes(nodes, prefix=""):
+                for node in nodes:
+                    click.echo(f"{prefix}- {node.id} ({node.type}): {node.title}")
+                    if node.children:
+                        print_nodes(node.children, prefix=prefix + "  ")
+
+            print_nodes(resource_map.nodes)
         except Exception as e:
             click.echo(f"[ERROR] {e}", err=True)
             sys.exit(1)
         return
 
     # List all resources
-    map_dir = Path(".resource_maps")
-    if not map_dir.exists():
-        click.echo("No resources found (directory .resource_maps missing).")
-        return
-
-    maps = list(map_dir.glob("*.json"))
+    maps = client.list_maps()
     if not maps:
         click.echo("No resources found.")
         return
 
     click.echo(f"found {len(maps)} resources:")
-    for map_file in maps:
+    for resource_id in maps:
         try:
-            data = json.loads(map_file.read_text(encoding="utf-8"))
-            click.echo(f" - {data.get('resource_id')} ({data.get('type')}): {data.get('title')}")
-        except:
-            click.echo(f" - {map_file.name} (corrupt)")
+            resource_map = client.get_map(resource_id)
+            click.echo(f" - {resource_map.resource_id} ({resource_map.type}): {resource_map.title}")
+        except Exception:
+            click.echo(f" - {resource_id} (corrupt)")
 
 @main.command()
 @async_command
@@ -208,6 +244,7 @@ async def inspect(node_id, resource):
 def check_map(path):
     """Validate a JSON map against the strict schema."""
     from citekit.models import ResourceMap
+    from citekit import __version__
     
     click.echo(f"[INFO] Validating {path}...")
     try:
@@ -216,7 +253,7 @@ def check_map(path):
         map_model = ResourceMap(**data)
         
         click.echo("[SUCCESS] Map is valid.")
-        click.echo(f"   Schema Version: 0.1.7")
+        click.echo(f"   Schema Version: {__version__}")
         click.echo(f"   Resource ID: {map_model.resource_id}")
         click.echo(f"   Nodes: {len(map_model.nodes)}")
         
@@ -239,7 +276,7 @@ def check_map(path):
 @click.option("--output", "-o", help="Output path for the map (default: .resource_maps/<name>.json).")
 def adapt(input_path, adapter, output):
     """Convert external data (GraphRAG, etc.) into a CiteKit Map."""
-    from citekit.adapters import GraphRAGAdapter, GenericAdapter
+    from citekit.adapters import GraphRAGAdapter, GenericAdapter, LlamaIndexAdapter
     import importlib.util
 
     click.echo(f"[INFO] Adapting {input_path} using '{adapter}'...")
@@ -250,6 +287,8 @@ def adapt(input_path, adapter, output):
         
         if adapter == "graphrag":
             adapter_instance = GraphRAGAdapter()
+        elif adapter == "llamaindex":
+            adapter_instance = LlamaIndexAdapter()
         elif adapter == "generic":
             adapter_instance = GenericAdapter()
         elif adapter.endswith(".py"):
@@ -274,7 +313,7 @@ def adapt(input_path, adapter, output):
                 click.echo("[ERROR] Custom script must define an 'adapt(data)' function or 'Adapter' class.", err=True)
                 sys.exit(1)
         else:
-            click.echo(f"[ERROR] Unknown adapter '{adapter}'. Use 'graphrag', 'generic', or a .py file.", err=True)
+            click.echo(f"[ERROR] Unknown adapter '{adapter}'. Use 'graphrag', 'llamaindex', 'generic', or a .py file.", err=True)
             sys.exit(1)
 
         # 2. Run Adaptation

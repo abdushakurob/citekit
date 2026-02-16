@@ -45,7 +45,8 @@ In the current era of **Agentic AI** and **Long-Context Models**, discovery is o
 CiteKit operates on a "Map-Resolve" pattern to maximize context efficiency:
 
 1.  **Phase 1: Ingestion (Cloud-Mapped)**
-    You pass a file to CiteKit. It is uploaded to the **Gemini File API** (temporarily) where a multimodal model analyzes its structural "DNA" to generate a JSON Resource Map. This consumes context tokens **once**.
+    You pass a file to CiteKit. It is uploaded to the configured mapper (Gemini by default) where a multimodal model analyzes its structural "DNA" to generate a JSON Resource Map. This consumes context tokens **once**.
+    If you want to avoid cloud ingestion, you can use a local model by implementing a custom `MapperProvider` (see [Custom Mappers](/guide/custom-mappers)).
     
 2.  **Phase 2: Resolution (Local-First)**
     Once the map (JSON) is stored locally, the cloud is no longer needed. Agents can query the map and resolve high-fidelity clips or pages 100% locally from your disk.

@@ -2,7 +2,7 @@
 
 **Local-first AI resource mapping SDK for precise content extraction**
 
-CiteKit enables AI agents to access specific parts of files—PDF pages, video clips, audio segments, image crops, and code blocks—without uploading entire documents to the cloud. It uses LLMs to generate structured "maps" of your content, then resolves exact references on demand.
+CiteKit enables AI agents to access specific parts of files—PDF pages, video clips, audio segments, image crops, and code blocks—without uploading entire documents to the cloud. It uses LLMs to generate structured "maps" of your content, then resolves exact references on demand. You can use the default cloud mapper or plug in local models via a custom `MapperProvider`.
 
 [![PyPI](https://img.shields.io/pypi/v/citekit)](https://pypi.org/project/citekit/)
 [![npm](https://img.shields.io/npm/v/citekit)](https://www.npmjs.com/package/citekit)
@@ -13,7 +13,7 @@ CiteKit enables AI agents to access specific parts of files—PDF pages, video c
 - **Local-First**: All file processing happens on your machine. No cloud storage persistence.
 - **Multi-Modal**: Supports PDF, Video (MP4/MOV), Audio (MP3/WAV), Images (PNG/JPG), and Text/Code.
 - **Smart Ingestion**:
-  - Uses **Gemini 1.5** via File API for handling large files (hours of video).
+  - Uses **Gemini 1.5** by default (via File API) for handling large files (hours of video). Custom mappers are supported.
   - **SHA-256 Hashing & Caching**: Never re-process the same file twice.
   - **Concurrency Control**: Built-in queueing to manage API rate limits.
 - **Precise Extraction**: Get exact PDF pages, video clips (stream-copied), image crops, or code slices.
@@ -47,13 +47,13 @@ npm install citekit
 
 ## Quick Start
 
-### 1. Set your API key
+### 1. Set your API key (Gemini default mapper only)
 
 ```bash
 export GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-Get a free API key at [Google AI Studio](https://makersuite.google.com/app/apikey).
+Get a free API key at [Google AI Studio](https://makersuite.google.com/app/apikey) or use a local model by implementing a custom mapper (see [Custom Mappers](docs/guide/custom-mappers.md)).
 
 ### 2. Ingest a file
 
@@ -88,6 +88,7 @@ import asyncio
 
 async def main():
     client = CiteKitClient()
+  # Optional: pass a custom MapperProvider if you don't use Gemini
     
     # Ingest a document
     resource_map = await client.ingest("research.pdf", "document")
@@ -98,7 +99,7 @@ async def main():
         print(f"  [{node.type}] {node.id}: {node.title}")
     
     # Resolve a specific section
-    evidence = await client.resolve("research", "methodology")
+    evidence = client.resolve("research", "methodology")
     print(f"Extracted to: {evidence.output_path}")
 
 asyncio.run(main())
@@ -145,17 +146,21 @@ Connect CiteKit to your AI agents (Claude Desktop, Cline) via the Model Context 
 }
 ```
 
+> If you use a custom mapper, `GEMINI_API_KEY` is not required.
+
 **Available MCP Tools:**
 - `listResources` - List all ingested resources
 - `getStructure` - Get the full map of a resource
+- `getNode` - Get details for a specific node
 - `resolve` - Extract specific content (mini-PDF, clip, crop)
 
 ## Documentation
 
-- **[Full Documentation](docs/index.html)** - Comprehensive guide with examples
-- **[API Reference](docs/api.html)** - Complete API documentation
-- **[MCP Integration](docs/mcp.html)** - Set up with AI agents
-- **[Examples](docs/examples.html)** - Real-world use cases
+- **[Full Documentation](docs/index.md)** - Comprehensive guide with examples
+- **[API Reference](docs/api/python.md)** - Python SDK reference
+- **[JavaScript SDK](docs/api/javascript.md)** - JavaScript SDK reference
+- **[MCP Integration](docs/integration/mcp.md)** - Set up with AI agents
+- **[Examples](docs/guide/examples/research.md)** - Real-world use cases
 
 ## Project Structure
 
@@ -183,7 +188,7 @@ citekit/
 
 ## How It Works
 
-1. **Ingestion**: CiteKit sends your file to an LLM (Gemini) which analyzes it and returns a structured "map" in JSON format. This map contains:
+1. **Ingestion**: CiteKit sends your file to a configured mapper (Gemini by default) which analyzes it and returns a structured "map" in JSON format. This map contains:
    - Hierarchical nodes (sections, chapters, topics)
    - Physical locations (page ranges, timestamps, bounding boxes)
    - Summaries and metadata
@@ -259,9 +264,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Roadmap
 
-- [ ] Support for more LLM providers (OpenAI, Anthropic)
+- [x] Support custom LLM providers via `MapperProvider`
+- [x] Caching layer to avoid re-processing
 - [ ] Web-based UI for browsing resource maps
-- [ ] Caching layer to avoid re-processing
 - [ ] Support for more file formats (DOCX, PPTX, etc.)
 - [ ] Collaborative map editing
 
@@ -269,7 +274,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/abdushakurob/citekit/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/abdushakurob/citekit/discussions)
-- **Documentation**: [docs/index.html](docs/index.html)
+- **Documentation**: [docs/index.md](docs/index.md)
 
 ## Acknowledgments
 

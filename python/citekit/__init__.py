@@ -6,8 +6,10 @@ from citekit.address import parse_address, build_address
 from citekit.mapper.base import MapperProvider
 from citekit.mapper.gemini import GeminiMapper
 from citekit.aggregator import create_agent_context
+from citekit.adapters import MapAdapter, GenericAdapter, GraphRAGAdapter, LlamaIndexAdapter
+from citekit.resolvers import Resolver, DocumentResolver, VideoResolver, AudioResolver, ImageResolver, TextResolver
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
 __all__ = [
     "ResourceMap",
@@ -20,4 +22,14 @@ __all__ = [
     "MapperProvider",
     "GeminiMapper",
     "create_agent_context",
+    "MapAdapter",
+    "GenericAdapter",
+    "GraphRAGAdapter",
+    "LlamaIndexAdapter",
+    "Resolver",
+    "DocumentResolver",
+    "VideoResolver",
+    "AudioResolver",
+    "ImageResolver",
+    "TextResolver",
 ]

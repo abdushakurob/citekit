@@ -11,7 +11,7 @@ pip install citekit
 ## Quick Start
 
 ```python
-from citekit import CiteKitClient, GeminiMapper
+from citekit import CiteKitClient
 
 # ... (see main docs)
 ```

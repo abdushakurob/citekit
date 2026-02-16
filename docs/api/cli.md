@@ -1,6 +1,6 @@
 # CLI Reference
 
-CiteKit provides a powerful command-line interface for managing the resource lifecycle.
+CiteKit provides a Python-based command-line interface for managing the resource lifecycle.
 
 ```bash
 python -m citekit.cli [COMMAND]
@@ -22,6 +22,8 @@ python -m citekit.cli ingest <path> [OPTIONS]
 | `--type` | `-t` | (auto) | `document`, `video`, `audio`, `image`, `text`. |
 | `--concurrency` | `-c` | `5` | Max parallel LLM calls. |
 | `--retries` | `-r` | `3` | Max API retries for rate limits or network issues. |
+| `--mapper` | `-m` | (none) | Mapper name (`gemini`) or path to a custom `.py` mapper. |
+| `--mapper-config` | | (none) | JSON string of kwargs for custom mapper initialization. |
 
 **Pro Tip**: If you omit `--type`, CiteKit will infer it from the file extension (e.g., `.pdf` -> `document`).
 
@@ -42,13 +44,20 @@ python -m citekit.cli resolve <node_id> [OPTIONS]
 **Example**:
 ```bash
 python -m citekit.cli resolve lecture.intro --virtual
-# Returns: {"address": "video://lecture#t=0,120", ...}
+```
+
+Output:
+```
+[RESOLVING] Node: intro
+[SUCCESS] Virtual resolution successful.
+	Modality: video
+	Address: video://lecture#t=0-120
 ```
 
 ---
 
 ### `list`
-Explores yours indexed resources.
+Explores your indexed resources.
 
 ```bash
 python -m citekit.cli list [resource_id]
@@ -88,7 +97,7 @@ python -m citekit.cli adapt <input> --adapter <adapter>
 
 | Option | Shorthand | Description |
 | :--- | :--- | :--- |
-| `--adapter` | `-a` | `graphrag`, `generic`, or path to a `.py` script. |
+| `--adapter` | `-a` | `graphrag`, `llamaindex`, `generic`, or path to a `.py` script. |
 | `--output` | `-o` | Where to save the CiteKit map. |
 
 ---
@@ -100,6 +109,8 @@ Starts the stdio MCP server for AI communication.
 python -m citekit.cli serve
 ```
 **Internal**: Connects your local resources to the agent's brain. Not interactive.
+
+> **Note**: The Node.js package currently exposes only `citekit serve` (MCP). All other CLI commands are Python-only.
 
 ---
 

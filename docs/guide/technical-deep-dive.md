@@ -18,7 +18,7 @@ When processing 100 files at once, we must avoid rate-limiting or memory exhaust
 -   **JavaScript**: Uses an internal async queue (`withConcurrencyLock`).
 
 ### Phase C: Mapper Resiliency (JSON Repair)
-LLMs often make small mistakes in JSON formatting (trailing commas, missing closing brackets). The `GeminiMapper` includes a **Repair Layer** that follows this priority sequence:
+LLMs often make small mistakes in JSON formatting (trailing commas, missing closing brackets). The default `GeminiMapper` includes a **Repair Layer** that follows this priority sequence. Custom mappers can implement similar repair logic.
 
 1.  **Strict Cleaning**: Uses regex to strip any text before the first `{` or `[` and after the last equivalent symbol.
 2.  **Bracket Healing**: If parsing fails, the engine performs a "stack-based count" of braces. If unbalanced, it appends the necessary closing characters to form a valid (even if truncated) object.
@@ -58,7 +58,7 @@ CiteKit defines standard exception behaviors to help developers build resilient 
 | :--- | :--- | :--- |
 | **API Rate Limit** | Retries with exponential backoff (1s, 2s, 4s). | Increase `concurrency_limit` to manage throughput. |
 | **FFmpeg Missing** | Raises `RuntimeError` (Py) or `Error` (JS). | Ensure system dependencies are in `PATH`. |
-| **Broken JSON** | Triggers Repair Engine. If still un-parsable, fails. | Check Gemini model safety filters. |
+| **Broken JSON** | Triggers Repair Engine. If still un-parsable, fails. | Check model safety filters or output truncation. |
 | **Invalid Coordinates**| Normalizes (e.g., negative page becomes 1). | Audit the `Mapper` prompt. |
 
 ---

@@ -4,7 +4,7 @@ The Python SDK is designed for seamless integration into backend services, data 
 
 ## Initialization
 
-The `CiteKitClient` is the main entry point. It manages the connection to the Gemini API (for mapping) and the local file system (for storage and resolution).
+The `CiteKitClient` is the main entry point. It manages the mapper (Gemini by default or a custom `MapperProvider`) and the local file system (for storage and resolution).
 
 ```python
 from citekit import CiteKitClient
@@ -74,8 +74,7 @@ start_time = node.location.start  # Seconds
 end_time = node.location.end      # Seconds
 
 # For Documents (PDF)
-page_start = node.location.page_start
-page_end = node.location.page_end
+pages = node.location.pages
 ```
 
 ## 3. Resolution (Extraction)
@@ -86,7 +85,7 @@ Resolution converts a logical `node_id` into a physical file or actionable metad
 Creates a new file on disk containing *only* the relevant content.
 
 ```python
-evidence = await client.resolve(
+evidence = client.resolve(
     resource_id="cs101_lec1", 
     node_id="intro_chapter"
 )
@@ -100,7 +99,7 @@ print(f"Generated: {evidence.output_path}")
 Returns valid addresses and metadata *without* running extraction tools (FFmpeg/PDF).
 
 ```python
-evidence = await client.resolve(
+evidence = client.resolve(
     resource_id="cs101_lec1", 
     node_id="intro_chapter",
     virtual=True

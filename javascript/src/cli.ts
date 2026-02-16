@@ -6,7 +6,7 @@ const program = new Command();
 program
     .name('citekit')
     .description('CiteKit CLI for managing local resources')
-    .version('0.1.0');
+    .version('0.1.7');
 
 program.command('serve')
     .description('Start the MCP server')

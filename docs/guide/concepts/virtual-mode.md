@@ -16,7 +16,7 @@ Traditional content resolution works like this:
 Virtual Resolution skips the "Physical" step.
 1.  **Map**: Find the "Explanation of Gravity".
 2.  **Virtual Resolve**: CiteKit returns the **Timestamps** (`start: 180, end: 210`) immediately.
-3.  **Consume**: You send the **Original Video URL** + the **Timestamps** to a modern Multimodal LLM (like Gemini 1.5).
+3.  **Consume**: You send the **Original Video URL** + the **Timestamps** to a modern Multimodal LLM (e.g., Gemini 1.5 or GPT-4o).
 
 ### Why this is better:
 -   **Zero Binary Dependencies**: No FFmpeg/Sharp/Pdf-lib required at runtime.
@@ -67,7 +67,7 @@ When `virtual: true` is passed, the `ResolvedEvidence` object looks like this:
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `modality` | `string` | The media type (`video`, `document`, etc.) |
-| `address` | `string` | A URI pointer, e.g., `video://lecture#t=180,210` |
+| `address` | `string` | A URI pointer, e.g., `video://lecture#t=180-210` |
 | `node` | `Node` | The full node object with its `location` metadata. |
 | `output_path` | `null` | **Empty**. No file was generated. |
 
@@ -92,4 +92,4 @@ When storing resolved evidence in your database, we recommend prefixing virtual 
 > **Observation**: Using a `virtual:` prefix helps your frontend logic instantly decide whether to fetch a file or just seek to a timestamp.
 >
 > 1. **Physical**: `https://cdn.example.com/resolved/clip_1.mp4`
-> 2. **Virtual**: `virtual:video://original#t=180,210`
+> 2. **Virtual**: `virtual:video://original#t=180-210`

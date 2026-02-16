@@ -1,6 +1,6 @@
 # Node.js SDK Guide
 
-The Node.js SDK provides a fully typed TypeScript interface for CiteKit, making it ideal for web applications (Next.js, Express) and serverless functions.
+The Node.js SDK provides a fully typed TypeScript interface for CiteKit, making it ideal for web applications (Next.js, Express) and serverless functions. Mapping uses Gemini by default, but you can plug in any custom `MapperProvider`.
 
 ## Initialization
 
@@ -16,7 +16,7 @@ const client = new CiteKitClient();
 const client = new CiteKitClient({
     storageDir: "./.maps",       // Custom map storage location
     outputDir: "./public/media", // Output resolvable files to public folder
-    apiKey: process.env.GEMINI_KEY, // Explicit API key
+    apiKey: process.env.GEMINI_API_KEY, // Explicit API key
     concurrencyLimit: 5          // Control parallel ingestion
 });
 ```
@@ -43,7 +43,7 @@ async function mapContent() {
 
 ## 2. Inspection (Planning)
 
-You can retrieve resource maps synchronously or asynchronously depending on your needs. The structure is fully typed.
+You can retrieve resource maps synchronously. The structure is fully typed.
 
 ```typescript
 // Get the map structure

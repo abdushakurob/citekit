@@ -6,7 +6,7 @@ CiteKit implements the **Model Context Protocol (MCP)**, allowing AI agents (lik
 
 -   **Claude Desktop App** (or any MCP-compliant client)
 -   **Python 3.10+** (for Python Server) OR **Node.js 18+** (for JS Server)
--   **Gemini API Key** (for ingestion)
+-   **Mapper API Key** (for ingestion with the default Gemini mapper)
 
 ## 2. Configuration (`claude_desktop_config.json`)
 
@@ -46,7 +46,7 @@ Does not require installing the package globally if you use `uv`.
   "mcpServers": {
     "citekit-js": {
       "command": "npx",
-      "args": ["-y", "@citekit/server"],
+      "args": ["-y", "citekit"],
       "env": {
         "GEMINI_API_KEY": "AIzaSy..."
       }
@@ -93,4 +93,4 @@ Here is how a typical interaction looks:
 - Check logs: `tail -f ~/Library/Logs/Claude/mcp.log`
 
 **"API Key Missing"**
-- Ensure `GEMINI_API_KEY` is set in the `env` section of the config JSON.
+- If you ingest with the default Gemini mapper, ensure `GEMINI_API_KEY` is set in the `env` section of the config JSON.

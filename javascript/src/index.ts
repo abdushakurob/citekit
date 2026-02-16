@@ -6,5 +6,8 @@ export * from "./resolvers/base.js";
 export * from "./resolvers/document.js";
 export * from "./resolvers/video.js";
 export * from "./resolvers/image.js";
+export * from "./resolvers/text.js";
+export * from "./resolvers/audio.js";
 export * from "./aggregator.js";
 export * from "./adapters.js";
+export * from "./address.js";

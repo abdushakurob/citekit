@@ -1,13 +1,12 @@
 /**
  * CiteKit JavaScript Client.
  *
- * Reads/writes resource map JSON files locally and calls the Python
- * resolver backend for resolution (since resolvers are Python-based).
+ * Reads/writes resource map JSON files locally and resolves evidence
+ * via modality-specific local resolvers.
  */
 
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from "node:fs";
 import { join, basename, extname } from "node:path";
-import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import type { ResourceMap, Node, ResolvedEvidence } from "./models.js";
 import { buildAddress } from "./address.js";
@@ -19,6 +18,7 @@ import { DocumentResolver } from "./resolvers/document.js";
 import { VideoResolver } from "./resolvers/video.js";
 import { ImageResolver } from "./resolvers/image.js";
 import { TextResolver } from "./resolvers/text.js";
+import { AudioResolver } from "./resolvers/audio.js";
 import type { MapperProvider } from "./mapper/base.js";
 import type { Resolver } from "./resolvers/base.js";
 
@@ -40,6 +40,8 @@ export interface CiteKitClientOptions {
     model?: string;
     /** Max retries for Gemini API calls. Default: 3 */
     maxRetries?: number;
+    /** Max concurrent ingestion calls. Default: 5 */
+    concurrencyLimit?: number;
     /** Custom mapper implementation (e.g. for Local LLMs). */
     mapper?: MapperProvider;
 }
@@ -49,6 +51,7 @@ export class CiteKitClient {
     private outputDir: string;
     private mapper: MapperProvider;
     private resolvers: Record<string, Resolver>;
+    private maxConcurrency: number;
 
     constructor(options: CiteKitClientOptions = {}) {
         const baseDir = options.baseDir ?? ".";
@@ -73,12 +76,13 @@ export class CiteKitClient {
         this.resolvers = {
             "document": new DocumentResolver(),
             "video": new VideoResolver(),
+            "audio": new AudioResolver(),
             "image": new ImageResolver(),
             "text": new TextResolver(),
-            // Audio uses VideoResolver logic mostly, but we can reuse or just alias?
-            // "audio" -> Generic A/V resolver?
-            // "audio": new VideoResolver(), // ffmpeg handles both
         };
+
+        // Concurrency
+        this.maxConcurrency = options.concurrencyLimit ?? 5;
 
         // Ensure directories exist
         if (!existsSync(this.storageDir)) mkdirSync(this.storageDir, { recursive: true });
@@ -166,6 +170,7 @@ export class CiteKitClient {
         // Add metadata
         if (!map.metadata) map.metadata = {};
         map.metadata["source_hash"] = fileHash;
+        map.metadata["source_size"] = statSync(resourcePath).size;
 
         // Save map
         const mapPath = join(this.storageDir, `${map.resource_id}.json`);
@@ -200,7 +205,6 @@ export class CiteKitClient {
 
     // Simple semaphore state
     private activeRequests = 0;
-    private maxConcurrency = 5;
     private queue: Array<() => void> = [];
 
     private async withConcurrencyLock<T>(fn: () => Promise<T>): Promise<T> {
@@ -227,23 +231,38 @@ export class CiteKitClient {
      */
     async resolve(resourceId: string, nodeId: string, options?: { virtual?: boolean }): Promise<ResolvedEvidence> {
         const map = this.getMap(resourceId);
-        const node = map.nodes.find((n) => n.id === nodeId);
+        const findNode = (nodes: Node[], targetId: string): Node | undefined => {
+            for (const node of nodes) {
+                if (node.id === targetId) return node;
+                if (node.children) {
+                    const found = findNode(node.children, targetId);
+                    if (found) return found;
+                }
+            }
+            return undefined;
+        };
+
+        const node = findNode(map.nodes, nodeId);
 
         if (!node) {
             throw new Error(`Node '${nodeId}' not found in map '${resourceId}'`);
         }
 
-        const type = map.type; // document, video, etc.
-        const resolver = this.resolvers[type];
+        if (options?.virtual || node.location.modality === "virtual") {
+            return {
+                output_path: undefined,
+                modality: node.location.modality,
+                address: buildAddress(resourceId, node.location),
+                node,
+                resource_id: resourceId
+            };
+        }
+
+        const modality = node.location.modality;
+        const resolver = this.resolvers[modality];
 
         if (!resolver) {
-            // Check if we can fallback?
-            // For now, if no resolver, failure.
-            // Maybe handle "audio" with video resolver?
-            if (type === "audio" && this.resolvers["video"]) {
-                return this.resolvers["video"].resolve(resourceId, nodeId, map.source_path, node.location, this.outputDir);
-            }
-            throw new Error(`No resolver implementation for resource type '${type}'`);
+            throw new Error(`No resolver implementation for resource type '${modality}'`);
         }
 
         return resolver.resolve(

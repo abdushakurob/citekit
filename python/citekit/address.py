@@ -21,6 +21,7 @@ _SCHEME_TO_MODALITY = {
     "audio": "audio",
     "image": "image",
     "text": "text",
+    "virtual": "virtual",
 }
 
 _MODALITY_TO_SCHEME = {v: k for k, v in _SCHEME_TO_MODALITY.items()}
@@ -53,6 +54,12 @@ def parse_address(address: str) -> tuple[str, Location]:
         raise ValueError(f"Unknown scheme '{scheme}'. Expected one of: {list(_SCHEME_TO_MODALITY.keys())}")
 
     modality = _SCHEME_TO_MODALITY[scheme]
+
+    if scheme == "virtual":
+        return resource_id, Location(
+            modality="virtual",
+            virtual_address=address,
+        )
 
     # Parse fragment parameters
     pages = None
@@ -121,6 +128,9 @@ def build_address(resource_id: str, location: Location) -> str:
     scheme = _MODALITY_TO_SCHEME.get(location.modality)
     if not scheme:
         raise ValueError(f"Unknown modality: {location.modality}")
+
+    if location.modality == "virtual":
+        return location.virtual_address or f"virtual://{resource_id}"
 
     fragment_parts = []
 

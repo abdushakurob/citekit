@@ -10,7 +10,7 @@ class TextResolver(Resolver):
     """Resolves text file locations by extracting line ranges."""
 
     def __init__(self, output_dir: str):
-        self._output_dir = output_dir
+        super().__init__(output_dir)
 
     def resolve(self, node: Node, source_path: str) -> str:
         """Extract lines from a text file."""
@@ -41,9 +41,12 @@ class TextResolver(Resolver):
         name, ext = os.path.splitext(basename)
         safe_id = node.id.replace(".", "_")
         output_filename = f"{name}_{safe_id}_lines_{start_line}-{end_line}{ext}"
-        output_path = os.path.join(self._output_dir, output_filename)
+        output_path = self._output_dir / output_filename
+
+        if output_path.exists():
+            return str(output_path)
 
         with open(output_path, "w", encoding="utf-8") as out:
             out.write(content)
 
-        return output_path
+        return str(output_path)

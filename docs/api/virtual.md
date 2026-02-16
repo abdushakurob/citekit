@@ -25,7 +25,7 @@ When `virtual` is `true`, the `ResolvedEvidence` object has the following state:
 | Property | Type | Value / Description |
 | :--- | :--- | :--- |
 | `modality` | `string` | `video`, `audio`, `document`, `image`, or `text`. |
-| `address` | `string` | The CiteKit URI pointer (e.g., `video://lecture#t=180,210`). |
+| `address` | `string` | The CiteKit URI pointer (e.g., `video://lecture#t=180-210`). |
 | `node` | `Node` | The full node object including `location` metadata. |
 | `output_path` | `null` | **Empty**. No file was generated. |
 

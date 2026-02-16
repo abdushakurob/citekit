@@ -51,6 +51,35 @@ Rules:
 Return ONLY a JSON array of nodes. No markdown, no explanation.
 `;
 
+const AUDIO_PROMPT = `\
+You are an audio structure analyzer. Given metadata about an audio file, identify key segments.
+
+Audio duration: {duration} seconds
+Filename: {filename}
+
+Each node must have:
+- "id": a descriptive dot-separated identifier
+- "title": a short human-readable title
+- "type": one of "introduction", "discussion", "explanation", "example", "summary", "interlude"
+- "location": { "modality": "audio", "start": <seconds>, "end": <seconds> }
+- "summary": brief description of what this segment covers
+
+Return ONLY a JSON array of nodes. No markdown, no explanation.
+`;
+
+const IMAGE_PROMPT = `\
+You are a visual structure analyzer. Given this image, identify distinct regions of interest.
+
+Each node must have:
+- "id": a descriptive dot-separated identifier
+- "title": a short human-readable title
+- "type": one of "diagram", "chart", "text_region", "photo", "illustration", "table", "formula"
+- "location": { "modality": "image", "bbox": [x1, y1, x2, y2] } where values are normalized 0.0-1.0
+- "summary": brief description of what this region contains
+
+Return ONLY a JSON array of nodes. No markdown, no explanation.
+`;
+
 const TEXT_PROMPT = `\
 You are a code/text structure analyzer. Analyze the attached text file sections.
 
@@ -96,10 +125,13 @@ export class GeminiMapper implements MapperProvider {
             nodes = await this.mapDocument(resourcePath);
         } else if (resourceType === "video") {
             nodes = await this.mapVideo(resourcePath);
+        } else if (resourceType === "audio") {
+            nodes = await this.mapAudio(resourcePath);
+        } else if (resourceType === "image") {
+            nodes = await this.mapImage(resourcePath);
         } else if (resourceType === "text") {
             nodes = await this.mapText(resourcePath);
         } else {
-            // Fallback or TODO for image/audio
             throw new Error(`Resource type '${resourceType}' not fully implemented in JS port yet.`);
         }
 
@@ -137,7 +169,29 @@ export class GeminiMapper implements MapperProvider {
             .replace("{duration}", duration.toString())
             .replace("{filename}", basename(path));
 
-        return this.callGeminiWithFile(path, prompt, "video/mp4");
+        return this.callGeminiWithFile(path, prompt, this.guessMime(path));
+    }
+
+    private async mapAudio(path: string): Promise<Node[]> {
+        const { ffprobe } = await import("fluent-ffmpeg");
+
+        const duration = await new Promise<number>((resolve) => {
+            ffprobe(path, (err, metadata) => {
+                if (err) resolve(0);
+                else resolve(metadata.format.duration || 0);
+            });
+        });
+
+        const prompt = AUDIO_PROMPT
+            .replace("{duration}", duration.toString())
+            .replace("{filename}", basename(path));
+
+        return this.callGeminiWithFile(path, prompt, this.guessMime(path));
+    }
+
+    private async mapImage(path: string): Promise<Node[]> {
+        const prompt = IMAGE_PROMPT;
+        return this.callGeminiWithFile(path, prompt, this.guessMime(path));
     }
 
     private async mapText(path: string): Promise<Node[]> {
@@ -152,6 +206,21 @@ export class GeminiMapper implements MapperProvider {
         if (ext === ".css") mime = "text/css";
 
         return this.callGeminiWithFile(path, prompt, mime);
+    }
+
+    private guessMime(path: string): string {
+        const ext = extname(path).toLowerCase();
+        if (ext === ".pdf") return "application/pdf";
+        if (ext === ".mp4" || ext === ".m4v" || ext === ".mov") return "video/mp4";
+        if (ext === ".mp3") return "audio/mpeg";
+        if (ext === ".wav") return "audio/wav";
+        if (ext === ".aac") return "audio/aac";
+        if (ext === ".m4a") return "audio/mp4";
+        if (ext === ".png") return "image/png";
+        if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
+        if (ext === ".webp") return "image/webp";
+        if (ext === ".gif") return "image/gif";
+        return "application/octet-stream";
     }
 
     private async callGeminiWithFile(path: string, prompt: string, mimeType: string): Promise<Node[]> {

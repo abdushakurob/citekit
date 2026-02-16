@@ -8,6 +8,8 @@ CiteKit is designed to be the **Universal Receiver** for your knowledge. While i
 
 CiteKit comes with adapters for popular frameworks.
 
+> **Note**: Adapter CLI support is provided by the Python SDK. The JavaScript SDK currently exposes only the `GenericAdapter` for programmatic use.
+
 ### GraphRAG
 If you use Microsoft GraphRAG, you can import its entity and community reports.
 
@@ -25,6 +27,13 @@ If you have a JSON file that already matches the Schema (or is close enough), us
 
 ```bash
 citekit adapt my_map.json --adapter generic
+```
+
+### LlamaIndex
+If you use LlamaIndex, you can import node exports into CiteKit maps.
+
+```bash
+citekit adapt llama_nodes.json --adapter llamaindex
 ```
 
 ## 2. Custom Adapters (Extensibility)
@@ -60,7 +69,7 @@ def adapt(file_path, **kwargs):
     # 3. Return Map
     return ResourceMap(
         resource_id="my_custom_import",
-        type="custom",
+        type="virtual",
         title="My Custom Data",
         nodes=nodes
     )

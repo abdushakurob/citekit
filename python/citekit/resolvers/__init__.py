@@ -5,6 +5,7 @@ from citekit.resolvers.document import DocumentResolver
 from citekit.resolvers.video import VideoResolver
 from citekit.resolvers.audio import AudioResolver
 from citekit.resolvers.image import ImageResolver
+from citekit.resolvers.text import TextResolver
 
 __all__ = [
     "Resolver",
@@ -12,4 +13,5 @@ __all__ = [
     "VideoResolver",
     "AudioResolver",
     "ImageResolver",
+    "TextResolver",
 ]

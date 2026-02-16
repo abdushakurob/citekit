@@ -7,7 +7,7 @@ This demonstrates using the **Python SDK** for **Temporal Content Orchestration*
 ## The Strategy: Concept-Based Navigation
 
 Standard video search relies on "rough" transcription chunks. CiteKit enables a more sophisticated agentic workflow:
-1.  **Structural Mapping**: Ingest the video via the Gemini File API to discover its semantic chapters and scenes (Cloud-side once).
+1.  **Structural Mapping**: Ingest the video via the configured mapper (Gemini by default) to discover its semantic chapters and scenes (cloud-side once).
 2.  **Deterministic Retrieval**: After mapping, all navigation and extraction is 100% local.
 3.  **Zero-Latency Switching**: Use **Virtual Resolution** for cloud agents or **Physical Extraction** for local desktop experiences.
 
@@ -49,18 +49,18 @@ def seek(concept):
     
     async def _search():
         # CiteKit provides the list of all semantic maps
-        resource_ids = client.list_resources()
+        resource_ids = client.list_maps()
         
         for rid in resource_ids:
-            map = client.get_structure(rid)
+            resource_map = client.get_map(rid)
             # Find the node that matches the concept
             # (In a real Agent, an LLM would choose the node based on summaries)
-            for node in map.nodes:
+            for node in resource_map.nodes:
                 if concept.lower() in node.id.lower() or concept.lower() in (node.summary or "").lower():
                     print(f"[INFO] Concept Found in {rid}: {node.title}")
                     
                     # Resolve to a physical high-fidelity clip
-                    evidence = await client.resolve(rid, node.id)
+                    evidence = client.resolve(rid, node.id)
                     
                     # Orchestrate the playback
                     print(f"[PLAYING] {evidence.output_path}")
@@ -80,9 +80,9 @@ While basic retrieval might return a fixed-window around a keyword, **Temporal O
 
 ### 2. Multi-Step Retrieval
 In an Agentic Loop (like ReAct), the agent can:
-1.  `list_resources()` to see the library.
-2.  `get_structure()` to "read" the video timeline in seconds.
+1.  `list_maps()` to see the library.
+2.  `get_map()` to "read" the video timeline in seconds.
 3.  `resolve()` to extract only the evidence it needs to reason.
 
 ### 3. Agentic Grounding
-Because the retrieval is **deterministic** (based on the map), the agent can ground its response with stable CiteKit URIs (`video://lex#t=180,210`), making it compatible with **Context Caching** for ultra-low latency future runs.
+Because the retrieval is **deterministic** (based on the map), the agent can ground its response with stable CiteKit URIs (`video://lex#t=180-210`), making it compatible with **Context Caching** for ultra-low latency future runs.

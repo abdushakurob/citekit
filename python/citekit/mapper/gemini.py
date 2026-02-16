@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import asyncio
 from pathlib import Path
 
 from google import genai
@@ -165,7 +166,8 @@ class GeminiMapper(MapperProvider):
         image_bytes = path.read_bytes()
         mime = _guess_image_mime(path)
 
-        response = self._client.models.generate_content(
+        response = await asyncio.to_thread(
+            self._client.models.generate_content,
             model=self._model,
             contents=[
                 genai_types.Content(
@@ -213,26 +215,25 @@ class GeminiMapper(MapperProvider):
         # Note: The new google-genai SDK uses client.files.upload
         try:
             # Sync upload for now (SDK might be sync)
-            file_obj = self._client.files.upload(file=path, config={"mime_type": mime_type})
+            file_obj = await asyncio.to_thread(self._client.files.upload, file=path, config={"mime_type": mime_type})
             print(f"DEBUG: Uploaded as {file_obj.name}")
 
             # Wait for processing if video
             if mime_type.startswith("video"):
-                import time
                 while file_obj.state.name == "PROCESSING":
                     print("DEBUG: Waiting for video processing...")
-                    time.sleep(2)
-                    file_obj = self._client.files.get(name=file_obj.name)
+                    await asyncio.sleep(2)
+                    file_obj = await asyncio.to_thread(self._client.files.get, name=file_obj.name)
                 
                 if file_obj.state.name == "FAILED":
                     raise ValueError(f"Video processing failed: {file_obj.error.message}")
 
             # 2. Generate Content
-            import time
             last_err = None
             for attempt in range(self._max_retries + 1):
                 try:
-                    response = self._client.models.generate_content(
+                    response = await asyncio.to_thread(
+                        self._client.models.generate_content,
                         model=self._model,
                         contents=[
                             genai_types.Content(
@@ -257,7 +258,7 @@ class GeminiMapper(MapperProvider):
                     if attempt < self._max_retries:
                         wait = 2 ** attempt # Exponential backoff
                         print(f"WARNING: Mapping failed (attempt {attempt+1}/{self._max_retries+1}). Retrying in {wait}s... Error: {e}")
-                        time.sleep(wait)
+                        await asyncio.sleep(wait)
                     else:
                         break
             
@@ -268,13 +269,14 @@ class GeminiMapper(MapperProvider):
             if 'file_obj' in locals() and file_obj:
                 print(f"DEBUG: Deleting remote file {file_obj.name}")
                 try:
-                    self._client.files.delete(name=file_obj.name)
+                    await asyncio.to_thread(self._client.files.delete, name=file_obj.name)
                 except Exception as e:
                     print(f"WARNING: Failed to delete remote file: {e}")
 
     async def _call_gemini_for_nodes(self, prompt: str) -> list[Node]:
         """Send a text-only prompt to Gemini."""
-        response = self._client.models.generate_content(
+        response = await asyncio.to_thread(
+            self._client.models.generate_content,
             model=self._model,
             contents=prompt,
             config=genai_types.GenerateContentConfig(
@@ -386,7 +388,6 @@ def _guess_image_mime(path: Path) -> str:
         ".gif": "image/gif",
         ".webp": "image/webp",
         ".bmp": "image/bmp",
-        ".bmp": "image/bmp",
     }.get(ext, "image/png")
 
 def _guess_mime_type(path: Path) -> str:
@@ -394,7 +395,10 @@ def _guess_mime_type(path: Path) -> str:
     ext = path.suffix.lower()
     if ext == ".pdf": return "application/pdf"
     if ext in (".mp4", ".m4v", ".mov"): return "video/mp4"
-    if ext in (".mp3", ".wav", ".aac", ".m4a"): return "audio/mp4"
+    if ext == ".mp3": return "audio/mpeg"
+    if ext == ".wav": return "audio/wav"
+    if ext == ".aac": return "audio/aac"
+    if ext == ".m4a": return "audio/mp4"
     if ext in (".png", ".jpg", ".jpeg"): return "image/jpeg"
     if ext in (".txt", ".md", ".py", ".js", ".ts", ".json", ".yaml", ".yml", ".html", ".css", ".rs", ".go", ".c", ".cpp"): return "text/plain"
     return "application/octet-stream"
