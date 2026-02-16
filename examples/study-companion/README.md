@@ -40,6 +40,13 @@ CiteKit maps videos into logical **Episodes/Chapters**:
 - Python 3.9+ or Node.js 18+ (for CiteKit installation)
 - A Gemini API key (for the default mapper)
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/study-companion
+```
+
 ## Setup
 
 ### 1. Install CiteKit

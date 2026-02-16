@@ -35,6 +35,13 @@ This example implements a four-phase approach:
 - Python 3.9+
 - A Gemini API key (or configure a custom mapper)
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/rag-fusion
+```
+
 ## Setup
 
 ### 1. Install Dependencies

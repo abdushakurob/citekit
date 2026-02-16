@@ -20,6 +20,13 @@ npm install -g citekit
 
 See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/study-companion) for full Claude Desktop setup instructions.
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/study-companion
+```
+
 ## The Goal
 We want to ask Claude:
 > "Can you find the part of the lecture where the professor explains 'Gradient Descent' and show me that clip?"

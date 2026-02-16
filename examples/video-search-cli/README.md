@@ -59,6 +59,13 @@ Choose Python or JavaScript based on your stack preferences.
 - `ffmpeg` installed (for video extraction)
 - A video player: `mpv` (recommended) or `vlc`
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/video-search-cli
+```
+
 > **Note:** This example uses the Python SDK, but all CLI commands shown are also available in JavaScript (v0.1.8+). See [CLI Alternative](#cli-alternative-javascript) below.
 
 ### Installing ffmpeg

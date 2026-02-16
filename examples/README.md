@@ -34,6 +34,15 @@ This directory contains **runnable real-world examples** demonstrating CiteKit's
 
 ## Quick Start
 
+## Get the Examples (Git)
+
+Clone the repo and jump into any example:
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples
+```
+
 Each example has its own directory with:
 - Complete working code
 - Setup instructions

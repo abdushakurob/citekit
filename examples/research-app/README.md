@@ -14,6 +14,13 @@ Unlike traditional systems that rely on keyword search or random text chunks, th
 - Node.js 18+
 - A Gemini API key (or configure a custom mapper)
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/research-app
+```
+
 ## Setup
 
 ### 1. Install Dependencies

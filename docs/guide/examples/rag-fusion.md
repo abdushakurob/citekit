@@ -19,6 +19,13 @@ python hybrid_rag.py
 
 See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/rag-fusion) for full instructions including production integration patterns.
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/rag-fusion
+```
+
 > **CLI Options:** While this example uses Python programmatically, you can explore documents via CLI with either:
 > - `python -m citekit <command>` (Python SDK)
 > - `npx citekit <command>` (JavaScript SDK, v0.1.8+)

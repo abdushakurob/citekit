@@ -23,6 +23,13 @@ npm start
 
 See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/research-app) for full instructions.
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/research-app
+```
+
 ## CLI Usage (Optional)
 
 While this example uses the programmatic Node.js API, you can also explore with CLI commands:

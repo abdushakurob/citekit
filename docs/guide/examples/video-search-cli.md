@@ -21,6 +21,13 @@ python orchestrate_video.py seek "gradient descent"
 
 See the [README](https://github.com/abdushakurob/citekit/tree/main/examples/video-search-cli) for full instructions including ffmpeg and video player setup.
 
+## Get the Example (Git)
+
+```bash
+git clone https://github.com/abdushakurob/citekit.git
+cd citekit/examples/video-search-cli
+```
+
 > **CLI Choice:** This example uses Python, but all CLI commands (`ingest`, `list`, `structure`, `resolve`, etc.) work identically in JavaScript (v0.1.8+). Choose based on your environment:
 > - **Python:** `python -m citekit <command>`
 > - **JavaScript:** `npx citekit <command>`
