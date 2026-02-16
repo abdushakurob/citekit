@@ -1,44 +1,29 @@
 # Changelog
 
-All notable changes to the CiteKit project will be documented in this file.
+All notable changes to this project will be documented in this file.
 
-## [0.1.6] - 2026-02-16
+## [0.1.7] - 2026-02-16
+
 ### Added
-- **Strategic Documentation Overhaul**: Completely refactored all guides to focus on **Modern AI Architectures** (Agentic RAG, LongRAG, GraphRAG, and Context Orchestration).
-- **Context Economics**: Added transparency regarding the two-phase lifecycle (Cloud-mapped ingestion vs. Local-first resolution).
-- **Dedicated API Docs**: Added separate technical specifications for [Virtual Resolution](/api/virtual) and [MCP Protocol](/api/mcp).
-- **CLI Upgrades**: Support for `--virtual`, `--concurrency` (`-c`), and `--retries` (`-r`) flags in the Python CLI.
-- **Virtual Pointer Protocol**: Official recommendation for the `virtual:` URI prefix in databases.
+-   **Text/Code Modality Support**: First-class support for mapping and resolving text-based files (`.txt`, `.md`, `.py`, `.ts`, etc.).
+    -   **Ingestion**: `TextMapper` uses sliding windows and LLM analysis to identify Classes, Functions, and Sections.
+    -   **Resolution**: `TextResolver` supports exact line-range extraction (`lines=[10, 20]`).
+    -   **Models**: Updated `Location` schema to support `lines` tuple.
+    -   **CLI**: `citekit ingest file.py --type text` support.
+-   **Map Portability**:
+    -   **Standardized Schema**: Ensured Python Pydantic models and TypeScript Interfaces match 1:1.
+    -   **Validator**: Added `citekit check-map <path.json>` command to validate maps against the strict schema.
+-   **Documentation**:
+    -   Comprehensive audit to ensure "Text" modality is documented in all API references and guides.
+    -   Added "Code Block" usage instructions to `getting-started.md`.
 
 ### Fixed
-- **Python SDK**: Added missing `os` import in `client.py` required for `/tmp` and environment variable support.
-- **Documentation**: Fixed double-protocol typo (`virtual://video://`) in examples.
+-   Fixed missing `lines` field in Python `Location` model.
+-   Fixed missing `text` types in JavaScript `ResourceMap` and `Location` definitions.
+-   Corrected numerous documentation omissions regarding text modality support.
 
-## [0.1.5] - 2026-02-16
-### Added
-- **Standardized Constructors**: Python `CiteKitClient` now supports `api_key`, `model`, and `max_retries` directly, matching the JS SDK.
-- **Robustness**: Implemented exponential backoff and retry logic in `GeminiMapper` (429 handling).
-
-### Fixed
-- **TypeScript**: Fixed the `maxRetries` "Ghost Property" in `CiteKitClientOptions` interface.
-
-## [0.1.4] - 2026-02-15
-### Changed
-- **Serverless First Refactor**: Optimized all SDKs for Vercel/AWS Lambda. This involved moving `sharp`, `fluent-ffmpeg`, and `pdf-lib` to optional peer dependencies.
-- **Mapping Logic**: Removed local PDF parsing in favor of Google's Gemini File API for zero-binary environments.
+## [0.1.6] - 2026-02-15
 
 ### Added
-- **`baseDir` support**: Added ability to redirect all storage/output to `/tmp` for read-only filesystems.
-
-## [0.1.3] - 2026-02-15
-### Added
-- **Initial JavaScript Port**: Established the core JS logic to match the Python resolver patterns.
-
-## [0.1.2] - 2026-02-15
-### Added
-- **Performance**: Added hashing, caching, and concurrency support for heavy mapping tasks.
-
-## [0.1.0] - 2026-02-14
-### Added
-- **Initial Release**: Core multimodal resolution patterns for Video, Audio, and Images.
-- **Gemini Integration**: Initial support for multimodal mapping via Gemini 1.5.
+-   **CLI**: `citekit list` and `citekit inspect` commands.
+-   **MCP**: Added `getNode` tool.

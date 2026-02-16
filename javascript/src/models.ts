@@ -7,10 +7,13 @@
 
 /** Physical location within a resource. */
 export interface Location {
-    modality: "document" | "video" | "audio" | "image";
+    modality: "document" | "video" | "audio" | "image" | "text";
 
     /** Document: 1-indexed page numbers. */
     pages?: number[];
+
+    /** Text: 1-indexed line range [start, end]. */
+    lines?: [number, number];
 
     /** Video/Audio: start time in seconds. */
     start?: number;
@@ -46,7 +49,7 @@ export interface Node {
 /** Structured map of a resource — the first output of ingestion. */
 export interface ResourceMap {
     resource_id: string;
-    type: "document" | "video" | "audio" | "image";
+    type: "document" | "video" | "audio" | "image" | "text";
     title: string;
     source_path: string;
     metadata?: Record<string, string | number | null>;

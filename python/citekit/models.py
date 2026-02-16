@@ -8,10 +8,12 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
+ResourceType = Literal["document", "video", "audio", "image", "text", "knowledge_graph", "web", "virtual"]
+
 class Location(BaseModel):
     """Physical location within a resource that a node points to."""
 
-    modality: Literal["document", "video", "audio", "image", "text"]
+    modality: ResourceType
 
     # Document-specific
     pages: list[int] | None = None
@@ -42,7 +44,7 @@ class ResourceMap(BaseModel):
     """Structured map of a resource — the first output of ingestion."""
 
     resource_id: str
-    type: Literal["document", "video", "audio", "image", "text"]
+    type: ResourceType
     title: str
     source_path: str
     metadata: dict[str, str | int | float | None] | None = None

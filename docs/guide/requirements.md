@@ -27,7 +27,7 @@ CiteKit uses FFmpeg to slice video and audio files locally (**Physical Resolutio
 
 **When is it NOT needed?**
 -   **Virtual Resolution**: If you only need timestamps/metadata.
--   **Modality**: If you only use PDFs or Images.
+-   **Modality**: If you only use PDFs, Images, or Text/Code.
 -   **Serverless**: Use [Virtual Mode](/guide/concepts/virtual-mode) for zero-binary deployments.
 
 **Requirement:**

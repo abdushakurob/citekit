@@ -57,13 +57,13 @@ def seek(concept):
             # (In a real Agent, an LLM would choose the node based on summaries)
             for node in map.nodes:
                 if concept.lower() in node.id.lower() or concept.lower() in (node.summary or "").lower():
-                    print(f"🎯 Concept Found in {rid}: {node.title}")
+                    print(f"[FOUND] Concept Found in {rid}: {node.title}")
                     
                     # Resolve to a physical high-fidelity clip
                     evidence = await client.resolve(rid, node.id)
                     
                     # Orchestrate the playback
-                    print(f"🎬 Playing: {evidence.output_path}")
+                    print(f"[PLAYING] {evidence.output_path}")
                     subprocess.run(["mpv", evidence.output_path])
                     return
 

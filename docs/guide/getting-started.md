@@ -10,7 +10,7 @@ This guide covers the installation and basic usage of the CiteKit SDK.
     -   **Linux**: `sudo apt install ffmpeg`
     
     > [!NOTE]
-    > If you only need **Virtual Resolution** (metadata/timestamps) or are running in an environment where you cannot install binaries, FFmpeg is **NOT** required. See [Virtual Resolution](/guide/concepts/virtual-mode).
+    > If you only need **Virtual Resolution** (metadata/timestamps), or are working with **Text/Code/Images**, FFmpeg is **NOT** required. See [Virtual Resolution](/guide/concepts/virtual-mode).
 
 2.  **Gemini API Key**: Required for the ingestion phase.
     -   Get a key from [Google AI Studio](https://makersuite.google.com/app/apikey).

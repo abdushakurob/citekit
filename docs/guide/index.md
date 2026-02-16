@@ -16,6 +16,7 @@ CiteKit answers this by **mapping the file structure first**, letting the agent 
     -   **Video**: Extract clips by time range (frame-perfect standard copy).
     -   **Audio**: Extract segments by time range.
     -   **Images**: Extract regions by bounding box.
+    -   **Text/Code**: Slices content by line range.
 -   **Agent-Ready**: Designed for MCP (Model Context Protocol), LangChain, and other agentic frameworks.
 
 ## Supported Modalities

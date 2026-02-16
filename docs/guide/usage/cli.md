@@ -139,3 +139,20 @@ Virtual resolution successful.
    Address: video://lecture_01#t=645-1350
    Location: lines=None, pages=None, start=645, end=1350
 ```
+
+## 4. Validate (Check-Map)
+
+To ensure your maps are portable and compliant with the schema (especially important if you edit them manually or generate them with other tools), use the `check-map` command.
+
+```bash
+python -m citekit.cli check-map .resource_maps/lecture_01.json
+```
+
+**Output:**
+```text
+🔍 Validating .resource_maps/lecture_01.json...
+✅ Map is valid.
+   Schema Version: 0.1.7
+   Resource ID: lecture_01
+   Nodes: 12
+```

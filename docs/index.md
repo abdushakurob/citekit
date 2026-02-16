@@ -18,7 +18,7 @@ features:
     details: Pay the "Token Tax" once. CiteKit maps your file via Gemini API once to create a structural index, then allows agents to resolve evidence 100% locally from then on.
     link: /guide/concepts/resource-mapping
   - title: High-Fidelity Extraction
-    details: Extract specific segments (video clips, audio ranges, PDF pages, image crops) locally without relying on proprietary cloud services.
+    details: Extract specific segments (video clips, audio ranges, PDF pages, image crops, code blocks) locally without relying on proprietary cloud services.
   - title: Model Context Protocol
     details: Includes a built-in MCP server for integration with Claude Desktop, Cline, and other compliant agents.
   - title: Text Structure Analysis

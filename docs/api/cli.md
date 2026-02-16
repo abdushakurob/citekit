@@ -11,6 +11,7 @@ CiteKit provides Command Line Interfaces (CLIs) for both Python and Node.js.
 | **Resolve Nodes** | Yes | No (API only) |
 | **MCP Server** | Yes (`serve`) | Yes (`serve`) |
 | **Inspect Maps** | Yes | No |
+| **Validate Maps** | Yes (`check-map`) | No |
 
 ## Python CLI
 
@@ -70,6 +71,14 @@ python -m citekit.cli resolve lecture.intro --virtual
 
 *   `--resource`, `-res`: Optional resource ID (if not provided in rid.nid format).
 *   `--virtual`: If set, returns only timestamps/pages without file extraction.
+
+### `check-map`
+
+Validates a JSON map against the official schema. Useful for debugging or before sharing maps.
+
+```bash
+python -m citekit.cli check-map path/to/map.json
+```
 
 **4. Start MCP Server**
 ```bash

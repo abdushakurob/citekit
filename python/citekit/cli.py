@@ -40,17 +40,17 @@ async def ingest(path, type, concurrency, retries):
         elif ext in (".png", ".jpg", ".jpeg", ".webp"):
             type = "image"
         else:
-            click.echo(f"⚠️ Could not infer type from extension '{ext}'. Please specify --type.", err=True)
+            click.echo(f"[!] Could not infer type from extension '{ext}'. Please specify --type.", err=True)
             sys.exit(1)
 
-    click.echo(f"🔍 Ingesting {path} as '{type}'...")
+    click.echo(f"[INFO] Ingesting {path} as '{type}'...")
     try:
         resource_map = await client.ingest(path, resource_type=type)
-        click.echo(f"✅ Map generated: {resource_map.resource_id}")
+        click.echo(f"[SUCCESS] Map generated: {resource_map.resource_id}")
         click.echo(f"   Title: {resource_map.title}")
         click.echo(f"   Nodes: {len(resource_map.nodes)}")
     except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
+        click.echo(f"[ERROR] {e}", err=True)
         sys.exit(1)
 
 @main.command()
@@ -62,7 +62,7 @@ async def resolve(node_id, resource, virtual):
     """Resolve a node ID to its value (file chunk)."""
     client = CiteKitClient()
     
-    click.echo(f"📎 Resolving node: {node_id}")
+    click.echo(f"[RESOLVING] Node: {node_id}")
     try:
         # We need to support the case where node_id is a full address or separate
         if "." in node_id and not resource:
@@ -72,18 +72,18 @@ async def resolve(node_id, resource, virtual):
 
         if not rid:
             # Try to find which resource contains this node
-            click.echo("⚠️ Resource ID missing. Use --resource or rid.nid format.")
+            click.echo("[!] Resource ID missing. Use --resource or rid.nid format.")
             sys.exit(1)
 
         evidence = await client.resolve(rid, nid, virtual=virtual)
         if virtual:
-            click.echo("✅ Virtual resolution successful.")
+            click.echo("[SUCCESS] Virtual resolution successful.")
         else:
-            click.echo(f"✅ Output: {evidence.output_path}")
+            click.echo(f"[SUCCESS] Output: {evidence.output_path}")
         click.echo(f"   Modality: {evidence.modality}")
         click.echo(f"   Address: {evidence.address}")
     except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
+        click.echo(f"[ERROR] {e}", err=True)
         sys.exit(1)
 
 @main.command()
@@ -97,7 +97,7 @@ async def structure(resource_id):
         resource_map = client.get_map(resource_id)
         click.echo(json.dumps(resource_map.model_dump(), indent=2, default=str))
     except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
+        click.echo(f"[ERROR] {e}", err=True)
         sys.exit(1)
 
 @main.command("list")
@@ -111,7 +111,7 @@ async def list_resources(resource_id):
         # List nodes for a specific resource
         try:
             resource_map = client.get_map(resource_id)
-            click.echo(f"🔍 Nodes in '{resource_id}':")
+            click.echo(f"[INFO] Nodes in '{resource_id}':")
             # Flatten nodes for display if needed, but for now just top-level
             for node in resource_map.nodes:
                 click.echo(f" - {node.id} ({node.type}): {node.title}")
@@ -119,7 +119,7 @@ async def list_resources(resource_id):
                     for child in node.children:
                         click.echo(f"   └─ {child.id} ({child.type}): {child.title}")
         except Exception as e:
-            click.echo(f"❌ Error: {e}", err=True)
+            click.echo(f"[ERROR] {e}", err=True)
             sys.exit(1)
         return
 
@@ -168,7 +168,7 @@ async def inspect(node_id, resource):
         rid, nid = resource, node_id
 
     if not rid:
-        click.echo("⚠️ Resource ID missing. Use --resource or rid.nid format.")
+        click.echo("[!] Resource ID missing. Use --resource or rid.nid format.")
         sys.exit(1)
 
     try:
@@ -188,10 +188,10 @@ async def inspect(node_id, resource):
 
         node = find_node(resource_map.nodes, nid)
         if not node:
-            click.echo(f"❌ Node '{nid}' not found in resource '{rid}'.")
+            click.echo(f"[ERROR] Node '{nid}' not found in resource '{rid}'.")
             sys.exit(1)
             
-        click.echo(f"🔍 Node: {node.id}")
+        click.echo(f"[INFO] Node: {node.id}")
         click.echo(f"   Resource: {rid} ({resource_map.type})")
         click.echo(f"   Title: {node.title}")
         click.echo(f"   Type: {node.type}")
@@ -200,7 +200,100 @@ async def inspect(node_id, resource):
             click.echo(f"   Summary: {node.summary}")
             
     except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
+        click.echo(f"[ERROR] {e}", err=True)
+        sys.exit(1)
+
+@main.command("check-map")
+@click.argument("path", type=click.Path(exists=True))
+def check_map(path):
+    """Validate a JSON map against the strict schema."""
+    from citekit.models import ResourceMap
+    
+    click.echo(f"[INFO] Validating {path}...")
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        # Pydantic validation
+        map_model = ResourceMap(**data)
+        
+        click.echo("[SUCCESS] Map is valid.")
+        click.echo(f"   Schema Version: 0.1.7")
+        click.echo(f"   Resource ID: {map_model.resource_id}")
+        click.echo(f"   Nodes: {len(map_model.nodes)}")
+        
+        # Additional logical checks
+        if map_model.type == "text":
+            text_nodes = [n for n in map_model.nodes if n.location.modality == "text"]
+            if not text_nodes:
+                click.echo("[WARNING] Map type is 'text' but contains no text-modality nodes.")
+                
+    except json.JSONDecodeError:
+        click.echo("[ERROR] Invalid JSON syntax.", err=True)
+        sys.exit(1)
+    except Exception as e:
+        click.echo(f"[ERROR] Validation Failed: {e}", err=True)
+        sys.exit(1)
+
+@main.command("adapt")
+@click.argument("input_path", type=click.Path(exists=True))
+@click.option("--adapter", "-a", required=True, help="Adapter name ('graphrag') or path to custom script.")
+@click.option("--output", "-o", help="Output path for the map (default: .resource_maps/<name>.json).")
+def adapt(input_path, adapter, output):
+    """Convert external data (GraphRAG, etc.) into a CiteKit Map."""
+    from citekit.adapters import GraphRAGAdapter, GenericAdapter
+    import importlib.util
+
+    click.echo(f"[INFO] Adapting {input_path} using '{adapter}'...")
+
+    try:
+        # 1. Resolve Adapter
+        adapter_instance = None
+        
+        if adapter == "graphrag":
+            adapter_instance = GraphRAGAdapter()
+        elif adapter == "generic":
+            adapter_instance = GenericAdapter()
+        elif adapter.endswith(".py"):
+            # Load custom script
+            spec = importlib.util.spec_from_file_location("custom_adapter", adapter)
+            if not spec or not spec.loader:
+                click.echo(f"[ERROR] Could not load custom adapter from {adapter}", err=True)
+                sys.exit(1)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            
+            # Look for 'adapt' function or 'Adapter' class
+            if hasattr(module, "adapt") and callable(module.adapt):
+                # Functional adapter wrapper
+                class FunctionalAdapter:
+                    def adapt(self, data, **kwargs):
+                        return module.adapt(data, **kwargs)
+                adapter_instance = FunctionalAdapter()
+            elif hasattr(module, "Adapter"):
+                adapter_instance = module.Adapter()
+            else:
+                click.echo("[ERROR] Custom script must define an 'adapt(data)' function or 'Adapter' class.", err=True)
+                sys.exit(1)
+        else:
+            click.echo(f"[ERROR] Unknown adapter '{adapter}'. Use 'graphrag', 'generic', or a .py file.", err=True)
+            sys.exit(1)
+
+        # 2. Run Adaptation
+        resource_map = adapter_instance.adapt(input_path)
+        
+        # 3. Save Output
+        if not output:
+            output_dir = Path(".resource_maps")
+            output_dir.mkdir(exist_ok=True)
+            output = output_dir / f"{resource_map.resource_id}.json"
+        
+        Path(output).write_text(json.dumps(resource_map.model_dump(), indent=2, default=str), encoding="utf-8")
+        
+        click.echo(f"[SUCCESS] Map adapted and saved to: {output}")
+        click.echo(f"   Resource ID: {resource_map.resource_id}")
+        click.echo(f"   Nodes: {len(resource_map.nodes)}")
+
+    except Exception as e:
+        click.echo(f"[ERROR] Adaptation Failed: {e}", err=True)
         sys.exit(1)
 
 if __name__ == "__main__":

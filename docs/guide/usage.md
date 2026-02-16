@@ -6,6 +6,11 @@ This guide covers the core operations of CiteKit: **Ingesting** (Mapping), **Ins
 CiteKit is designed to be **isomorphic**. You can mix and match interfaces (e.g., Ingest via CLI, Resolve via Python).
 :::
 
+- [Ingestion](./usage.md#1-ingesting-resources)
+- [Inspection](./usage.md#2-inspecting-maps)
+- [Resolution](./usage.md#3-resolving-content)
+- [Map Adapters](./adapters.md)
+
 ## 1. Ingesting Resources
 
 Ingestion is the process of analyzing a file (Video, Audio, PDF, Text) to create a **Resource Map**. This is the only step that requires the external Gemini API.
