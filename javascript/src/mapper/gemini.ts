@@ -51,6 +51,24 @@ Rules:
 Return ONLY a JSON array of nodes. No markdown, no explanation.
 `;
 
+const TEXT_PROMPT = `\
+You are a code/text structure analyzer. Analyze the attached text file sections.
+
+Each node must have:
+- "id": a dot-separated identifier (e.g. "MyClass.my_method" or "Installation.Requirements")
+- "title": a short human-readable title
+- "type": one of "class", "function", "method", "header", "section", "directive"
+- "location": { "modality": "text", "lines": [start_line, end_line] } (1-indexed, inclusive)
+- "summary": a 1-sentence summary of what this section contains
+
+Rules:
+- Be precise with line numbers.
+- Capture high-level structure (Classes, Top-level functions, Markdown headers).
+- Do not map every single line of code, just the structural blocks.
+
+Return ONLY a JSON array of nodes.
+`;
+
 export class GeminiMapper implements MapperProvider {
     private maxRetries: number;
     private genAI: GoogleGenerativeAI;
@@ -78,6 +96,8 @@ export class GeminiMapper implements MapperProvider {
             nodes = await this.mapDocument(resourcePath);
         } else if (resourceType === "video") {
             nodes = await this.mapVideo(resourcePath);
+        } else if (resourceType === "text") {
+            nodes = await this.mapText(resourcePath);
         } else {
             // Fallback or TODO for image/audio
             throw new Error(`Resource type '${resourceType}' not fully implemented in JS port yet.`);
@@ -118,6 +138,20 @@ export class GeminiMapper implements MapperProvider {
             .replace("{filename}", basename(path));
 
         return this.callGeminiWithFile(path, prompt, "video/mp4");
+    }
+
+    private async mapText(path: string): Promise<Node[]> {
+        const prompt = TEXT_PROMPT;
+        // Simple mime mapping for common text types
+        const ext = extname(path).toLowerCase();
+        let mime = "text/plain";
+        if (ext === ".md") mime = "text/markdown";
+        if (ext === ".py") mime = "text/x-python";
+        if (ext === ".js" || ext === ".ts") mime = "text/javascript";
+        if (ext === ".html") mime = "text/html";
+        if (ext === ".css") mime = "text/css";
+
+        return this.callGeminiWithFile(path, prompt, mime);
     }
 
     private async callGeminiWithFile(path: string, prompt: string, mimeType: string): Promise<Node[]> {

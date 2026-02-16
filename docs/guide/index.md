@@ -1,6 +1,6 @@
 # Overview
 
-**CiteKit** is an open-source, local-first SDK that enables AI agents to reference specific parts of multimodal files (PDFs, Videos, Audio, Images) without hallucinating.
+**CiteKit** is an open-source, local-first SDK that enables AI agents to reference specific parts of multimodal files (PDFs, Videos, Audio, Images, Code) without hallucinating.
 
 It solves the *context granularity* problem:
 > "How do I give my agent access to a 2-hour video or 500-page PDF without blowing up the context window?"
@@ -26,6 +26,7 @@ CiteKit answers this by **mapping the file structure first**, letting the agent 
 | **Video** | `.mp4`, `.mov`, `.mkv` | Exact clips (time range) via stream copy. |
 | **Audio** | `.mp3`, `.wav`, `.m4a` | Exact segments (time range). |
 | **Image** | `.jpg`, `.png`, `.webp` | Semantic regions (charts, objects) as cropped images. |
+| **Text** | `.txt`, `.md`, `.py`, `.js` | Structural blocks & line-range slices. |
 
 ## Why Use CiteKit?
 

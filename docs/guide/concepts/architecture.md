@@ -41,7 +41,7 @@ graph TD
 
 The ingestion process enables "blind" agents to understand file content.
 
--   **Input**: A file path (PDF, MP4, MP3, JPG).
+-   **Input**: A file path (PDF, MP4, MP3, JPG, PY, MD, TXT).
 -   **Process**:
     1.  The file is uploaded to Google's GenAI File API (temporarily).
     2.  CiteKit prompts a Gemini 1.5 model with a domain-specific schema instruction.
@@ -90,6 +90,7 @@ Uses specialized libraries to extract byte-perfect segments based on the map's c
 | **Video** | `ffmpeg` | Performs stream copy (`-c copy`) for instant cutting without re-encoding. |
 | **Audio** | `ffmpeg` | Trims audio streams to specified timestamps. |
 | **Image** | `Pillow` / `sharp` | Crops images to specified bounding boxes. |
+| **Text** | Native (Python/JS) | Slices file content by line range. |
 
 ### Virtual Resolution (Zero-Binary)
 Skips the extraction entirely and returns the **conceptual coordinates** (timestamps, page numbers, or bounding boxes) along with a virtual address. This mode has **zero external binary dependencies** (no FFmpeg needed) and is ideal for serverless environments.
@@ -103,4 +104,4 @@ Skips the extraction entirely and returns the **conceptual coordinates** (timest
 5.  **CiteKit** identifies timestamps: `180.5` to `210.0`.
 6.  **Agent** receives the metadata directly, using it to point an LLM (GenAI File API) at the original file's specific segment.
 
-*The same flow applies to Images (Metadata -> Crop) and PDFs (TOC -> Page Extraction).*
+*The same flow applies to Images (Metadata -> Crop), PDFs (TOC -> Page Extraction), and Code (Structure -> Line Slicing).*

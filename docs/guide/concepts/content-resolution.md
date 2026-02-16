@@ -47,6 +47,13 @@ CiteKit creates a new image file cropped to the semantic region of interest.
     2.  Crop to `bbox: [x, y, w, h]`.
     3.  Save as original format (JPG/PNG).
 
+### 4. Text (Line Slicing)
+
+For text files (`.txt`, `.md`, `.py`), resolution is purely valid python string slicing:
+1.  Read the source file content.
+2.  Extract lines `[start_line : end_line]`.
+3.  Write the subset to a new file.
+
 ## Caching Strategy
 
 Resolved evidences are hashed and cached in `.citekit_output/`.

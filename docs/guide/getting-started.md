@@ -51,6 +51,11 @@ async def main():
     print("Ingesting chart...")
     chart_map = await client.ingest("quarterly_report.png", "image")
     print(f"Found {len(chart_map.nodes)} regions in image.")
+    
+    # Example 3: Code/Text
+    print("Ingesting code...")
+    code_map = await client.ingest("main.py", "text")
+    print(f"Mapped {len(code_map.nodes)} functions/classes.")
 
     # 3. Resolve (Extract Content)
     # Extracts the specific region (x,y,w,h) as a new image file
@@ -80,12 +85,29 @@ async function main() {
     const chartMap = await client.ingest('./chart.png', 'image');
     console.log(`Found ${chartMap.nodes.length} regions.`);
 
+    // Example 3: Ingest Code
+    console.log("Ingesting code...");
+    const codeMap = await client.ingest('./main.ts', 'text');
+    console.log(`Mapped structure of code.`);
+
     // 3. Resolve
     const evidence = await client.resolve(videoMap.resource_id, videoMap.nodes[0].id);
     console.log(`Saved clip to: ${evidence.output_path}`);
 }
 
 main();
+
+### Command Line Interface (CLI)
+
+The CLI is perfect for testing or simple scripting without writing code.
+
+```bash
+# 1. Ingest (Map)
+python -m citekit.cli ingest lecture.mp4 --type video
+
+# 2. Resolve (Extract)
+# Extracts the node with ID "intro_scene"
+python -m citekit.cli resolve lecture intro_scene
 ```
 
 ## Next Steps

@@ -44,6 +44,15 @@ export default withMermaid(defineConfig({
                     ]
                 },
                 {
+                    text: 'Usage Guide',
+                    items: [
+                        { text: 'CLI', link: '/guide/usage/cli' },
+                        { text: 'Python SDK', link: '/guide/usage/python' },
+                        { text: 'Node.js SDK', link: '/guide/usage/node' },
+                        { text: 'MCP Agent', link: '/guide/usage/mcp' }
+                    ]
+                },
+                {
                     text: 'Core Concepts',
                     items: [
                         { text: 'Architecture', link: '/guide/concepts/architecture' },

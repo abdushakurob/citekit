@@ -17,12 +17,12 @@ features:
   - title: Context Economics
     details: Pay the "Token Tax" once. CiteKit maps your file via Gemini API once to create a structural index, then allows agents to resolve evidence 100% locally from then on.
     link: /guide/concepts/resource-mapping
-  - title: One-Time Cloud Mapping
-    details: Only the ingestion phase interacts with the cloud (Gemini File API). Once mapped, the structural JSON and all content resolution stay on your disk.
   - title: High-Fidelity Extraction
-    details: Extract specific segments (video clips, audio ranges, PDF pages, image crops) locally using FFmpeg or PyMuPDF.
+    details: Extract specific segments (video clips, audio ranges, PDF pages, image crops) locally without relying on proprietary cloud services.
   - title: Model Context Protocol
     details: Includes a built-in MCP server for integration with Claude Desktop, Cline, and other compliant agents.
+  - title: Text Structure Analysis
+    details: Native support for codebases and docs (`.txt`, `.md`, `.py`). Maps classes/functions and resolves specific line ranges.
 ---
 
 ## Quick Install
@@ -44,53 +44,46 @@ pip install citekit
 
 :::
 
-## Overview
+## Quick Usage
 
-CiteKit is the high-fidelity orchestration layer for **Modern AI Architectures**. It solves the **Context Precision Problem** in multimodal applications (Agentic RAG, Long-Context reasoning, and Multi-Agent flows).
+CiteKit works the same way across all interfaces: **Ingest** to map, **Resolve** to extract.
 
-Instead of "fuzzy" context loading, CiteKit employs a **Semantic Indexing** strategy:
+::: code-group
 
-1.  **Map**: Files are analyzed to discover their "Structural DNA" (Topics, Scenes, Charts).
-2.  **Orchestrate**: Agents use the Map to navigate and choose relevant logical units.
-3.  **Resolve**: CiteKit extracts exactly those high-fidelity segments (Physical or Virtual).
-
-## Workflow
-
-### 1. Ingestion
-The file is processed to generate a `ResourceMap`.
-
-```python
+```python [Python]
 from citekit import CiteKitClient
+
+# 1. Ingest (Map)
 client = CiteKitClient()
 video_map = await client.ingest("lecture.mp4", "video")
+
+# 2. Resolve (Extract)
+# Extracts exact clip from 10s to 20s
+evidence = await client.resolve(video_map.resource_id, "intro_scene")
+print(evidence.output_path)
 ```
 
-### 2. Selection
-The agent (or a human via MCP) selects a Node ID.
+```typescript [Node.js]
+import { CiteKitClient } from 'citekit';
 
-```json
-{
-  "id": "intro_sequence",
-  "type": "section",
-  "location": { "start": 0, "end": 45 }
-}
+// 1. Ingest (Map)
+const client = new CiteKitClient();
+const map = await client.ingest('lecture.mp4', 'video');
+
+// 2. Resolve (Extract)
+const evidence = await client.resolve(map.resource_id, 'intro_scene');
+console.log(evidence.output_path);
 ```
 
-### 3. Resolution
-The specific segment is extracted locally.
+```bash [CLI]
+# 1. Ingest
+python -m citekit.cli ingest lecture.mp4 --type video
 
-```python
-evidence = await client.resolve("lecture", "intro_sequence")
+# 2. Resolve
+python -m citekit.cli resolve lecture intro_scene
 ```
 
-## MCP Support (Claude / Cline)
-
-CiteKit has a built-in MCP server. No extra plugins required.
-
-1.  **Install**: `pip install citekit`
-2.  **Config**: Add to your `claude_desktop_config.json`:
-
-```json
+```json [MCP Config]
 {
   "mcpServers": {
     "citekit": {
@@ -101,3 +94,17 @@ CiteKit has a built-in MCP server. No extra plugins required.
   }
 }
 ```
+
+:::
+
+## Overview
+
+CiteKit is the high-fidelity orchestration layer for **Modern AI Architectures**. It solves the **Context Precision Problem** in multimodal applications (Agentic RAG, Long-Context reasoning, and Multi-Agent flows).
+
+Instead of "fuzzy" context loading, CiteKit employs a **Semantic Indexing** strategy:
+
+1.  **Map**: Files are analyzed to discover their "Structural DNA" (Topics, Scenes, Charts).
+2.  **Orchestrate**: Agents use the Map to navigate and choose relevant logical units.
+3.  **Resolve**: CiteKit extracts exactly those high-fidelity segments (Physical or Virtual).
+
+

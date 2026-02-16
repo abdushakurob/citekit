@@ -41,6 +41,7 @@ Since CiteKit relies on Gemini 1.5, it supports massive context windows, allowin
 -   **Audio**: Up to 11 hours.
 -   **PDF**: Up to 1000+ pages.
 -   **Images**: High-resolution analysis of charts, diagrams, and complex scenes.
+-   **Text/Code**: Up to 1M tokens of source code or documentation.
 
 ## 4. Visual Analysis Strategy (Images)
 

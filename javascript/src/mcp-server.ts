@@ -72,6 +72,25 @@ function createServer(storageDir?: string, outputDir?: string): Server {
                     required: ["resource_id", "node_id"],
                 },
             },
+            {
+                name: "getNode",
+                description:
+                    "Get detailed metadata for a specific node without resolving it.",
+                inputSchema: {
+                    type: "object" as const,
+                    properties: {
+                        resource_id: {
+                            type: "string",
+                            description: "The resource ID.",
+                        },
+                        node_id: {
+                            type: "string",
+                            description: "The node ID.",
+                        },
+                    },
+                    required: ["resource_id", "node_id"],
+                },
+            },
         ],
     }));
 
@@ -101,6 +120,36 @@ function createServer(storageDir?: string, outputDir?: string): Server {
                         {
                             type: "text" as const,
                             text: JSON.stringify(structure, null, 2),
+                        },
+                    ],
+                };
+            }
+
+            if (name === "getNode") {
+                const { resource_id, node_id } = args as Record<string, string>;
+                const structure = client.getStructure(resource_id);
+
+                function findNode(nodes: any[], targetId: string): any {
+                    for (const node of nodes) {
+                        if (node.id === targetId) return node;
+                        if (node.children) {
+                            const found = findNode(node.children, targetId);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                }
+
+                const node = findNode(structure.nodes, node_id);
+                if (!node) {
+                    throw new Error(`Node '${node_id}' not found in resource '${resource_id}'`);
+                }
+
+                return {
+                    content: [
+                        {
+                            type: "text" as const,
+                            text: JSON.stringify(node, null, 2),
                         },
                     ],
                 };

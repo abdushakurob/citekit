@@ -20,6 +20,7 @@ _SCHEME_TO_MODALITY = {
     "video": "video",
     "audio": "audio",
     "image": "image",
+    "text": "text",
 }
 
 _MODALITY_TO_SCHEME = {v: k for k, v in _SCHEME_TO_MODALITY.items()}
@@ -34,6 +35,9 @@ def parse_address(address: str) -> tuple[str, Location]:
 
         >>> parse_address("video://lecture1#t=192-230")
         ('lecture1', Location(modality='video', start=192.0, end=230.0))
+        
+        >>> parse_address("text://code#lines=10-20")
+        ('code', Location(modality='text', lines=(10, 20)))
 
         >>> parse_address("image://diagram#bbox=0.2,0.3,0.8,0.7")
         ('diagram', Location(modality='image', bbox=(0.2, 0.3, 0.8, 0.7)))
@@ -55,6 +59,7 @@ def parse_address(address: str) -> tuple[str, Location]:
     start = None
     end = None
     bbox = None
+    lines = None
 
     if fragment:
         params = dict(part.split("=", 1) for part in fragment.split("&") if "=" in part)
@@ -66,6 +71,19 @@ def parse_address(address: str) -> tuple[str, Location]:
                 pages = list(range(int(p_start), int(p_end) + 1))
             else:
                 pages = [int(p) for p in page_str.split(",")]
+
+        if "lines" in params:
+            lines_str = params["lines"]
+            if "-" in lines_str:
+                l_start, l_end = lines_str.split("-", 1)
+                lines = (int(l_start), int(l_end))
+            elif "," in lines_str:
+                # Fallback if someone uses comma, but lines is usually a range tuple
+                parts = lines_str.split(",")
+                if len(parts) >= 2:
+                    lines = (int(parts[0]), int(parts[-1]))
+                else:
+                    lines = (int(parts[0]), int(parts[0]))
 
         if "t" in params:
             time_str = params["t"]
@@ -86,6 +104,7 @@ def parse_address(address: str) -> tuple[str, Location]:
         start=start,
         end=end,
         bbox=bbox,
+        lines=lines,
     )
 
 
@@ -114,6 +133,10 @@ def build_address(resource_id: str, location: Location) -> str:
             fragment_parts.append(f"pages={pages_sorted[0]}-{pages_sorted[-1]}")
         else:
             fragment_parts.append(f"pages={','.join(str(p) for p in pages_sorted)}")
+
+    if location.lines is not None:
+        start_line, end_line = location.lines
+        fragment_parts.append(f"lines={start_line}-{end_line}")
 
     if location.start is not None and location.end is not None:
         start_str = _format_time(location.start)

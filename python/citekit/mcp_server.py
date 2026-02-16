@@ -90,6 +90,24 @@ def create_server(
                     "required": ["resource_id", "node_id"],
                 },
             ),
+            Tool(
+                name="getNode",
+                description="Get detailed metadata for a specific node without resolving it.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "resource_id": {
+                            "type": "string",
+                            "description": "The resource ID.",
+                        },
+                        "node_id": {
+                            "type": "string",
+                            "description": "The node ID.",
+                        },
+                    },
+                    "required": ["resource_id", "node_id"],
+                },
+            ),
         ]
 
     @server.call_tool()
@@ -124,6 +142,34 @@ def create_server(
                 )]
             except (FileNotFoundError, ValueError) as e:
                 return [TextContent(type="text", text=f"Error: {e}")]
+
+        elif name == "getNode":
+            resource_id = arguments["resource_id"]
+            node_id = arguments["node_id"]
+            try:
+                # Helper to find node (duplicate logic from CLI, likely should be in Client)
+                structure = client.get_map(resource_id)
+                
+                def find_node(nodes, target_id):
+                    for node in nodes:
+                        if node.id == target_id:
+                            return node
+                        if node.children:
+                            found = find_node(node.children, target_id)
+                            if found:
+                                return found
+                    return None
+
+                node = find_node(structure.nodes, node_id)
+                if not node:
+                    return [TextContent(type="text", text=f"Error: Node '{node_id}' not found.")]
+                
+                return [TextContent(
+                    type="text",
+                    text=json.dumps(node.model_dump(mode="json"), indent=2),
+                )]
+            except FileNotFoundError:
+                 return [TextContent(type="text", text=f"Error: Resource '{resource_id}' not found.")]
 
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]

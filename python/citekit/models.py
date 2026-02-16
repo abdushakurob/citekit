@@ -11,10 +11,13 @@ from pydantic import BaseModel, Field
 class Location(BaseModel):
     """Physical location within a resource that a node points to."""
 
-    modality: Literal["document", "video", "audio", "image"]
+    modality: Literal["document", "video", "audio", "image", "text"]
 
     # Document-specific
     pages: list[int] | None = None
+
+    # Text-specific
+    lines: tuple[int, int] | None = None
 
     # Video/Audio-specific (seconds)
     start: float | None = None
@@ -39,7 +42,7 @@ class ResourceMap(BaseModel):
     """Structured map of a resource — the first output of ingestion."""
 
     resource_id: str
-    type: Literal["document", "video", "audio", "image"]
+    type: Literal["document", "video", "audio", "image", "text"]
     title: str
     source_path: str
     metadata: dict[str, str | int | float | None] | None = None

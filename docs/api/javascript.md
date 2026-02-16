@@ -28,7 +28,7 @@ Uploads file to LLM and generates a map.
 ```typescript
 async ingest(
     sourcePath: string, 
-    modality: 'video' | 'audio' | 'document' | 'image'
+    modality: 'video' | 'audio' | 'document' | 'image' | 'text'
 ): Promise<ResourceMap>
 ```
 
@@ -102,7 +102,7 @@ interface ResourceMap {
     resource_id: string;
     title: string;
     source_path: string;
-    type: 'video' | 'audio' | 'document' | 'image';
+    type: 'video' | 'audio' | 'document' | 'image' | 'text';
     nodes: Node[];
     metadata: Record<string, any>;
 }
@@ -134,7 +134,8 @@ interface ResolvedEvidence {
 ### `Location`
 ```typescript
 interface Location {
-    // For Video/Audio (seconds)
+    // For Text (1-indexed, inclusive)
+    lines?: [number, number];
     start?: number;
     end?: number;
     

@@ -2,7 +2,7 @@
 
 **Local-first AI resource mapping SDK for precise content extraction**
 
-CiteKit enables AI agents to access specific parts of files—PDF pages, video clips, audio segments, image crops—without uploading entire documents to the cloud. It uses LLMs to generate structured "maps" of your content, then resolves exact references on demand.
+CiteKit enables AI agents to access specific parts of files—PDF pages, video clips, audio segments, image crops, and code blocks—without uploading entire documents to the cloud. It uses LLMs to generate structured "maps" of your content, then resolves exact references on demand.
 
 [![PyPI](https://img.shields.io/pypi/v/citekit)](https://pypi.org/project/citekit/)
 [![npm](https://img.shields.io/npm/v/citekit)](https://www.npmjs.com/package/citekit)
@@ -11,12 +11,12 @@ CiteKit enables AI agents to access specific parts of files—PDF pages, video c
 ## Features
 
 - **Local-First**: All file processing happens on your machine. No cloud storage persistence.
-- **Multi-Modal**: Supports PDF, Video (MP4/MOV), Audio (MP3/WAV), and Images (PNG/JPG).
+- **Multi-Modal**: Supports PDF, Video (MP4/MOV), Audio (MP3/WAV), Images (PNG/JPG), and Text/Code.
 - **Smart Ingestion**:
   - Uses **Gemini 1.5** via File API for handling large files (hours of video).
   - **SHA-256 Hashing & Caching**: Never re-process the same file twice.
   - **Concurrency Control**: Built-in queueing to manage API rate limits.
-- **Precise Extraction**: Get exact PDF pages, video clips (stream-copied), or image crops.
+- **Precise Extraction**: Get exact PDF pages, video clips (stream-copied), image crops, or code slices.
 - **Serverless Friendly**:
   - **Zero Browser Dependencies**: Removed `pdf-parse` to avoid `DOMMatrix` errors in Vercel/Lambda.
   - **Configurable `baseDir`**: Support for read-only filesystems (e.g., `/tmp`).
@@ -196,6 +196,7 @@ citekit/
      - **PDFs**: Creates a mini-PDF with just those pages
      - **Videos**: Cuts a clip using ffmpeg (stream-copied, no re-encoding)
      - **Images**: Crops the specified region
+     - **Text**: Slices content by line range
    - Saves the result to `.citekit_output/`
 
 ## Development

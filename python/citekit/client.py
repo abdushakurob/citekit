@@ -11,7 +11,9 @@ from citekit.mapper.base import MapperProvider
 from citekit.models import Location, Node, ResolvedEvidence, ResourceMap
 from citekit.resolvers.audio import AudioResolver
 from citekit.resolvers.document import DocumentResolver
+from citekit.resolvers.document import DocumentResolver
 from citekit.resolvers.image import ImageResolver
+from citekit.resolvers.text import TextResolver
 from citekit.resolvers.video import VideoResolver
 
 
@@ -65,6 +67,7 @@ class CiteKitClient:
             "video": VideoResolver(output_dir=str(self._output_dir)),
             "audio": AudioResolver(output_dir=str(self._output_dir)),
             "image": ImageResolver(output_dir=str(self._output_dir)),
+            "text": TextResolver(output_dir=str(self._output_dir)),
         }
 
     # ── Ingestion ────────────────────────────────────────────────────────────
@@ -83,8 +86,8 @@ class CiteKitClient:
         - Limits concurrent mapper calls using a semaphore.
 
         Args:
-            resource_path: Path to the resource file (PDF, video, audio, image).
-            resource_type: One of "document", "video", "audio", "image".
+            resource_path: Path to the resource file (PDF, video, audio, image, text).
+            resource_type: One of "document", "video", "audio", "image", "text".
             resource_id: Optional custom ID. Defaults to the filename stem.
 
         Returns:

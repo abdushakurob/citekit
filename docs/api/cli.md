@@ -30,20 +30,40 @@ pip install citekit
 python -m citekit.cli ingest video.mp4 --type video --concurrency 2 --retries 5
 ```
 
-*   `--type`, `-t`: One of `video`, `audio`, `document`, `image`.
+*   `--type`, `-t`: One of `video`, `audio`, `document`, `image`, `text`.
 *   `--concurrency`, `-c`: Max parallel mapper calls (default: 5).
 *   `--retries`, `-r`: Max API retries (default: 3).
 
-**2. List resources**
+### `list`
+
+Lists all ingested resources or inspects a specific resource.
+
 ```bash
+# List all resources
 python -m citekit.cli list
+
+# List nodes in a specific resource
+python -m citekit.cli list my_video
+```
+
+*   `node_id` (Optional): If provided without a resource ID, it tries to parse `resource_id.node_id`.
+
+### `inspect`
+
+View detailed metadata for a specific node without resolving it.
+
+```bash
+# Inspect a node
+python -m citekit.cli inspect DataProcessor --resource test_code
+
+# Shorthand
+python -m citekit.cli inspect test_code.DataProcessor
 ```
 
 **3. Resolve (Extract) content**
 ```bash
 # Physical extraction (default)
 python -m citekit.cli resolve lecture.intro
-
 # Virtual resolution (metadata only)
 python -m citekit.cli resolve lecture.intro --virtual
 ```

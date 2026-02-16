@@ -17,7 +17,9 @@ import { buildAddress } from "./address.js";
 import { GeminiMapper } from "./mapper/gemini.js";
 import { DocumentResolver } from "./resolvers/document.js";
 import { VideoResolver } from "./resolvers/video.js";
+import { VideoResolver } from "./resolvers/video.js";
 import { ImageResolver } from "./resolvers/image.js";
+import { TextResolver } from "./resolvers/text.js";
 import type { MapperProvider } from "./mapper/base.js";
 import type { Resolver } from "./resolvers/base.js";
 
@@ -79,7 +81,9 @@ export class CiteKitClient {
         this.resolvers = {
             "document": new DocumentResolver(),
             "video": new VideoResolver(),
+            "video": new VideoResolver(),
             "image": new ImageResolver(),
+            "text": new TextResolver(),
             // Audio uses VideoResolver logic mostly, but we can reuse or just alias?
             // "audio" -> Generic A/V resolver?
             // "audio": new VideoResolver(), // ffmpeg handles both

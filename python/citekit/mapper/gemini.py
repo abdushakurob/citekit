@@ -88,6 +88,24 @@ Return ONLY a JSON array of nodes. No markdown, no explanation.
 """
 
 
+_TEXT_PROMPT = """\
+You are a code/text structure analyzer. Analyze the attached text file sections.
+
+Each node must have:
+- "id": a dot-separated identifier (e.g. "MyClass.my_method" or "Installation.Requirements")
+- "title": a short human-readable title
+- "type": one of "class", "function", "method", "header", "section", "directive"
+- "location": {{ "modality": "text", "lines": [start_line, end_line] }} (1-indexed, inclusive)
+- "summary": a 1-sentence summary of what this section contains
+
+Rules:
+- Be precise with line numbers.
+- Capture high-level structure (Classes, Top-level functions, Markdown headers).
+- Do not map every single line of code, just the structural blocks.
+
+Return ONLY a JSON array of nodes.
+"""
+
 class GeminiMapper(MapperProvider):
     """Mapper provider that uses Google Gemini to analyze resources.
 
@@ -122,6 +140,8 @@ class GeminiMapper(MapperProvider):
             nodes = await self._map_video(path)
         elif resource_type == "audio":
             nodes = await self._map_audio(path)
+        elif resource_type == "text":
+            nodes = await self._map_text(path)
         else:
             raise ValueError(f"Unknown resource type: {resource_type}")
 
@@ -178,6 +198,13 @@ class GeminiMapper(MapperProvider):
         duration = _get_media_duration(path)
         prompt = _AUDIO_PROMPT.format(duration=duration, filename=path.name)
         return await self._call_gemini_with_file(path, prompt, mime_type=_guess_mime_type(path))
+
+    async def _map_text(self, path: Path) -> list[Node]:
+        """Upload text file to Gemini and ask for structure."""
+        # For text files, we can just upload them as text/plain or specific mime
+        # Gemini File API supports text/plain, text/markdown, text/x-python, etc.
+        mime = _guess_mime_type(path)
+        return await self._call_gemini_with_file(path, _TEXT_PROMPT, mime_type=mime)
 
     async def _call_gemini_with_file(self, path: Path, prompt: str, mime_type: str) -> list[Node]:
         """Upload file, generate content, and cleanup."""
@@ -330,6 +357,7 @@ class GeminiMapper(MapperProvider):
             location = Location(
                 modality=loc_data.get("modality", "document"),
                 pages=loc_data.get("pages"),
+                lines=tuple(loc_data["lines"]) if "lines" in loc_data else None,
                 start=loc_data.get("start"),
                 end=loc_data.get("end"),
                 bbox=bbox,
@@ -368,6 +396,7 @@ def _guess_mime_type(path: Path) -> str:
     if ext in (".mp4", ".m4v", ".mov"): return "video/mp4"
     if ext in (".mp3", ".wav", ".aac", ".m4a"): return "audio/mp4"
     if ext in (".png", ".jpg", ".jpeg"): return "image/jpeg"
+    if ext in (".txt", ".md", ".py", ".js", ".ts", ".json", ".yaml", ".yml", ".html", ".css", ".rs", ".go", ".c", ".cpp"): return "text/plain"
     return "application/octet-stream"
 
 

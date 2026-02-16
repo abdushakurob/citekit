@@ -12,7 +12,7 @@ A Resource Map is a strictly typed JSON object.
 interface ResourceMap {
   resource_id: string;      // Unique identifier (slugified filename)
   source_path: string;      // Absolute path to the original file
-  type: 'video' | 'audio' | 'pdf' | 'image';
+  type: 'video' | 'audio' | 'pdf' | 'image' | 'text';
   metadata: {
     title?: string;
     duration?: number;      // Seconds (Video/Audio)
@@ -32,6 +32,7 @@ interface ResourceNode {
   location: 
     | { start: number; end: number }           // Video/Audio
     | { pages: number[] }                      // PDF
+    | { lines: [number, number] }              // Text
     | { bbox: [x, y, w, h] };                  // Image
 
   children?: ResourceNode[]; // Recursive structure

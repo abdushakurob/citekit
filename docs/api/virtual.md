@@ -24,7 +24,7 @@ When `virtual` is `true`, the `ResolvedEvidence` object has the following state:
 
 | Property | Type | Value / Description |
 | :--- | :--- | :--- |
-| `modality` | `string` | `video`, `audio`, `document`, or `image`. |
+| `modality` | `string` | `video`, `audio`, `document`, `image`, or `text`. |
 | `address` | `string` | The CiteKit URI pointer (e.g., `video://lecture#t=180,210`). |
 | `node` | `Node` | The full node object including `location` metadata. |
 | `output_path` | `null` | **Empty**. No file was generated. |
@@ -60,11 +60,13 @@ CiteKit uses a custom URI scheme to represent virtual slices accurately.
 | `video` | `video` | `t` | `video://lecture#t=60-90` |
 | `audio` | `audio` | `t` | `audio://meeting#t=10.5-20.0` |
 | `image` | `image` | `bbox` | `image://diagram#bbox=0.1,0.1,0.5,0.5` |
+| `text` | `text` | `lines` | `text://code#lines=10-25` |
 
 ### Fragment Grammar
 
 - **Time Range (`t`)**: `start-end` (in seconds or HH:MM:SS format).
 - **Page Range (`pages`)**: `start-end` (consecutive) or `p1,p2,p3` (comma-separated).
+- **Line Range (`lines`)**: `start-end` (1-indexed, inclusive).
 - **Bounding Box (`bbox`)**: `x1,y1,x2,y2` (normalized 0.0 to 1.0).
 
 ---

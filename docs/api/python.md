@@ -42,7 +42,7 @@ async def ingest(
 ```
 
 *   `source_path`: Path to local file.
-*   `modality`: One of `"video"`, `"audio"`, `"document"` (PDF), `"image"`.
+*   `modality`: One of `"video"`, `"audio"`, `"document"` (PDF), `"image"`, `"text"`.
 *   **Returns**: `ResourceMap` object.
 
 ### `get_structure`
@@ -118,7 +118,7 @@ class ResourceMap(BaseModel):
     resource_id: str
     title: str
     source_path: str
-    type: str # "video" | "audio" | "document" | "image"
+    type: str # "video" | "audio" | "document" | "image" | "text"
     nodes: List[Node]
     metadata: Dict[str, Any]
 ```
@@ -153,6 +153,9 @@ class Location(BaseModel):
     
     # For Documents
     pages: List[int] | None = None
+
+    # For Text/Code
+    lines: Tuple[int, int] | None = None
     
     # For Images [x1, y1, x2, y2]
     bbox: Tuple[float, float, float, float] | None = None

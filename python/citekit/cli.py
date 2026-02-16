@@ -94,16 +94,36 @@ async def structure(resource_id):
     client = CiteKitClient()
     
     try:
-        resource_map = await client.get_map(resource_id)
+        resource_map = client.get_map(resource_id)
         click.echo(json.dumps(resource_map.model_dump(), indent=2, default=str))
     except Exception as e:
         click.echo(f"❌ Error: {e}", err=True)
         sys.exit(1)
 
 @main.command("list")
+@click.argument("resource_id", required=False)
 @async_command
-async def list_resources():
-    """List all ingested resources."""
+async def list_resources(resource_id):
+    """List ingested resources or nodes within a resource."""
+    client = CiteKitClient()
+    
+    if resource_id:
+        # List nodes for a specific resource
+        try:
+            resource_map = client.get_map(resource_id)
+            click.echo(f"🔍 Nodes in '{resource_id}':")
+            # Flatten nodes for display if needed, but for now just top-level
+            for node in resource_map.nodes:
+                click.echo(f" - {node.id} ({node.type}): {node.title}")
+                if node.children:
+                    for child in node.children:
+                        click.echo(f"   └─ {child.id} ({child.type}): {child.title}")
+        except Exception as e:
+            click.echo(f"❌ Error: {e}", err=True)
+            sys.exit(1)
+        return
+
+    # List all resources
     map_dir = Path(".resource_maps")
     if not map_dir.exists():
         click.echo("No resources found (directory .resource_maps missing).")
@@ -132,6 +152,56 @@ async def serve():
     server = create_server()
     async with stdio_server() as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
+
+@main.command()
+@click.argument("node_id")
+@click.option("--resource", "-res", help="Resource ID (optional if node_id is unique).")
+@async_command
+async def inspect(node_id, resource):
+    """Inspect a node's metadata without resolving details."""
+    client = CiteKitClient()
+    
+    # Logic to find resource/node similar to resolve
+    if "." in node_id and not resource:
+        rid, nid = node_id.split(".", 1)
+    else:
+        rid, nid = resource, node_id
+
+    if not rid:
+        click.echo("⚠️ Resource ID missing. Use --resource or rid.nid format.")
+        sys.exit(1)
+
+    try:
+        # We don't have a direct get_node method, so we read the map
+        resource_map = client.get_map(rid)
+        
+        # Recursive search for node
+        def find_node(nodes, target_id):
+            for node in nodes:
+                if node.id == target_id:
+                    return node
+                if node.children:
+                    found = find_node(node.children, target_id)
+                    if found:
+                        return found
+            return None
+
+        node = find_node(resource_map.nodes, nid)
+        if not node:
+            click.echo(f"❌ Node '{nid}' not found in resource '{rid}'.")
+            sys.exit(1)
+            
+        click.echo(f"🔍 Node: {node.id}")
+        click.echo(f"   Resource: {rid} ({resource_map.type})")
+        click.echo(f"   Title: {node.title}")
+        click.echo(f"   Type: {node.type}")
+        click.echo(f"   Location: {node.location}")
+        if node.summary:
+            click.echo(f"   Summary: {node.summary}")
+            
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

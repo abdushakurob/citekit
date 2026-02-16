@@ -28,7 +28,7 @@ We have removed all browser-centric libraries (like `pdf-parse`) to eliminate `D
 
 ### The "Virtual Mode" Solution (Binary-Free)
 
-If you are running in an environment where you cannot or do not want to install FFmpeg, you can still use CiteKit for video and audio by using **Virtual Resolution**.
+If you are running in an environment where you cannot or do not want to install FFmpeg, you can still use CiteKit for video, audio, and text by using **Virtual Resolution**.
 
 Instead of creating a physical clip, CiteKit returns the exact timestamp metadata. You can then pass these timestamps to your LLM API (like Gemini's `startOffset`) or use them in your frontend video player.
 

@@ -76,15 +76,14 @@ Add the following:
     *   **Args**: `serve`
     *   **Environment Variables**: `{"GEMINI_API_KEY": "..."}`
 
-## Supported Tools
+### Available Tools
 
-Once connected, the AI will have access to these tools:
-
-1.  **`listResources`**: Lists all generated maps in your `.resource_maps` directory.
-2.  **`getStructure`**: Returns the full JSON structure of a specific map, including all chapters, sections, and timestamps.
-3.  **`resolve`**: Extracts a specific node (clip/page).
-    -   **Physical (Default)**: Returns a local path to the extracted file.
-    -   **Virtual**: Returns only the metadata (timestamps/pages) without extraction. Pass `"virtual": true` in arguments.
+| Tool | Description | Input |
+| :--- | :--- | :--- |
+| `listResources` | List all ingested resources. | `{}` |
+| `getStructure` | Get the full JSON map of a resource. | `{ resource_id }` |
+| `getNode` | Get metadata for a specific node. | `{ resource_id, node_id }` |
+| `resolve` | Extract content (physical or virtual). | `{ resource_id, node_id, virtual? }` |
 
 ---
 
