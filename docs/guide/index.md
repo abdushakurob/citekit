@@ -29,36 +29,38 @@ CiteKit answers this by **mapping the file structure first**, letting the agent 
 
 ## Why Use CiteKit?
 
-| Feature | Without CiteKit | With CiteKit |
-| :--- | :--- | :--- |
-| **Context Strategy** | "Stuff the whole file" (expensive/impossible) or "Arbitrary chunking" (loss of context). | **Semantic Selection**: Agent sees a map of chapters/scenes and picks exactly what it needs. |
-| **Privacy** | Uploading full files to 3rd party APIs for every query. | **Local Processing**: Verification/extraction happens on `localhost`. Only the initial mapping uses an LLM. |
-| **Accuracy** | Vector search (RAG) often returns irrelevant chunks. | **Deterministic**: If an agent asks for "Introduction", they get exactly the introduction node. |
+In the current era of **Agentic AI** and **Long-Context Models**, discovery is only half the battle. CiteKit provides the high-fidelity **Context Orchestration** required for production-grade reliability.
 
-## How It Works
+| Modern Problem | CiteKit Solution |
+| :--- | :--- |
+| **Agentic Loops** | Provides deterministic tools (`resolve`) that let agents navigate files like expert researchers. |
+| **Attention Loss** | Minimizes "Lost in the Middle" by sending only relevant, structurally coherent segments to LLMs. |
+| **Multimodal Blindspots** | Bridges the gap between text-based RAG and visual/temporal evidence (Video/PDF). |
+| **Context Overload** | Enables **Context Caching** and **Semantic Partitioning** to keep latency and costs low. |
 
-1.  **Ingest**: You pass a file to CiteKit. It uses a Multimodal LLM (Gemini 1.5) *once* to generate a structural map.
-2.  **Store**: The map is saved locally (JSON).
-3.  **Resolve**: When an agent wants "Section 3.1", CiteKit instantly extracts those pages/seconds from the original file on your disk (or returns metadata via [**Virtual Resolution**](/guide/concepts/virtual-mode)).
+## How It Works: The Two-Phase Lifecycle
 
-## Installation
+CiteKit operates on a "Map-Resolve" pattern to maximize context efficiency:
 
-```bash
-# Python
-pip install citekit
-# Installs SDK & CLI
+1.  **Phase 1: Ingestion (Cloud-Mapped)**
+    You pass a file to CiteKit. It is uploaded to the **Gemini File API** (temporarily) where a multimodal model analyzes its structural "DNA" to generate a JSON Resource Map. This consumes context tokens **once**.
+    
+2.  **Phase 2: Resolution (Local-First)**
+    Once the map (JSON) is stored locally, the cloud is no longer needed. Agents can query the map and resolve high-fidelity clips or pages 100% locally from your disk.
 
-# Node.js
-npm install citekit
-# To use the CLI (serve command)
-npm install -g citekit
-```
+> [!IMPORTANT]
+> **Context Economics**: For a 2-hour video, you might use 100k tokens *once* for mapping. From then on, an agent can "see" the entire structure in ~1k tokens of JSON, and "resolve" any segment without ever sending the video to the cloud again.
 
-## Real-World Examples
+## Deployment Choice
 
-- [**Research App (Node.js)**](/guide/examples/research-app) - Build a CLI that extracts methodology sections from PDFs.
-- [**Video Search Engine (Python)**](/guide/examples/video-search-cli) - Build a tool to semantic search your video library.
-- [**Study Companion (MCP)**](/guide/examples/study-companion) - Connect Claude Desktop to your local lectures.
-- [**Hybrid RAG (Diagram-Aware)**](/guide/examples/rag-fusion) - Use CiteKit to provide visual evidence for text-based RAG.
+CiteKit is designed for the modern edge:
+- **Local Native**: Full FFmpeg/PDF extraction for desktop apps and high-performance servers.
+- **[Virtual Resolution](/guide/concepts/virtual-mode)**: Metadata-only resolution for **Zero-Binary Serverless** environments (Vercel/Lambda).
 
-[Get Started Now →](/guide/getting-started)
+## Architecture & Integration
+
+- [**The Modern Stack**](/guide/modern-stack) - See how CiteKit fits with Agentic RAG, GraphRAG, and Long-Context models.
+- [**Contextual Retrieval**](/guide/concepts/content-resolution) - Learn about frame-perfect and page-perfect orchestration.
+- [**Agentic Examples**](/guide/examples/research-app) - Practical implementations for Research, Study, and Search agents.
+
+[Get Started with CiteKit →](/guide/getting-started)

@@ -24,12 +24,12 @@ graph TD
     D -->|Write| E[./.resource_maps/]
     end
 
-    subgraph "Phase 3: Resolution (Runtime)"
-    App[Agent App] -->|Request Node| F[CiteKit Resolver]
+    subgraph "Phase 3: Context Orchestration (Runtime)"
+    App[Agent App] -->|Request Node| F[CiteKit Orchestrator]
     F -->|Read| E
     F -->|Read| A
-    F -->|Physical Mode| G[Evidence File]
-    F -->|Virtual Mode| H[Metadata Only]
+    F -->|Physical Mode| G[High-Fidelity Evidence]
+    F -->|Virtual Mode| H[Deterministic Metadata]
     G -->|Return Path| App
     H -->|Return JSON| App
     end

@@ -39,6 +39,7 @@ export default withMermaid(defineConfig({
                     text: 'Introduction',
                     items: [
                         { text: 'Overview', link: '/guide/' },
+                        { text: 'The Modern Stack', link: '/guide/modern-stack' },
                         { text: 'Quick Start', link: '/guide/getting-started' },
                     ]
                 },

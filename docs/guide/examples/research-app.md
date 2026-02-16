@@ -1,114 +1,82 @@
-# Build a Research Assistant (Node.js)
+# Example: Agentic Research Engine (Node.js)
 
-In this tutorial, we will build a complete command-line tool that scans a folder of PDF research papers, finds their "Methodology" sections, and extracts them as standalone PDFs.
+In this tutorial, we'll build an **Agentic Research** tool. It uses CiteKit to navigate a library of technical papers, performing **Contextual Retrieval** to extract specific sections (like "Methodology") with perfect fidelity.
 
-This demonstrates the core power of CiteKit: **Structured Extraction** without needing a vector database.
+This demonstrates the core power of CiteKit: Providing **Deterministic Evidence** for high-density research agents.
+
+## Why this is a "Modern" Approach
+
+Unlike traditional systems that rely on keyword search or random text chunks, an **Agentic Research** workflow uses CiteKit to:
+1.  **Understand Structure**: The agent sees the "TOC" of the document first.
+2.  **Navigate Hierarchically**: It decides which section is relevant based on summaries.
+3.  **Extract Deterministically**: It pulls the exact pages, preserving all diagrams, formulas, and formatting.
 
 ## Prerequisites
 
 -   Node.js 18+
--   A folder containing some PDF research papers.
 -   A Gemini API Key.
 
 ## 1. Project Setup
 
-Create a new directory and initialize your project:
-
 ```bash
-mkdir research-extractor
-cd research-extractor
+mkdir citekit-research-agent
+cd citekit-research-agent
 npm init -y
 npm install citekit dotenv
 ```
 
-Create a `.env` file with your API key:
-
-```env
-GEMINI_API_KEY=AIzaSy...
-```
-
 ## 2. The Implementation
 
-Create `extract.js`:
-
 ```javascript
-/* extract.js */
+/* research_agent.js */
 import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
 import { CiteKitClient } from 'citekit';
 
-// Initialize CiteKit (Local-First by default)
+// CiteKit acts as the "Optical" layer for our researcher
 const client = new CiteKitClient({
-    storageDir: '.resource_maps',
-    outputDir: 'extracted_methods'
+    outputDir: 'research_evidence'
 });
 
-async function main() {
-    const inputDir = './papers';
+async function runResearchTask() {
+    const paperPath = './papers/deep_research_v4.pdf';
     
-    // 1. Get all PDF files
-    if (!fs.existsSync(inputDir)) {
-        console.error(`Error: Directory '${inputDir}' not found.`);
-        return;
-    }
+    console.log(`🔍 Inspecting Paper: ${path.basename(paperPath)}`);
+
+    // STEP 1: Discovery (Ingestion)
+    // The file is sent to the Gemini File API ONCE to generate the map.
+    // This is the only time the file leaves your local machine.
+    const map = await client.ingest(paperPath, 'document');
     
-    const papers = fs.readdirSync(inputDir).filter(file => file.endsWith('.pdf'));
-    console.log(`Found ${papers.length} papers to process...`);
+    // STEP 2: Intent Analysis
+    // We want to find where the experimental methodology is.
+    // In a real agent, the LLM would pick these node IDs.
+    const methodologyNodes = map.nodes.filter(node => 
+        node.id.includes('method') || node.summary?.includes('experimental')
+    );
 
-    for (const file of papers) {
-        const filePath = path.join(inputDir, file);
-        console.log(`\n📄 Processing: ${file}`);
-
-        // 2. Ingest: Generate the Map (Cached automatically)
-        const resourceMap = await client.ingest(filePath, 'document');
+    // STEP 3: Contextual Retrieval & Evidence Extraction
+    for (const node of methodologyNodes) {
+        console.log(`🎯 Orchestrating Context: "${node.title}"`);
         
-        // 3. Search: Find the relevant nodes in the map
-        const methodologyNodes = resourceMap.nodes.filter(node => {
-            const id = node.id.toLowerCase();
-            const summary = (node.summary || "").toLowerCase();
-            
-            return id.includes('method') || 
-                   id.includes('experiment') || 
-                   summary.includes('how we tested');
-        });
-
-        if (methodologyNodes.length === 0) {
-            console.log("   ⚠️ No methodology section found.");
-            continue;
-        }
-
-        // 4. Resolve: Extract semantic sections
-        for (const node of methodologyNodes) {
-            console.log(`   🎯 Found: "${node.id}" (Pages ${node.location.start}-${node.location.end})`);
-            
-            // This pulls ONLY these pages into a new PDF
-            const evidence = await client.resolve(resourceMap.resource_id, node.id);
-            console.log(`      ✅ Extracted: ${evidence.output_path}`);
-        }
+        // This extracts the specific pages as a high-fidelity PDF slice
+        const evidence = await client.resolve(map.resource_id, node.id);
+        
+        console.log(`✅ Evidence extracted to: ${evidence.output_path}`);
     }
 }
 
-main().catch(console.error);
+runResearchTask().catch(console.error);
 ```
 
-## 3. Comparision: Why Use This Approach?
+## Modern Capabilities
 
-### vs. Context Stuffing
-**Context Stuffing**: You allow the LLM to read all 20 PDFs (File Upload).
-*   **Cost**: Huge. You pay for 100% of tokens for every query.
-*   **Performance**: "Lost in the Middle" phenomenon. Finding a specific methodology detail in 500 pages of text often fails.
-*   **Latency**: Waiting for 500 pages to be processed takes ~30-60s.
+### 1. Hierarchical Navigation
+By using the CiteKit Map, your agent doesn't have to "guess" where information is. It sees a recursive structure of Parts → Chapters → Sections, allowing for **Zoomable Context**.
 
-**CiteKit**:
-*   **Cost**: You pay for mapping *once*. Queries run on local JSON (free).
-*   **Performance**: You extract only the 3 pages that matter. The LLM sees *exactly* what it needs to see.
+### 2. High-Density Grounding
+When the agent cites a formula or a diagram from page 14, it doesn't just quote text. It provides the **Visual Evidence** (the PDF slice) to the reasoning model, ensuring the most accurate grounding possible.
 
-### vs. Traditional RAG (Vector DB)
-**RAG**: You chunk the PDF into 500-word segments and embed them.
-*   **Loss of Layout**: Equations, tables, and diagrams in methodology sections are often mangled by text extractors.
-*   **Fragmentation**: A "Methodology" section is a logical unit. RAG returns random paragraphs *from* the section, possibly missing the critical context or the diagram on the next page.
-
-**CiteKit**:
-*   **Semantic Integrity**: The map identifies the "Methodology" as a start/end page range.
-*   **Visual Fidelity**: By extracting a *PDF subset* (pages 3-5), you preserve the layout, fonts, and diagrams perfectly for a multimodal Model.
+### 3. Context Orchestration
+This pattern is ideal for **Multi-Agent Systems**. One agent (the "Map Reader") identifies the relevant nodes, and another agent (the "Verifier") receives the sliced PDF to perform deep analysis.

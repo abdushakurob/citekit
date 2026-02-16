@@ -1,6 +1,6 @@
-# Content Resolution
+# Content Orchestration
 
-**Resolution** is the process of extracting a specific segment from a source file based on a `ResourceNode`.
+**Content Resolution** is the technical mechanism behind **Context Orchestration**. It is the process of extracting a specific segment from a source file based on a `ResourceNode` to provide high-fidelity evidence to an agent.
 
 ## Modes of Resolution
 

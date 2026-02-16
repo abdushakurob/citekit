@@ -1,98 +1,71 @@
-# Build a Video Search CLI (Python)
+# Example: Temporal Content Orchestration (Python)
 
-In this example, we'll build a command-line tool that lets you "search" inside a folder of videos. You ask a question, and it plays the exact clip where the answer is discussed.
+In this guide, we'll build a **Video Orchestration** tool. It lets you "search" inside a library of videos not just by keywords, but by **Concepts**, and plays the exact temporal segment where those concepts are mastered.
 
-This demonstrates using the **Python SDK** to build a RAG-alternative for video libraries.
+This demonstrates using the **Python SDK** for **Temporal Content Orchestration** in modern agentic loops.
 
-## Prerequisites
+## The Strategy: Concept-Based Navigation
 
--   Python 3.10+
--   `setup.py` or just install dependencies: `pip install citekit click mpv-player`
--   (Optional) `mpv` installed on your system to play the video.
+Standard video search relies on "rough" transcription chunks. CiteKit enables a more sophisticated agentic workflow:
+1.  **Structural Mapping**: Ingest the video via the Gemini File API to discover its semantic chapters and scenes (Cloud-side once).
+2.  **Deterministic Retrieval**: After mapping, all navigation and extraction is 100% local.
+3.  **Zero-Latency Switching**: Use **Virtual Resolution** for cloud agents or **Physical Extraction** for local desktop experiences.
 
-## 1. The Strategy
-
-Instead of transcribing the video and searching text (Standard RAG), we will:
-1.  **Map** the video structure using CiteKit.
-2.  **Filter** the structure for relevant topics.
-3.  **Resolve** the relevant node to a clip.
-4.  **Play** the clip using a media player.
-
-## 2. The Code (`videase.py`)
+## Implementation (`orchestrate_video.py`)
 
 ```python
 import click
 import os
 import subprocess
 import asyncio
-from typing import List
 from citekit import CiteKitClient
 
-# Initialize Client
+# CiteKit acts as our temporal orchestrator
 client = CiteKitClient()
 
 @click.group()
 def cli():
-    """Videase: Video Search Engine"""
+    """Video Orchestrator: Semantic Timeline Navigation"""
     pass
 
 @cli.command()
 @click.argument('directory', type=click.Path(exists=True))
-def ingest(directory):
-    """Scan a directory and index all videos."""
+def index(directory):
+    """Orchestrate: Generate structural maps for a video library."""
     files = [f for f in os.listdir(directory) if f.endswith(('.mp4', '.mov', '.mkv'))]
-    click.echo(f"Found {len(files)} videos.")
-
+    
     async def _process():
         for f in files:
             path = os.path.join(directory, f)
-            click.echo(f"Indexing {f}...")
-            # This generates the map (cached if repeated)
+            print(f"📡 Mapping Structural DNA: {f}")
             await client.ingest(path, "video")
-            click.echo("Done.")
 
     asyncio.run(_process())
 
 @cli.command()
-@click.argument('query')
-def search(query):
-    """Search for a concept and play the clip."""
+@click.argument('concept')
+def seek(concept):
+    """Seek: Find a concept and play the high-fidelity clip."""
     
     async def _search():
-        # 1. List all known maps
-        resource_ids = client.list_maps()
-        matches = []
-
-        click.echo(f"Searching {len(resource_ids)} videos for '{query}'...")
-
-        # 2. Naive Search (In production, use an LLM here to pick nodes)
-        # We search the 'summary' and 'id' of nodes in the JSON map.
-        for rid in resource_ids:
-            structure = client.get_structure(rid)
-            for node in structure.nodes:
-                text = (f"{node.id} {node.summary}").lower()
-                if query.lower() in text:
-                    matches.append((rid, node))
-
-        if not matches:
-            click.echo("No matches found.")
-            return
-
-        # 3. Present options
-        for i, (rid, node) in enumerate(matches):
-            click.echo(f"[{i}] {rid}: {node.id} ({node.start}s - {node.end}s)")
-
-        # 4. User selection
-        choice = click.prompt("Play which clip?", type=int)
-        selected_rid, selected_node = matches[choice]
-
-        # 5. Resolve (Stream Copy)
-        click.echo("Extracting clip...")
-        evidence = await client.resolve(selected_rid, selected_node.id)
+        # CiteKit provides the list of all semantic maps
+        resource_ids = client.list_resources()
         
-        # 6. Play
-        click.echo(f"Playing {evidence.output_path}...")
-        subprocess.run(["mpv", evidence.output_path])
+        for rid in resource_ids:
+            map = client.get_structure(rid)
+            # Find the node that matches the concept
+            # (In a real Agent, an LLM would choose the node based on summaries)
+            for node in map.nodes:
+                if concept.lower() in node.id.lower() or concept.lower() in (node.summary or "").lower():
+                    print(f"🎯 Concept Found in {rid}: {node.title}")
+                    
+                    # Resolve to a physical high-fidelity clip
+                    evidence = await client.resolve(rid, node.id)
+                    
+                    # Orchestrate the playback
+                    print(f"🎬 Playing: {evidence.output_path}")
+                    subprocess.run(["mpv", evidence.output_path])
+                    return
 
     asyncio.run(_search())
 
@@ -100,24 +73,16 @@ if __name__ == '__main__':
     cli()
 ```
 
-## 3. Usage
+## Why this is "Modern"
 
-```bash
-# Index your lecture folder
-python videase.py ingest ./lectures
+### 1. From Keywords to Concepts
+While basic retrieval might return a fixed-window around a keyword, **Temporal Orchestration** returns the **logical unit**. If a professor explains a proof over 5 minutes, CiteKit gives you all 5 minutes. No more cut-off explanations.
 
-# Find where "Gradient Descent" is discussed
-python videase.py search "gradient"
-```
+### 2. Multi-Step Retrieval
+In an Agentic Loop (like ReAct), the agent can:
+1.  `list_resources()` to see the library.
+2.  `get_structure()` to "read" the video timeline in seconds.
+3.  `resolve()` to extract only the evidence it needs to reason.
 
-## Why this approach vs. VectorDB?
-
-### Standard Video RAG
--   **Method**: Transcribe video -> Chunk text -> Embed -> Vector Search.
--   **Result**: You search "Gradient Descent". The DB returns a 30-second chunk *around* the word.
--   **Problem**: The professor might strictly define it for 5 minutes. The 30s chunk cuts off the explanation. Or the word is mentioned in passing in a different context.
-
-### CiteKit Approach (Structural)
--   **Method**: LLM maps visual/audio structure -> Search Map -> Extract Node.
--   **Result**: You search "Gradient Descent". The Map contains a node `id: "gradient_descent_explanation"` with `start: 600, end: 900`.
--   **Outcome**: You get the **entire 5-minute explanation**. The retrieval unit is the **concept**, not the keyword.
+### 3. Agentic Grounding
+Because the retrieval is **deterministic** (based on the map), the agent can ground its response with stable CiteKit URIs (`video://lex#t=180,210`), making it compatible with **Context Caching** for ultra-low latency future runs.

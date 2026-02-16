@@ -14,13 +14,13 @@ hero:
       link: /integration/mcp
 
 features:
-  - title: Context Mapping
-    details: Generates hierarchical JSON maps of video, audio, PDF, and image content, enabling agents to understand file structure without consuming context tokens.
+  - title: Context Economics
+    details: Pay the "Token Tax" once. CiteKit maps your file via Gemini API once to create a structural index, then allows agents to resolve evidence 100% locally from then on.
     link: /guide/concepts/resource-mapping
-  - title: Zero-Copy Extraction
-    details: extract specific segments (video clips, audio ranges, PDF pages, image crops) locally.
-  - title: Local-First
-    details: File processing occurs on the local filesystem. No data is sent to the cloud during the retrieval phase.
+  - title: One-Time Cloud Mapping
+    details: Only the ingestion phase interacts with the cloud (Gemini File API). Once mapped, the structural JSON and all content resolution stay on your disk.
+  - title: High-Fidelity Extraction
+    details: Extract specific segments (video clips, audio ranges, PDF pages, image crops) locally using FFmpeg or PyMuPDF.
   - title: Model Context Protocol
     details: Includes a built-in MCP server for integration with Claude Desktop, Cline, and other compliant agents.
 ---
@@ -46,13 +46,13 @@ pip install citekit
 
 ## Overview
 
-CiteKit is a software development kit designed to solve the **Context Granularity Problem** in multimodal AI applications.
+CiteKit is the high-fidelity orchestration layer for **Modern AI Architectures**. It solves the **Context Precision Problem** in multimodal applications (Agentic RAG, Long-Context reasoning, and Multi-Agent flows).
 
-Traditional RAG (Retrieval Augmented Generation) approaches often rely on arbitrary chunking or full-file context loading. CiteKit employs a **Map-Reduce** strategy:
+Instead of "fuzzy" context loading, CiteKit employs a **Semantic Indexing** strategy:
 
-1.  **Map**: The file is analyzed once by a specific prompt to generate a structural index (JSON).
-2.  **Reduce**: Agents query this index to select only relevant nodes.
-3.  **Resolve**: The selected nodes are extracted as standalone files.
+1.  **Map**: Files are analyzed to discover their "Structural DNA" (Topics, Scenes, Charts).
+2.  **Orchestrate**: Agents use the Map to navigate and choose relevant logical units.
+3.  **Resolve**: CiteKit extracts exactly those high-fidelity segments (Physical or Virtual).
 
 ## Workflow
 

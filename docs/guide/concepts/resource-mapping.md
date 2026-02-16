@@ -1,6 +1,6 @@
 # Resource Maps
 
-The **Resource Map** is the core abstraction in CiteKit. Think of it as a **DOM (Document Object Model) for multimodal files**.
+The **Resource Map** is the core abstraction in CiteKit. It is a **Semantic Index** designed for **Hierarchical Retrieval**. Think of it as a **DOM (Document Object Model) for multimodal files**.
 
 Just as the DOM allows JavaScript to query specific elements of a webpage (`document.getElementById`), the Resource Map allows an Agent to query specific segments of a video, PDF, or image (`map.nodes['chart_1']`).
 

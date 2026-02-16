@@ -4,8 +4,10 @@ All notable changes to the CiteKit project will be documented in this file.
 
 ## [0.1.6] - 2026-02-16
 ### Added
-- **CLI Upgrades**: Support for `--virtual`, `--concurrency` (`-c`), and `--retries` (`-r`) flags in the Python CLI.
+- **Strategic Documentation Overhaul**: Completely refactored all guides to focus on **Modern AI Architectures** (Agentic RAG, LongRAG, GraphRAG, and Context Orchestration).
+- **Context Economics**: Added transparency regarding the two-phase lifecycle (Cloud-mapped ingestion vs. Local-first resolution).
 - **Dedicated API Docs**: Added separate technical specifications for [Virtual Resolution](/api/virtual) and [MCP Protocol](/api/mcp).
+- **CLI Upgrades**: Support for `--virtual`, `--concurrency` (`-c`), and `--retries` (`-r`) flags in the Python CLI.
 - **Virtual Pointer Protocol**: Official recommendation for the `virtual:` URI prefix in databases.
 
 ### Fixed
