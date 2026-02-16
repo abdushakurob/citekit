@@ -88,7 +88,8 @@ export default withMermaid(defineConfig({
                         { text: 'JavaScript SDK', link: '/api/javascript' },
                         { text: 'CLI Reference', link: '/api/cli' },
                         { text: 'Data Models', link: '/api/models' },
-                        { text: 'Virtual Resolution', link: '/guide/concepts/virtual-mode' }
+                        { text: 'MCP Protocol', link: '/api/mcp' },
+                        { text: 'Virtual Resolution', link: '/api/virtual' }
                     ]
                 }
             ]
