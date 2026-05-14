@@ -16,7 +16,7 @@ import { CiteKitClient } from 'citekit';
 import path from 'node:path';
 import fs from 'node:fs';
 
-const client = new CiteKitClient();
+const client = new CiteKitClient({ apiKey: process.env.GEMINI_API_KEY });
 
 async function analyzePapers(paperFolder) {
     const files = fs.readdirSync(paperFolder).filter(f => f.endsWith('.pdf'));

@@ -156,8 +156,8 @@ export interface MapperProvider {
 ```typescript
 // ollama-mapper.ts
 import type { MapperProvider, ResourceMap, Node } from 'citekit';
-import { readFileSync } from 'node:fs';
-import { basename, resolve } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
+import { basename, resolve, extname } from 'node:path';
 
 export class OllamaMapper implements MapperProvider {
     private model: string;

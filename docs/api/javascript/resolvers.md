@@ -287,21 +287,19 @@ console.log(evidence);
 // { output_path: '.citekit_output/photo_album_photo_1_person.jpg', ... }
 ```
 
-    bbox: [x1, y1, x2, y2]  // Normalized 0-1 corners (top-left to bottom-right)
-
 ```typescript
 // location must have:
+{
+    modality: 'image',
+    bbox: [x1, y1, x2, y2]  // Normalized 0-1 corners (top-left to bottom-right)
+}
+```
+
+**Coordinates** (all 0-1 normalized):
 - `x1`: Left edge (0 = leftmost, 1 = rightmost)
 - `y1`: Top edge (0 = topmost, 1 = bottommost)
 - `x2`: Right edge (0 = leftmost, 1 = rightmost)
 - `y2`: Bottom edge (0 = topmost, 1 = bottommost)
-```
-
-**Coordinates** (all 0-1 normalized):
-- `x`: Left edge (0 = leftmost, 1 = rightmost)
-- `y`: Top edge (0 = topmost, 1 = bottommost)
-- `width`: Crop width (0.5 = half image width)
-- `height`: Crop height (0.5 = half image height)
 
 ### Example
 

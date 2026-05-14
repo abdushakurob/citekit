@@ -33,11 +33,12 @@ export class TextResolver implements Resolver {
             throw new Error(`Source file not found: ${sourcePath}`);
         }
 
-        if (!location.lines) {
+        const linesRange = location.lines || (options as any)?.node?.lines;
+        if (!linesRange) {
             throw new Error(`Node '${nodeId}' has no line range defined.`);
         }
 
-        const [startLine, endLine] = location.lines;
+        const [startLine, endLine] = linesRange;
 
         // Read file
         const fileContent = readFileSync(sourcePath, "utf-8");

@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path
 
-from citekit.address import build_address
+from citekit.address import build_address, parse_address
 from citekit.mapper.base import MapperProvider
 from citekit.models import Location, Node, ResolvedEvidence, ResourceMap
 from citekit.resolvers.audio import AudioResolver
@@ -14,6 +14,8 @@ from citekit.resolvers.document import DocumentResolver
 from citekit.resolvers.image import ImageResolver
 from citekit.resolvers.text import TextResolver
 from citekit.resolvers.video import VideoResolver
+from citekit.resolvers.base import Resolver
+from citekit.adapters import MapAdapter
 
 
 class CiteKitClient:
@@ -53,12 +55,20 @@ class CiteKitClient:
         base_path = Path(base_dir)
         self._storage_dir = base_path / storage_dir
         self._output_dir = base_path / output_dir
+        
+        # Normalize paths for Windows/Linux compatibility
+        self._storage_dir = Path(os.path.normpath(str(self._storage_dir)))
+        self._output_dir = Path(os.path.normpath(str(self._output_dir)))
+
         self._storage_dir.mkdir(parents=True, exist_ok=True)
         self._output_dir.mkdir(parents=True, exist_ok=True)
         
         # Concurrency control
         import asyncio
         self._semaphore = asyncio.Semaphore(concurrency_limit)
+
+        # Initialize adapters
+        self._adapters: dict[str, MapAdapter] = {}
 
         # Initialize resolvers
         self._resolvers = {
@@ -124,17 +134,19 @@ class CiteKitClient:
         # 2. Queueing / Concurrency Control
         async with self._semaphore:
             resource_map = await self._mapper.generate_map(
-                resource_path=resource_path,
+                resource_path=os.path.normpath(resource_path),
                 resource_type=resource_type,
                 resource_id=resource_id,
             )
 
-        # Inject hash into metadata (we need to update the model to support it or just add to dict)
-        # Assuming ResourceMap.metadata is a dict or supports extra fields
+        # Inject hash into metadata
         if resource_map.metadata is None:
             resource_map.metadata = {}
         resource_map.metadata["source_hash"] = file_hash
         resource_map.metadata["source_size"] = path_obj.stat().st_size
+        
+        # Ensure source_path is POSIX for cross-platform JSON
+        resource_map.source_path = Path(resource_map.source_path).as_posix()
 
         # Save to local storage
         self._save_map(resource_map)
@@ -178,7 +190,85 @@ class CiteKitClient:
 
     def save_map(self, resource_map: ResourceMap) -> None:
         """Persist a ResourceMap to local storage."""
+        # Normalize source path before saving
+        resource_map.source_path = Path(resource_map.source_path).as_posix()
         self._save_map(resource_map)
+
+    # ── Power Features & Search ──────────────────────────────────────────────
+
+    def search(self, query: str) -> list[tuple[str, Node]]:
+        """Search across all ingested maps for nodes matching the query.
+        
+        Matches against node.title and node.summary (case-insensitive).
+        Returns a list of (resource_id, Node) tuples.
+        """
+        results = []
+        query_lower = query.lower()
+
+        for resource_id in self.list_maps():
+            try:
+                res_map = self.get_map(resource_id)
+                
+                def _search_nodes(nodes: list[Node]):
+                    for node in nodes:
+                        match = False
+                        if node.title and query_lower in node.title.lower():
+                            match = True
+                        elif node.summary and query_lower in node.summary.lower():
+                            match = True
+                        
+                        if match:
+                            results.append((resource_id, node))
+                        
+                        if node.children:
+                            _search_nodes(node.children)
+
+                _search_nodes(res_map.nodes)
+            except Exception:
+                continue
+        
+        return results
+
+    def resolve_from_url(self, url: str) -> ResolvedEvidence | None:
+        """Helper to map a standard URL or CiteKit address back to evidence."""
+        try:
+            resource_id, location = parse_address(url)
+            return self.resolve(resource_id, "unknown", virtual=True) # Node ID is often unknown from URL alone
+        except Exception:
+            # Try to find by metadata URL if stored?
+            # For now, just handle CiteKit addresses.
+            return None
+
+    def is_visited(self, node_id: str) -> bool:
+        """Check if a node has been physically resolved/extracted recently.
+        
+        Checks if any file in the output directory matches this node's ID pattern.
+        """
+        safe_id = node_id.replace(".", "_")
+        # Search for files containing the safe_id in their name
+        for p in self._output_dir.glob(f"*_{safe_id}_*"):
+            return True
+        return False
+
+    # ── Extendability ────────────────────────────────────────────────────────
+
+    def register_resolver(self, modality: str, resolver: Resolver) -> None:
+        """Register a custom resolver for a specific modality (e.g. 'csv', 'slack')."""
+        self._resolvers[modality] = resolver
+
+    def register_adapter(self, name: str, adapter: MapAdapter) -> None:
+        """Register a custom adapter for external data sources."""
+        self._adapters[name] = adapter
+
+    def adapt(self, adapter_name: str, input_data: Any, **kwargs) -> ResourceMap:
+        """Use a registered adapter to convert data into a ResourceMap."""
+        adapter = self._adapters.get(adapter_name)
+        if not adapter:
+            raise ValueError(f"No adapter registered with name: {adapter_name}")
+        
+        resource_map = adapter.adapt(input_data, **kwargs)
+        self.save_map(resource_map)
+        return resource_map
 
     # ── Resolution ───────────────────────────────────────────────────────────
 

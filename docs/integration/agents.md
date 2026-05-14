@@ -9,8 +9,9 @@ You can create a custom Tool for LangChain that wraps CiteKit.
 ```python
 from langchain_core.tools import tool
 from citekit import CiteKitClient
+import os
 
-client = CiteKitClient()
+client = CiteKitClient(api_key=os.environ.get("GEMINI_API_KEY"))
 
 @tool
 async def get_video_context(query: str, video_id: str):
@@ -51,13 +52,14 @@ In CrewAI, CiteKit can be a tool assigned to a specific "Researcher" agent.
 from crewai import Agent, Task, Crew, Process
 from langchain.tools import tool
 from citekit import CiteKitClient
+import os
 
 # Define Tool
 class CiteKitTools:
     @tool("Video Inspector")
     def inspect_video(video_path: str):
         """Analyzes a video file and returns its structure map."""
-        client = CiteKitClient()
+        client = CiteKitClient(api_key=os.environ.get("GEMINI_API_KEY"))
         # Note: CrewAI tools are often sync, so you might need a sync wrapper
         # or use asyncio.run()
         import asyncio
@@ -67,7 +69,7 @@ class CiteKitTools:
     @tool("Image Inspector")
     def inspect_image(image_path: str):
         """Analyzes an image and returns regions of interest (charts, objects)."""
-        client = CiteKitClient()
+        client = CiteKitClient(api_key=os.environ.get("GEMINI_API_KEY"))
         # Note: CrewAI tools are often sync, so you might need a sync wrapper
         # or use asyncio.run()
         import asyncio

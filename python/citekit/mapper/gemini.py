@@ -97,12 +97,14 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "class", "function", "method", "header", "section", "directive"
 - "location": {{ "modality": "text", "lines": [start_line, end_line] }} (1-indexed, inclusive)
+- "lines": [start_line, end_line]  (Duplicate the lines here at the top level for consistency with pages logic)
 - "summary": a 1-sentence summary of what this section contains
 
 Rules:
 - Be precise with line numbers.
 - Capture high-level structure (Classes, Top-level functions, Markdown headers).
 - Do not map every single line of code, just the structural blocks.
+- Matching logic: For PDFs we use "pages", for text/code we MUST use "lines" [start, end].
 
 Return ONLY a JSON array of nodes.
 """
@@ -150,7 +152,7 @@ class GeminiMapper(MapperProvider):
             resource_id=resource_id,
             type=resource_type,
             title=path.stem.replace("_", " ").replace("-", " ").title(),
-            source_path=str(path.resolve()),
+            source_path=path.resolve().as_posix(),
             nodes=nodes,
         )
 
@@ -371,6 +373,7 @@ class GeminiMapper(MapperProvider):
                 type=raw.get("type", "section"),
                 location=location,
                 summary=raw.get("summary"),
+                lines=tuple(raw["lines"]) if "lines" in raw and raw["lines"] else location.lines,
             ))
 
         return nodes

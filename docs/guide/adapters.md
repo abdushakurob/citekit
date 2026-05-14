@@ -14,7 +14,7 @@ CiteKit comes with adapters for popular frameworks.
 If you use Microsoft GraphRAG, you can import its entity and community reports.
 
 ```bash
-citekit adapt output/artifacts/create_final_entities.parquet.json --adapter graphrag
+python -m citekit adapt output/artifacts/create_final_entities.parquet.json --adapter graphrag
 ```
 
 **What it does:**
@@ -26,14 +26,14 @@ citekit adapt output/artifacts/create_final_entities.parquet.json --adapter grap
 If you have a JSON file that already matches the Schema (or is close enough), use the generic adapter.
 
 ```bash
-citekit adapt my_map.json --adapter generic
+python -m citekit adapt my_map.json --adapter generic
 ```
 
 ### LlamaIndex
 If you use LlamaIndex, you can import node exports into CiteKit maps.
 
 ```bash
-citekit adapt llama_nodes.json --adapter llamaindex
+python -m citekit adapt llama_nodes.json --adapter llamaindex
 ```
 
 ## 2. Custom Adapters (Extensibility)
@@ -80,7 +80,7 @@ def adapt(file_path, **kwargs):
 Simply pass the path to your script:
 
 ```bash
-citekit adapt ./raw_data.json --adapter ./my_converter.py
+python -m citekit adapt ./raw_data.json --adapter ./my_converter.py
 ```
 
 CiteKit will dynamically load your script, run the transformation, and validate/save the result.

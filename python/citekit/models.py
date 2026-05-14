@@ -40,6 +40,7 @@ class Node(BaseModel):
     type: str = Field(..., description="Node type: definition, example, explanation, diagram, etc.")
     location: Location
     summary: str | None = None
+    lines: tuple[int, int] | None = None
     children: list[Node] = Field(default_factory=list)
 
 

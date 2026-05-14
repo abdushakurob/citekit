@@ -30,14 +30,14 @@ from citekit import CiteKitClient
 import asyncio
 
 async def main():
-    client = CiteKitClient()
+    client = CiteKitClient(api_key="YOUR_GEMINI_API_KEY")
     
     # Ingest video
     video_map = await client.ingest("lecture.mp4", "video")
     print(f"Mapped: {video_map.resource_id}")
 
     # Ingest text
-    text_map = await client.ingest("README.md", "document")
+    text_map = await client.ingest("README.md", "text")
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -47,14 +47,14 @@ if __name__ == "__main__":
 import { CiteKitClient } from 'citekit';
 
 async function main() {
-    const client = new CiteKitClient();
+    const client = new CiteKitClient({ apiKey: process.env.GEMINI_API_KEY });
 
     // Ingest video
     const videoMap = await client.ingest('./lecture.mp4', 'video');
     console.log(`Mapped: ${videoMap.resource_id}`);
 
     // Ingest text
-    const textMap = await client.ingest('./README.md', 'document');
+    const textMap = await client.ingest('./README.md', 'text');
 }
 
 main();

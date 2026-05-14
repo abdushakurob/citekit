@@ -2,6 +2,26 @@
 
 All notable changes to the CiteKit project will be documented in this file.
 
+## [0.2.0-rc1] - 2026-05-14
+### Added
+- **Power Features**: 
+  - `client.search(query)`: Hierarchical keyword search across all ingested resources (Python & JS).
+  - `client.resolve_from_url(url)`: Helper to map CiteKit addresses back to evidence (Python & JS).
+  - `client.is_visited(node_id)`: extractor state tracker for extraction history (Python & JS).
+- **Extendability (Resolvers & Adapters)**:
+  - `client.register_resolver(modality, resolver)`: Allows community-driven modality support (e.g., CSV, SQL, Slack).
+  - `client.register_adapter(name, adapter)`: Dynamic adapter registration for external data sources.
+- **Schema Update**: Promoted `lines` to a root-level field in the `Node` model for better accessibility and structural parity with PDF pages.
+
+### Changed
+- **Cross-Platform Hardening**: 
+  - Implemented automatic path normalization (`os.path.normpath` / `path.normalize`) throughout the core.
+  - Standardized `source_path` as POSIX-style (forward slashes) in JSON maps for seamless migration between Windows and Linux.
+- **Mapper Precision**: Updated `GeminiMapper` prompts to explicitly extract line numbers for text/code resources.
+
+### Fixed
+- **Resolution Bug**: Resolved `TextResolver` file-slicing bug where full files were being copied; now correctly extracts specific line ranges with robust bounds checking.
+
 ## [0.1.8] - 2026-02-16
 ### Added
 - **JavaScript CLI Parity**: Implemented all CLI commands in the JavaScript package (ingest, resolve, list, structure, check-map, inspect, adapt, serve) to match Python CLI functionality.

@@ -17,13 +17,14 @@ class TextResolver(Resolver):
         if not os.path.exists(source_path):
             raise FileNotFoundError(f"Source file not found: {source_path}")
 
-        if node.location.lines is None:
+        # Use node.lines if available, otherwise location.lines
+        lines_range = node.lines or node.location.lines
+        if lines_range is None:
             raise ValueError(f"Node '{node.id}' has no line range defined.")
 
-        start_line, end_line = node.location.lines
+        start_line, end_line = lines_range
         # Convert to 0-indexed for python list slicing
         # 1-indexed inclusive -> 0-indexed exclusive
-        # e.g. lines 1-3 -> [0, 1, 2] -> split[0:3]
         start_idx = max(0, start_line - 1)
         end_idx = end_line
 

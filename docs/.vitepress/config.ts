@@ -30,7 +30,14 @@ export default withMermaid(defineConfig({
             { text: 'Guide', link: '/guide/' },
             { text: 'API', link: '/api/python' },
             { text: 'MCP', link: '/integration/mcp' },
-            { text: 'GitHub', link: 'https://github.com/abdushakurob/citekit' }
+            { text: 'GitHub', link: 'https://github.com/abdushakurob/citekit' },
+            {
+                text: 'Experimental',
+                items: [
+                    { text: 'Status: Beta/Experimental', link: '/guide/requirements' },
+                    { text: 'Contribute', link: 'https://github.com/abdushakurob/citekit' }
+                ]
+            }
         ],
 
         sidebar: {

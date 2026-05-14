@@ -64,6 +64,7 @@ Represents a segment or logical unit within a resource. Hierarchical (supports c
 | `type` | string | Node category (e.g., "section", "scene", "chapter", "class", "function") |
 | `summary` | string \| null | Brief description of node content |
 | `location` | Location | Where node is located in resource (temporal/spatial) |
+| `lines` | [number, number] \| null | Text/Code lines (duplicate of location.lines for structural consistency) |
 | `children` | Node[] | Nested child nodes (optional, defaults to empty list) |
 
 **Example:**
@@ -243,6 +244,7 @@ class Node(BaseModel):
     type: str
     location: Location
     summary: str | None = None
+    lines: tuple[int, int] | None = None
     children: list["Node"] = Field(default_factory=list)
 
 class ResourceMap(BaseModel):
@@ -279,6 +281,7 @@ export interface Node {
     type: string;
     location: Location;
     summary?: string;
+    lines?: [number, number];
     children?: Node[];
 }
 

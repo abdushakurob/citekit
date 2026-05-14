@@ -6,10 +6,10 @@
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from "node:fs";
-import { join, basename, extname } from "node:path";
+import { join, basename, extname, normalize } from "node:path";
 import { createHash } from "node:crypto";
 import type { ResourceMap, Node, ResolvedEvidence } from "./models.js";
-import { buildAddress } from "./address.js";
+import { buildAddress, parseAddress } from "./address.js";
 
 // ── Imported Mappers & Resolvers ────────────────────────────────────────
 
@@ -51,12 +51,13 @@ export class CiteKitClient {
     private outputDir: string;
     private mapper: MapperProvider;
     private resolvers: Record<string, Resolver>;
+    private adapters: Record<string, any> = {};
     private maxConcurrency: number;
 
     constructor(options: CiteKitClientOptions = {}) {
         const baseDir = options.baseDir ?? ".";
-        this.storageDir = join(baseDir, options.storageDir ?? ".resource_maps");
-        this.outputDir = join(baseDir, options.outputDir ?? ".citekit_output");
+        this.storageDir = normalize(join(baseDir, options.storageDir ?? ".resource_maps"));
+        this.outputDir = normalize(join(baseDir, options.outputDir ?? ".citekit_output"));
 
         const apiKey = options.apiKey ?? process.env.GEMINI_API_KEY;
 
@@ -174,9 +175,86 @@ export class CiteKitClient {
 
         // Save map
         const mapPath = join(this.storageDir, `${map.resource_id}.json`);
+        // Ensure source_path is POSIX
+        map.source_path = map.source_path.replace(/\\/g, "/");
         writeFileSync(mapPath, JSON.stringify(map, null, 2));
 
         return map;
+    }
+
+    // ── Power Features & Search ──────────────────────────────────────────────
+
+    /**
+     * Search across all ingested maps for nodes matching the query.
+     */
+    search(query: string): Array<{ resourceId: string, node: Node }> {
+        const results: Array<{ resourceId: string, node: Node }> = [];
+        const queryLower = query.toLowerCase();
+        const maps = this.listMaps();
+
+        for (const resourceId of maps) {
+            try {
+                const map = this.getMap(resourceId);
+                const searchNodes = (nodes: Node[]) => {
+                    for (const node of nodes) {
+                        let match = false;
+                        if (node.title?.toLowerCase().includes(queryLower)) match = true;
+                        else if (node.summary?.toLowerCase().includes(queryLower)) match = true;
+
+                        if (match) results.push({ resourceId, node });
+                        if (node.children) searchNodes(node.children);
+                    }
+                };
+                searchNodes(map.nodes);
+            } catch (e) {
+                continue;
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Helper to map a standard URL or CiteKit address back to evidence.
+     */
+    resolveFromUrl(url: string): ResolvedEvidence | undefined {
+        try {
+            const { resourceId, location } = parseAddress(url);
+            // We return a virtual evidence since we don't have the full Node object easily
+            return {
+                resource_id: resourceId,
+                modality: location.modality,
+                address: url,
+                node: { id: "unknown", type: "section", location },
+            };
+        } catch (e) {
+            return undefined;
+        }
+    }
+
+    /**
+     * Check if a node has been physically resolved/extracted recently.
+     */
+    isVisited(nodeId: string): boolean {
+        const safeId = nodeId.replace(/\./g, "_");
+        if (!existsSync(this.outputDir)) return false;
+        const files = readdirSync(this.outputDir);
+        return files.some(f => f.includes(`_${safeId}_`));
+    }
+
+    // ── Extendability ────────────────────────────────────────────────────────
+
+    /**
+     * Register a custom resolver for a specific modality.
+     */
+    registerResolver(modality: string, resolver: Resolver): void {
+        this.resolvers[modality] = resolver;
+    }
+
+    /**
+     * Register a custom adapter for external data sources.
+     */
+    registerAdapter(name: string, adapter: any): void {
+        this.adapters[name] = adapter;
     }
 
     // ── Utilities ───────────────────────────────────────────────────────────

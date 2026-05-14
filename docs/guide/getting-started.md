@@ -72,7 +72,7 @@ print(f"Nodes found: {len(resource_map.nodes)}")
 ```typescript
 import { CiteKitClient } from 'citekit';
 
-const client = new CiteKitClient();
+const client = new CiteKitClient({ apiKey: process.env.GEMINI_API_KEY });
 const resourceMap = client.getMap('lecture');
 ```
 

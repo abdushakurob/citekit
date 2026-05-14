@@ -140,12 +140,14 @@ Implement this interface to create custom mappers (for local LLMs, OpenAI, Anthr
 ### Interface Definition
 
 ```python
+from abc import ABC, abstractmethod
 from citekit.mapper.base import MapperProvider
 from citekit.models import ResourceMap
 
-class MapperProvider(Protocol):
-    """Abstract protocol for all mappers."""
+class MapperProvider(ABC):
+    """Abstract base class for all mappers."""
     
+    @abstractmethod
     async def generate_map(
         self,
         resource_path: str,
@@ -161,11 +163,6 @@ class MapperProvider(Protocol):
             
         Returns:
             ResourceMap with hierarchical nodes
-            
-        Raises:
-            FileNotFoundError: If resource_path doesn't exist
-            ValueError: If resource_type is invalid
-            RuntimeError: If generation fails
         """
         ...
 ```

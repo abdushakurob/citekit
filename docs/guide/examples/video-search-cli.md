@@ -49,7 +49,7 @@ import asyncio
 from citekit import CiteKitClient
 
 # CiteKit acts as our temporal orchestrator
-client = CiteKitClient()
+client = CiteKitClient(api_key=os.environ.get("GEMINI_API_KEY"))
 
 @click.group()
 def cli():

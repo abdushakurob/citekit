@@ -12,12 +12,12 @@ The CiteKit CLI is the primary management tool for local-first multimodal workfl
 | **`list`** | `python -m citekit.cli list` or `citekit list` | Exploring the local index of resources. | [Management API](/api/cli/manage) |
 | **`check-map`** | `python -m citekit.cli check-map <path>` or `citekit check-map <path>` | Validating external or edited maps. | [Management API](/api/cli/manage#citekit-check-map) |
 | **`structure`** | `python -m citekit.cli structure <id>` or `citekit structure <id>` | Dumping a raw map JSON. | [Management API](/api/cli/manage#citekit-structure) |
-| **`adapt`** | `python -m citekit.cli adapt <data>` or `citekit adapt <data>` | Converting external datasets (GraphRAG, etc). | [Adapter API](/api/cli/adapt) |
+| **`adapt`** | `python -m citekit.cli adapt <data>` | Converting external datasets (GraphRAG, etc). | [Adapter API](/api/cli/adapt) |
 | **`serve`** | `python -m citekit.cli serve` or `citekit serve` | Starting the Model Context Protocol server. | [MCP Protocol](/api/mcp/) |
 
 ## Installation
 
-The CLI is included automatically with both the Python and JavaScript SDKs. As of v0.1.8, both packages have full CLI parity.
+The CLI is included automatically with both the Python and JavaScript SDKs. Use Python CLI for adapters (`adapt`).
 
 ### Python
 ```bash
@@ -31,7 +31,7 @@ npm install -g citekit
 citekit --help
 ```
 
-Both CLIs provide identical functionality. If you prefer not to install globally, use `npx citekit` instead.
+JavaScript CLI covers core lifecycle commands; adapter conversion is currently Python CLI only. If you prefer not to install globally, use `npx citekit` instead.
 
 ---
 

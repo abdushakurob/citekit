@@ -45,6 +45,9 @@ export interface Node {
     /** 1-2 sentence summary. */
     summary?: string;
 
+    /** Text: 1-indexed line range [start, end]. */
+    lines?: [number, number];
+
     /** Nested nodes. */
     children?: Node[];
 }

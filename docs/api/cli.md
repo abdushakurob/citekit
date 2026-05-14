@@ -124,10 +124,9 @@ The "Universal Receiver" command.
 ```bash
 # Python
 python -m citekit.cli adapt <input> --adapter <adapter>
-
-# JavaScript
-citekit adapt <input> --adapter <adapter>
 ```
+
+> JavaScript CLI `adapt` is not implemented yet. Use Python CLI for adapters.
 
 | Option | Shorthand | Description |
 | :--- | :--- | :--- |
@@ -148,7 +147,7 @@ citekit serve
 ```
 **Internal**: Connects your local resources to the agent's brain. Not interactive.
 
-> **Note**: As of v0.1.8, both Python and JavaScript packages have full CLI parity.
+> **Note**: JavaScript CLI supports core lifecycle commands (`ingest`, `resolve`, `list`, `structure`, `check-map`, `inspect`, `serve`). Use Python CLI for `adapt`.
 
 ---
 

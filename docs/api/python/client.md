@@ -330,37 +330,58 @@ def save_map(self, resource_map: ResourceMap) -> None
 | :--- | :--- | :--- |
 | `resource_map` | `ResourceMap` | The resource map to persist. |
 
-#### Example
+---
+
+### `search(query)`
+
+Searches across all ingested resource maps for nodes matching the query in their title or summary.
 
 ```python
-from citekit.models import ResourceMap, Node, Location
+def search(query: str) -> list[tuple[str, Node]]
+```
 
-client = CiteKitClient(api_key="YOUR_GEMINI_API_KEY")
+#### Returns
 
-# Create a custom map
-custom_map = ResourceMap(
-    resource_id="custom_resource",
-    type="text",
-    title="My Custom Map",
-    source_path="/path/to/file.txt",
-    nodes=[
-        Node(
-            id="intro",
-            title="Introduction",
-            type="section",
-            location=Location(modality="text", lines=(1, 10))
-        ),
-        Node(
-            id="body",
-            title="Main Content",
-            type="section",
-            location=Location(modality="text", lines=(11, 50))
-        )
-    ]
-)
+- **`list[tuple[str, Node]]`**: A list of `(resource_id, Node)` tuples matching the query.
 
-client.save_map(custom_map)
-print(f"Saved '{custom_map.resource_id}' to storage")
+---
+
+### `resolve_from_url(url)`
+
+Helper to map a standard URL or CiteKit address back to evidence.
+
+```python
+def resolve_from_url(url: str) -> ResolvedEvidence | None
+```
+
+---
+
+### `is_visited(node_id)`
+
+Checks if a node has been physically resolved/extracted recently by looking for matching files in the output directory.
+
+```python
+def is_visited(node_id: str) -> bool
+```
+
+---
+
+### `register_resolver(modality, resolver)`
+
+Extensibility point: Register a custom resolver for a specific modality (e.g., `"csv"`, `"slack"`).
+
+```python
+def register_resolver(modality: str, resolver: Resolver) -> None
+```
+
+---
+
+### `register_adapter(name, adapter)`
+
+Extensibility point: Register a custom adapter for external data sources.
+
+```python
+def register_adapter(name: str, adapter: MapAdapter) -> None
 ```
 
 ---
@@ -394,6 +415,7 @@ class Node(BaseModel):
     type: str
     location: Location
     summary: str | None = None
+    lines: tuple[int, int] | None = None  # Text/Code lines (1-indexed)
     children: list["Node"] = Field(default_factory=list)
 
 class ResourceMap(BaseModel):
@@ -423,11 +445,16 @@ All field names use snake_case (e.g., `resource_id`, not `resourceId`) for consi
 
 **Missing mapper or API key:**
 ```python
-try:
-    client = CiteKitClient()  # No mapper, no api_key
-    await client.ingest("file.mp4")
-except RuntimeError as e:
-    print(f"Error: {e}")  # "No mapper provider configured..."
+import asyncio
+
+async def main():
+    try:
+        client = CiteKitClient()  # No mapper, no api_key
+        await client.ingest("file.mp4", "video")
+    except RuntimeError as e:
+        print(f"Error: {e}")  # "No mapper provider configured..."
+
+asyncio.run(main())
 ```
 
 **Resource not found:**

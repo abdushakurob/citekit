@@ -10,7 +10,7 @@ The `CiteKitClient` class accepts a configuration object to customize paths and 
 import { CiteKitClient } from 'citekit';
 
 // Default Initialization
-const client = new CiteKitClient();
+const client = new CiteKitClient({ apiKey: process.env.GEMINI_API_KEY });
 
 // Custom Configuration
 const client = new CiteKitClient({
@@ -89,7 +89,7 @@ const result = await client.resolve(
 );
 
 // No file created
-console.log(result.output_path); // null
+console.log(result.output_path); // undefined
 
 // Use metadata to drive logic
 const { start, end } = result.node.location;

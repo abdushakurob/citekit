@@ -52,22 +52,26 @@ CiteKit works the same way across all interfaces: **Ingest** to map, **Resolve**
 
 ```python [Python]
 from citekit import CiteKitClient
+import asyncio
 
-# 1. Ingest (Map)
-client = CiteKitClient()
-video_map = await client.ingest("lecture.mp4", "video")
+async def main():
+  # 1. Ingest (Map)
+  client = CiteKitClient(api_key="YOUR_GEMINI_API_KEY")
+  video_map = await client.ingest("lecture.mp4", "video")
 
-# 2. Resolve (Extract)
-# Extracts exact clip from 10s to 20s
-evidence = client.resolve(video_map.resource_id, "intro_scene")
-print(evidence.output_path)
+  # 2. Resolve (Extract)
+  # Extracts exact clip from 10s to 20s
+  evidence = client.resolve(video_map.resource_id, "intro_scene")
+  print(evidence.output_path)
+
+asyncio.run(main())
 ```
 
 ```typescript [Node.js]
 import { CiteKitClient } from 'citekit';
 
 // 1. Ingest (Map)
-const client = new CiteKitClient();
+const client = new CiteKitClient({ apiKey: process.env.GEMINI_API_KEY });
 const map = await client.ingest('lecture.mp4', 'video');
 
 // 2. Resolve (Extract)

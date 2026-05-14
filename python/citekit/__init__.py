@@ -9,7 +9,7 @@ from citekit.aggregator import create_agent_context
 from citekit.adapters import MapAdapter, GenericAdapter, GraphRAGAdapter, LlamaIndexAdapter
 from citekit.resolvers import Resolver, DocumentResolver, VideoResolver, AudioResolver, ImageResolver, TextResolver
 
-__version__ = "0.1.7"
+__version__ = "0.2.0-rc1"
 
 __all__ = [
     "ResourceMap",

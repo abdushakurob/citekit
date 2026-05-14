@@ -330,38 +330,61 @@ console.log(`Available resources: ${maps.join(', ')}`);
 
 ### `getStructure(resourceId)`
 
-Retrieves a resource map as a plain JavaScript object (JSON-serializable). Commonly used by MCP servers and integrations.
+Retrieves a resource map as a plain JavaScript object (JSON-serializable).
 
 ```typescript
 getStructure(resourceId: string): ResourceMap
 ```
 
-#### Parameters
+---
 
-| Parameter | Type | Description |
-| :--- | :--- | :--- |
-| `resourceId` | `string` | The resource ID to retrieve. |
+### `search(query)`
 
-#### Returns
-
-- **`ResourceMap`**: The resource map as a plain object (ready for JSON serialization).
-
-#### Example
+Searches across all ingested resource maps for nodes matching the query in their title or summary.
 
 ```typescript
-const client = new CiteKitClient({
-    apiKey: process.env.GEMINI_API_KEY
-});
-
-const structure = client.getStructure('lecture_01');
-// Can be serialized directly to JSON
-const jsonStr = JSON.stringify(structure);
-console.log(jsonStr);
+search(query: string): Array<{ resourceId: string, node: Node }>
 ```
 
-#### Throws
+---
 
-- **`Error`**: If no map exists for the given `resourceId`.
+### `resolveFromUrl(url)`
+
+Helper to map a standard URL or CiteKit address back to evidence.
+
+```typescript
+resolveFromUrl(url: string): ResolvedEvidence | undefined
+```
+
+---
+
+### `isVisited(nodeId)`
+
+Checks if a node has been physically resolved/extracted recently.
+
+```typescript
+isVisited(nodeId: string): boolean
+```
+
+---
+
+### `registerResolver(modality, resolver)`
+
+Extensibility point: Register a custom resolver for a specific modality.
+
+```typescript
+registerResolver(modality: string, resolver: Resolver): void
+```
+
+---
+
+### `registerAdapter(name, adapter)`
+
+Extensibility point: Register a custom adapter for external data sources.
+
+```typescript
+registerAdapter(name: string, adapter: any): void
+```
 
 ---
 
@@ -383,11 +406,12 @@ export interface ResourceMap {
 }
 
 export interface Node {
-    id: string;             // Unique within resource (e.g., "chapter_1.scene_2")
+    id: string;             // Unique within resource
     title?: string;         // Display name
-    type: string;           // "section", "scene", "chapter", "class", "function", etc.
+    type: string;           // "section", "scene", "chapter", "class", etc.
     location: Location;     // Temporal/spatial bounds
     summary?: string;       // Brief description
+    lines?: [number, number]; // Text lines (1-indexed)
     children?: Node[];      // Nested nodes (optional)
 }
 

@@ -3,40 +3,25 @@
 Resolvers handle physical extraction of content from resources. Adapters convert external data formats into CiteKit `ResourceMap` objects.
 
 ---
-
-    "bbox": [x1, y1, x2, y2]  # Normalized 0-1 corners
-
 Resolvers take a `Node` with location data and extract the physical segment from the source file.
 
-- `x1`: Left edge (0 = leftmost, 1 = rightmost)
-- `y1`: Top edge (0 = topmost, 1 = bottommost)
-- `x2`: Right edge (0 = leftmost, 1 = rightmost)
-- `y2`: Bottom edge (0 = topmost, 1 = bottommost)
+## Base Interface: `Resolver`
+
+```python
+from abc import ABC, abstractmethod
+from pathlib import Path
 from citekit.models import Node
 
 class Resolver(ABC):
     """Base class for all resolvers."""
-    
+
     def __init__(self, output_dir: str = ".citekit_output"):
         self._output_dir = Path(output_dir)
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
     @abstractmethod
     def resolve(self, node: Node, source_path: str) -> str:
-        """Extract evidence for a node from the source file.
-        
-        Args:
-            node: The node to resolve, containing location info
-            source_path: Path to the original resource file
-            
-        Returns:
-            Path to the generated output file
-            
-        Raises:
-            FileNotFoundError: If source file doesn't exist
-            ValueError: If node location is invalid
-            RuntimeError: If extraction fails
-        """
+        """Extract evidence for a node from the source file."""
         ...
 ```
 

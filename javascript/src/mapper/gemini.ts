@@ -88,12 +88,14 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "class", "function", "method", "header", "section", "directive"
 - "location": { "modality": "text", "lines": [start_line, end_line] } (1-indexed, inclusive)
+- "lines": [start_line, end_line]  (Duplicate the lines here at the top level for consistency with pages logic)
 - "summary": a 1-sentence summary of what this section contains
 
 Rules:
 - Be precise with line numbers.
 - Capture high-level structure (Classes, Top-level functions, Markdown headers).
 - Do not map every single line of code, just the structural blocks.
+- Matching logic: For PDFs we use "pages", for text/code we MUST use "lines" [start, end].
 
 Return ONLY a JSON array of nodes.
 `;
@@ -341,7 +343,8 @@ export class GeminiMapper implements MapperProvider {
                 title: raw.title,
                 type: raw.type || "section",
                 location: raw.location,
-                summary: raw.summary
+                summary: raw.summary,
+                lines: raw.lines || raw.location?.lines
             }));
         } catch (e) {
             console.error("DEBUG: Failed JSON parse. Raw:", cleaned);

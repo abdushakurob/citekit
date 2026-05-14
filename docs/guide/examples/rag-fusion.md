@@ -55,7 +55,7 @@ import asyncio
 from citekit import CiteKitClient
 
 # CiteKit acts as our high-fidelity orchestrator
-citekit = CiteKitClient()
+citekit = CiteKitClient(api_key="YOUR_GEMINI_API_KEY")
 
 async def modern_hybrid_query(query: str, vector_db):
     # Discovery Phase: Find relevant text via semantic similarity
@@ -70,7 +70,7 @@ async def modern_hybrid_query(query: str, vector_db):
         print("Detected visual reference. Orchestrating evidence...")
         
         # Deterministic resolution of Section 7 (Diagram)
-        evidence = await citekit.resolve(
+        evidence = citekit.resolve(
             resource_id="internal_spec", 
             node_id="fig_7_topology"
         )

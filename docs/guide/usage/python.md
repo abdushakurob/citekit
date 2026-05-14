@@ -11,7 +11,7 @@ from citekit import CiteKitClient
 
 # Default Initialization
 # Uses '.resource_maps' and '.citekit_output' in current dir
-client = CiteKitClient()
+client = CiteKitClient(api_key="YOUR_GEMINI_API_KEY")
 
 # Custom Configuration
 client = CiteKitClient(
@@ -28,6 +28,8 @@ client = CiteKitClient(
 The `ingest` method analyzes a file and returns a `ResourceMap` object.
 
 ```python
+import asyncio
+
 async def analyze_file():
     # Returns a ResourceMap Pydantic model
     resource_map = await client.ingest(
@@ -38,6 +40,8 @@ async def analyze_file():
     
     print(f"Title: {resource_map.title}")
     print(f"Total Nodes: {len(resource_map.nodes)}")
+
+asyncio.run(analyze_file())
 ```
 
 **Error Handling:**

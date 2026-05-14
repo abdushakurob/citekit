@@ -27,6 +27,7 @@ type Node = {
   start?: number;      // Seconds (Video/Audio)
   end?: number;        // Seconds (Video/Audio)
   pages?: number[];    // Page numbers (PDF)
+  lines?: [number, number]; // Line numbers (Text/Code)
   children?: Node[];   // Nested structure
 }
 ```
@@ -70,11 +71,11 @@ You can customize the underlying model in the `CiteKitClient` constructor.
 ```python
 from citekit import CiteKitClient
 
-# default: gemini-1.5-flash (Fast, Cheap)
-client = CiteKitClient()
+# default: gemini-2.0-flash (Fast, Cheap)
+client = CiteKitClient(api_key="YOUR_GEMINI_API_KEY")
 
 # High-accuracy mode (Slower, More Expensive)
-client_pro = CiteKitClient(model="gemini-1.5-pro")
+client_pro = CiteKitClient(api_key="YOUR_GEMINI_API_KEY", model="gemini-1.5-pro")
 ```
 
 | Model (Gemini mapper) | Best For | Speed | Cost |

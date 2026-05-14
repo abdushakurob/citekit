@@ -48,7 +48,7 @@ python -m citekit list
 python -m citekit structure paper_id
 ```
 
-Since v0.1.8, both SDKs have full CLI parity with all 8 commands.
+Since v0.1.8, both SDKs share core CLI workflows (`ingest`, `resolve`, `list`, `structure`, `check-map`, `inspect`, `serve`). Use Python CLI for `adapt`.
 
 ## Why this is a "Modern" Approach
 
