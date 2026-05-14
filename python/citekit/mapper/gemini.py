@@ -25,6 +25,7 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "section", "definition", "example", "explanation", "diagram", "theorem", "exercise", "summary"
 - "location": {{ "modality": "document", "pages": [list of 1-indexed page numbers] }}
+- "pages": [list of 1-indexed page numbers] (Duplicate here at the root level)
 - "summary": a 1-2 sentence summary of what this section covers
 
 Rules:
@@ -46,6 +47,7 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "diagram", "chart", "text_region", "photo", "illustration", "table", "formula"
 - "location": {{ "modality": "image", "bbox": [x1, y1, x2, y2] }} where values are normalized 0.0-1.0
+- "bbox": [x1, y1, x2, y2] (Duplicate here at the root level)
 - "summary": brief description of what this region contains
 
 Return ONLY a JSON array of nodes. No markdown, no explanation.
@@ -62,6 +64,8 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "introduction", "explanation", "example", "demonstration", "summary", "transition"
 - "location": {{ "modality": "video", "start": <seconds>, "end": <seconds> }}
+- "start": <seconds> (Duplicate here at the root level)
+- "end": <seconds> (Duplicate here at the root level)
 - "summary": brief description of what this segment covers
 
 Rules:
@@ -374,6 +378,10 @@ class GeminiMapper(MapperProvider):
                 location=location,
                 summary=raw.get("summary"),
                 lines=tuple(raw["lines"]) if "lines" in raw and raw["lines"] else location.lines,
+                pages=raw.get("pages") or location.pages,
+                start=raw.get("start") or location.start,
+                end=raw.get("end") or location.end,
+                bbox=tuple(raw["bbox"]) if "bbox" in raw and raw["bbox"] else location.bbox,
             ))
 
         return nodes

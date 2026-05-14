@@ -53,10 +53,12 @@ class CiteKitClient:
             self._mapper = GeminiMapper(api_key=key, model=model, max_retries=max_retries)
 
         base_path = Path(base_dir)
+        self._base_dir = base_path
         self._storage_dir = base_path / storage_dir
         self._output_dir = base_path / output_dir
         
         # Normalize paths for Windows/Linux compatibility
+        self._base_dir = Path(os.path.normpath(str(self._base_dir)))
         self._storage_dir = Path(os.path.normpath(str(self._storage_dir)))
         self._output_dir = Path(os.path.normpath(str(self._output_dir)))
 
@@ -272,13 +274,14 @@ class CiteKitClient:
 
     # ── Resolution ───────────────────────────────────────────────────────────
 
-    def resolve(self, resource_id: str, node_id: str, virtual: bool = False) -> ResolvedEvidence:
+    def resolve(self, resource_id: str, node_id: str, virtual: bool = False, source_path: str | None = None) -> ResolvedEvidence:
         """Resolve a node into extracted evidence.
 
         Args:
             resource_id: The resource to look up.
             node_id: The node ID within that resource.
             virtual: If True, returns only metadata without physical extraction.
+            source_path: Optional override for the source file location.
 
         Returns:
             ResolvedEvidence with the path to the extracted file (or None if virtual).
@@ -307,12 +310,30 @@ class CiteKitClient:
                 resource_id=resource_id,
             )
 
-        # 2. Physical Resolution
+        # 2. Physical Resolution: Determine absolute source path
+        # Priority: 1. Explicitly passed source_path, 2. Map's source_path
+        effective_source = source_path or resource_map.source_path
+        
+        # Ensure we have an absolute path to the source file
+        if not os.path.isabs(effective_source):
+            # Resolve relative to the client's base_dir
+            abs_path = (self._base_dir / effective_source).resolve()
+        else:
+            abs_path = Path(effective_source).resolve()
+
+        if not abs_path.exists():
+            # Fallback: check if the file exists directly in base_dir
+            fallback = (self._base_dir / os.path.basename(effective_source)).resolve()
+            if fallback.exists():
+                abs_path = fallback
+            else:
+                raise FileNotFoundError(f"Source file not found at: {abs_path}")
+
         resolver = self._resolvers.get(modality)
         if resolver is None:
             raise ValueError(f"No resolver for modality: {modality}")
 
-        output_path = resolver.resolve(node, resource_map.source_path)
+        output_path = resolver.resolve(node, str(abs_path))
 
         return ResolvedEvidence(
             output_path=output_path,

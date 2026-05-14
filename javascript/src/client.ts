@@ -49,15 +49,16 @@ export interface CiteKitClientOptions {
 export class CiteKitClient {
     private storageDir: string;
     private outputDir: string;
+    private baseDir: string;
     private mapper: MapperProvider;
     private resolvers: Record<string, Resolver>;
     private adapters: Record<string, any> = {};
     private maxConcurrency: number;
 
     constructor(options: CiteKitClientOptions = {}) {
-        const baseDir = options.baseDir ?? ".";
-        this.storageDir = normalize(join(baseDir, options.storageDir ?? ".resource_maps"));
-        this.outputDir = normalize(join(baseDir, options.outputDir ?? ".citekit_output"));
+        this.baseDir = normalize(options.baseDir ?? ".");
+        this.storageDir = normalize(join(this.baseDir, options.storageDir ?? ".resource_maps"));
+        this.outputDir = normalize(join(this.baseDir, options.outputDir ?? ".citekit_output"));
 
         const apiKey = options.apiKey ?? process.env.GEMINI_API_KEY;
 
@@ -343,10 +344,24 @@ export class CiteKitClient {
             throw new Error(`No resolver implementation for resource type '${modality}'`);
         }
 
+        // Rebase source path relative to base_Dir if needed
+        let sourcePath = map.source_path;
+        const isAbsolute = sourcePath.startsWith("/") || sourcePath.includes(":\\");
+        
+        if (!isAbsolute) {
+            sourcePath = join(this.baseDir, sourcePath);
+        } else if (!existsSync(sourcePath)) {
+            // Fallback: if absolute path doesn't exist, try relative to baseDir
+            const altPath = join(this.baseDir, basename(sourcePath));
+            if (existsSync(altPath)) {
+                sourcePath = altPath;
+            }
+        }
+
         return resolver.resolve(
             resourceId,
             nodeId,
-            map.source_path,
+            sourcePath,
             node.location,
             this.outputDir,
             options

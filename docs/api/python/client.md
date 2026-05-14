@@ -33,7 +33,7 @@ client = CiteKitClient(
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `mapper` | `MapperProvider \| None` | `None` | Custom mapper instance. If `None` and `api_key` is provided, auto-initializes `GeminiMapper`. |
-| `base_dir` | `str` | `"."` | Root directory for all CiteKit operations. Useful for serverless environments. |
+| `base_dir` | `str` | `"."` | Root directory for all CiteKit operations. Acts as the anchor for resolving relative source paths. |
 | `storage_dir`| `str` | `".resource_maps"` | Relative path (from `base_dir`) where resource maps are persisted as JSON files. |
 | `output_dir` | `str` | `".citekit_output"` | Relative path (from `base_dir`) where resolved clips/extracts are written. |
 | `concurrency_limit` | `int` | `5` | Maximum number of parallel mapper calls (ingestion). Prevents rate-limiting. |
@@ -149,7 +149,8 @@ Resolves a node to extracted evidence. Extracts the physical segment from the re
 def resolve(
     resource_id: str,
     node_id: str,
-    virtual: bool = False
+    virtual: bool = False,
+    source_path: str | None = None
 ) -> ResolvedEvidence
 ```
 
@@ -160,6 +161,7 @@ def resolve(
 | `resource_id` | `str` | The resource ID (from `ingest()` or `list_maps()`). |
 | `node_id` | `str` | The node ID to resolve (e.g., `"chapter_1.scene_2"`). Use `get_map(resource_id).list_node_ids()` or `citekit list <resource_id>` to discover available nodes. |
 | `virtual` | `bool` | If `True`, returns only metadata without extracting physical files (no FFmpeg/PDF library calls). Defaults to `False`. |
+| `source_path` | `str \| None` | Optional override for the source file location. If provided, CiteKit uses this path instead of the one stored in the resource map. |
 
 #### Returns
 
@@ -174,10 +176,15 @@ def resolve(
 
 1. **Map Lookup**: Loads the resource map from `storage_dir`.
 2. **Node Search**: Finds the node by ID in the hierarchical structure.
-3. **Address Building**: Generates a CiteKit URI based on the node's location.
-4. **Virtual Check**: If `virtual=True`, returns address without extraction.
-5. **Modality Dispatch**: Selects the appropriate resolver (VideoResolver, DocumentResolver, etc.).
-6. **Physical Extraction**: Resolver writes the extracted segment to `output_dir`.
+3. **Smart Path Rebasing**: 
+   - If `source_path` is provided as an argument, use it.
+   - Otherwise, take the `source_path` from the map.
+   - If it's a relative path, resolve it against the client's `base_dir`.
+   - If it's an absolute path but doesn't exist, CiteKit attempts to find the file inside `base_dir` (handling WSL/Windows cross-platform migration).
+4. **Address Building**: Generates a CiteKit URI based on the node's location.
+5. **Virtual Check**: If `virtual=True`, returns address without extraction.
+6. **Modality Dispatch**: Selects the appropriate resolver (VideoResolver, DocumentResolver, etc.).
+7. **Physical Extraction**: Resolver writes the extracted segment to `output_dir`.
 
 #### Examples
 
@@ -415,7 +422,12 @@ class Node(BaseModel):
     type: str
     location: Location
     summary: str | None = None
-    lines: tuple[int, int] | None = None  # Text/Code lines (1-indexed)
+    # Root-level coordinate fields (for structural consistency)
+    lines: tuple[int, int] | None = None
+    pages: list[int] | None = None
+    bbox: tuple[float, float, float, float] | None = None
+    start: float | None = None
+    end: float | None = None
     children: list["Node"] = Field(default_factory=list)
 
 class ResourceMap(BaseModel):

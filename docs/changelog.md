@@ -2,7 +2,7 @@
 
 All notable changes to the CiteKit project will be documented in this file.
 
-## [0.2.0-rc1] - 2026-05-14
+## [0.2.1] - 2026-05-14
 ### Added
 - **Power Features**: 
   - `client.search(query)`: Hierarchical keyword search across all ingested resources (Python & JS).
@@ -11,7 +11,17 @@ All notable changes to the CiteKit project will be documented in this file.
 - **Extendability (Resolvers & Adapters)**:
   - `client.register_resolver(modality, resolver)`: Allows community-driven modality support (e.g., CSV, SQL, Slack).
   - `client.register_adapter(name, adapter)`: Dynamic adapter registration for external data sources.
-- **Schema Update**: Promoted `lines` to a root-level field in the `Node` model for better accessibility and structural parity with PDF pages.
+- **Schema Evolution**: Promoted `lines`, `pages`, `start`, `end`, and `bbox` to root-level fields in the `Node` model for better accessibility and structural parity.
+
+### Changed
+- **Cross-Platform Hardening**: 
+  - Implemented automatic path normalization (`os.path.normpath` / `path.normalize`) throughout the core.
+  - Standardized `source_path` as POSIX-style (forward slashes) in JSON maps for seamless migration between Windows and Linux.
+- **Mapper Precision**: Updated `GeminiMapper` prompts to explicitly extract structural coordinates at the root level.
+
+### Fixed
+- **Source Path Rebasing**: Fixed a critical bug where `CiteKitClient.resolve()` ignored the `base_dir` passed in the constructor.
+- **Resolution Bug**: Resolved `TextResolver` file-slicing bug where full files were being copied.
 
 ### Changed
 - **Cross-Platform Hardening**: 

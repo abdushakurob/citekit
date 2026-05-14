@@ -63,8 +63,12 @@ Represents a segment or logical unit within a resource. Hierarchical (supports c
 | `title` | string \| null | Display name (e.g., "Chapter 1: Fundamentals") |
 | `type` | string | Node category (e.g., "section", "scene", "chapter", "class", "function") |
 | `summary` | string \| null | Brief description of node content |
-| `location` | Location | Where node is located in resource (temporal/spatial) |
-| `lines` | [number, number] \| null | Text/Code lines (duplicate of location.lines for structural consistency) |
+| `location` | Location | Full location metadata object |
+| `lines` | [number, number] \| null | Text/Code lines (Root-level copy for structural consistency) |
+| `pages` | number[] \| null | Document page numbers (Root-level copy) |
+| `bbox` | [number, number, number, number] \| null | Image bounding box (Root-level copy) |
+| `start` | number \| null | Video/Audio start time (Root-level copy) |
+| `end` | number \| null | Video/Audio end time (Root-level copy) |
 | `children` | Node[] | Nested child nodes (optional, defaults to empty list) |
 
 **Example:**
@@ -79,6 +83,7 @@ Represents a segment or logical unit within a resource. Hierarchical (supports c
     "modality": "document",
     "pages": [45, 67]
   },
+  "pages": [45, 67],
   "children": [
     {
       "id": "chapter_2.section_1.subsection_1",
@@ -244,7 +249,12 @@ class Node(BaseModel):
     type: str
     location: Location
     summary: str | None = None
+    # Root-level coordinate fields (for structural consistency)
     lines: tuple[int, int] | None = None
+    pages: list[int] | None = None
+    bbox: tuple[float, float, float, float] | None = None
+    start: float | None = None
+    end: float | None = None
     children: list["Node"] = Field(default_factory=list)
 
 class ResourceMap(BaseModel):
@@ -281,7 +291,12 @@ export interface Node {
     type: string;
     location: Location;
     summary?: string;
+    // Root-level coordinate fields (for structural consistency)
     lines?: [number, number];
+    pages?: number[];
+    bbox?: [number, number, number, number];
+    start?: number;
+    end?: number;
     children?: Node[];
 }
 

@@ -44,7 +44,7 @@ interface CiteKitClientOptions {
     /** Max retries for Gemini API calls (default: 3) */
     maxRetries?: number;
 
-    /** Base directory for all CiteKit operations. Useful for serverless (e.g., /tmp). */
+    /** Base directory for all CiteKit operations. Acts as the anchor for resolving relative source paths. */
     baseDir?: string;
 
     /** Directory where resource maps are stored (relative to baseDir). Default: ".resource_maps" */
@@ -182,7 +182,7 @@ Resolves a node to extracted evidence. Extracts the physical segment from the re
 async resolve(
     resourceId: string,
     nodeId: string,
-    options?: { virtual?: boolean }
+    options?: { virtual?: boolean; sourcePath?: string }
 ): Promise<ResolvedEvidence>
 ```
 
@@ -193,6 +193,7 @@ async resolve(
 | `resourceId` | `string` | The resource ID (from `ingest()` or `listMaps()`). |
 | `nodeId` | `string` | The node ID to resolve (e.g., `"chapter_1.scene_2"`). |
 | `options?.virtual` | `boolean \| undefined` | If `true`, returns metadata without extracting files (no FFmpeg/PDF library calls). Defaults to `false`. |
+| `options?.sourcePath` | `string \| undefined` | Optional override for the source file location. If provided, CiteKit uses this path instead of the one stored in the resource map. |
 
 #### Returns
 
@@ -207,10 +208,15 @@ async resolve(
 
 1. **Map Lookup**: Loads the resource map from `storageDir`.
 2. **Node Search**: Recursively finds the node by ID in the hierarchical structure.
-3. **Address Building**: Generates a CiteKit URI based on the node's location.
-4. **Virtual Check**: If `virtual=true`, returns address without extraction.
-5. **Modality Dispatch**: Selects the appropriate resolver (VideoResolver, DocumentResolver, etc.).
-6. **Physical Extraction**: Resolver writes the extracted segment to `outputDir` (async I/O).
+3. **Smart Path Rebasing**: 
+   - If `sourcePath` is provided in options, use it.
+   - Otherwise, take the `source_path` from the map.
+   - If it's a relative path, resolve it against the client's `baseDir`.
+   - If it's an absolute path but doesn't exist, CiteKit attempts to find the file inside `baseDir` (handling WSL/Windows cross-platform migration).
+4. **Address Building**: Generates a CiteKit URI based on the node's location.
+5. **Virtual Check**: If `virtual=true`, returns address without extraction.
+6. **Modality Dispatch**: Selects the appropriate resolver (VideoResolver, DocumentResolver, etc.).
+7. **Physical Extraction**: Resolver writes the extracted segment to `outputDir` (async I/O).
 
 #### Examples
 
@@ -411,7 +417,12 @@ export interface Node {
     type: string;           // "section", "scene", "chapter", "class", etc.
     location: Location;     // Temporal/spatial bounds
     summary?: string;       // Brief description
-    lines?: [number, number]; // Text lines (1-indexed)
+    // Root-level coordinate fields (for structural consistency)
+    lines?: [number, number];
+    pages?: number[];
+    bbox?: [number, number, number, number];
+    start?: number;
+    end?: number;
     children?: Node[];      // Nested nodes (optional)
 }
 

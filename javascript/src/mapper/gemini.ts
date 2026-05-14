@@ -17,6 +17,7 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "section", "definition", "example", "explanation", "diagram", "theorem", "exercise", "summary"
 - "location": { "modality": "document", "pages": [list of 1-indexed page numbers] }
+- "pages": [list of 1-indexed page numbers] (Duplicate here at the root level)
 - "summary": a 1-2 sentence summary of what this section covers
 
 Rules:
@@ -41,6 +42,8 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "introduction", "explanation", "example", "demonstration", "summary", "transition"
 - "location": { "modality": "video", "start": <seconds>, "end": <seconds> }
+- "start": <seconds> (Duplicate here at the root level)
+- "end": <seconds> (Duplicate here at the root level)
 - "summary": brief description of what this segment covers
 
 Rules:
@@ -62,6 +65,8 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "introduction", "discussion", "explanation", "example", "summary", "interlude"
 - "location": { "modality": "audio", "start": <seconds>, "end": <seconds> }
+- "start": <seconds> (Duplicate here at the root level)
+- "end": <seconds> (Duplicate here at the root level)
 - "summary": brief description of what this segment covers
 
 Return ONLY a JSON array of nodes. No markdown, no explanation.
@@ -75,6 +80,7 @@ Each node must have:
 - "title": a short human-readable title
 - "type": one of "diagram", "chart", "text_region", "photo", "illustration", "table", "formula"
 - "location": { "modality": "image", "bbox": [x1, y1, x2, y2] } where values are normalized 0.0-1.0
+- "bbox": [x1, y1, x2, y2] (Duplicate here at the root level)
 - "summary": brief description of what this region contains
 
 Return ONLY a JSON array of nodes. No markdown, no explanation.
@@ -344,7 +350,11 @@ export class GeminiMapper implements MapperProvider {
                 type: raw.type || "section",
                 location: raw.location,
                 summary: raw.summary,
-                lines: raw.lines || raw.location?.lines
+                lines: raw.lines || raw.location?.lines,
+                pages: raw.pages || raw.location?.pages,
+                start: raw.start || raw.location?.start,
+                end: raw.end || raw.location?.end,
+                bbox: raw.bbox || raw.location?.bbox
             }));
         } catch (e) {
             console.error("DEBUG: Failed JSON parse. Raw:", cleaned);
