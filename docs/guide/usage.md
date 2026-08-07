@@ -2,7 +2,9 @@
 
 This guide covers the core operations of CiteKit: **Ingesting** (Mapping), **Inspecting** (Planning), and **Resolving** (Extracting).
 
-> **Tip:** CiteKit is designed to be **isomorphic**. You can mix and match interfaces (e.g., Ingest via CLI, Resolve via Python).
+::: tip
+CiteKit is designed to be **isomorphic**. You can mix and match interfaces (e.g., Ingest via CLI, Resolve via Python).
+:::
 
 - [Ingestion](./usage.md#1-ingesting-resources)
 - [Inspection](./usage.md#2-inspecting-maps)
@@ -13,10 +15,9 @@ This guide covers the core operations of CiteKit: **Ingesting** (Mapping), **Ins
 
 Ingestion is the process of analyzing a file (Video, Audio, PDF, Text) to create a **Resource Map**. This is the only step that requires a mapper (Gemini by default, or a custom `MapperProvider` for local models).
 
-<Tabs>
-<TabItem value="CLI" label="CLI">
+::: code-group
 
-```bash
+```bash [CLI]
 # Ingest a video
 python -m citekit.cli ingest lecture.mp4 --type video
 
@@ -24,10 +25,7 @@ python -m citekit.cli ingest lecture.mp4 --type video
 python -m citekit.cli ingest README.md --type text
 ```
 
-</TabItem>
-<TabItem value="Python" label="Python">
-
-```python
+```python [Python]
 from citekit import CiteKitClient
 import asyncio
 
@@ -45,10 +43,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-</TabItem>
-<TabItem value="Node.js" label="Node.js">
-
-```typescript
+```typescript [Node.js]
 import { CiteKitClient } from 'citekit';
 
 async function main() {
@@ -65,17 +60,15 @@ async function main() {
 main();
 ```
 
-</TabItem>
-</Tabs>
+:::
 
 ## 2. Inspecting Maps
 
 Once ingested, you can inspect the **Resource Map** to see the structured nodes (chapters, sections, classes) available for resolution.
 
-<Tabs>
-<TabItem value="CLI" label="CLI">
+::: code-group
 
-```bash
+```bash [CLI]
 # List all ingested resources
 python -m citekit.cli list
 
@@ -86,10 +79,7 @@ python -m citekit.cli list lecture
 python -m citekit.cli inspect lecture.intro_scene
 ```
 
-</TabItem>
-<TabItem value="Python" label="Python">
-
-```python
+```python [Python]
 # Get the full map object
 video_map = client.get_map("lecture")
 
@@ -98,10 +88,7 @@ for node in video_map.nodes:
     print(f"ID: {node.id}, Type: {node.type}")
 ```
 
-</TabItem>
-<TabItem value="Node.js" label="Node.js">
-
-```typescript
+```typescript [Node.js]
 // Get the full map object
 const videoMap = client.getStructure("lecture");
 
@@ -111,27 +98,22 @@ videoMap.nodes.forEach(node => {
 });
 ```
 
-</TabItem>
-</Tabs>
+:::
 
 ## 3. Resolving Content
 
 Resolution is the process of extracting the high-fidelity selection (clip, crop, slice) based on a Node ID. This happens **locally**.
 
-<Tabs>
-<TabItem value="CLI" label="CLI">
+::: code-group
 
-```bash
+```bash [CLI]
 # Resolve a node to a file
 python -m citekit.cli resolve lecture intro_scene
 
 # Output: .citekit_output/lecture_intro_scene_t_0-30.mp4
 ```
 
-</TabItem>
-<TabItem value="Python" label="Python">
-
-```python
+```python [Python]
 # Resolve to physical file
 evidence = client.resolve("lecture", "intro_scene")
 print(f"Path: {evidence.output_path}")
@@ -141,21 +123,17 @@ meta = client.resolve("lecture", "intro_scene", virtual=True)
 print(f"Time range: {meta.node.location.start} - {meta.node.location.end}")
 ```
 
-</TabItem>
-<TabItem value="Node.js" label="Node.js">
-
-```typescript
+```typescript [Node.js]
 // Resolve to physical file
 const evidence = await client.resolve("lecture", "intro_scene");
-console.log(`Path: {evidence.output_path}`);
+console.log(`Path: ${evidence.output_path}`);
 
 // Resolve to metadata only (Virtual)
 const meta = await client.resolve("lecture", "intro_scene", { virtual: true });
-console.log(`Time range: {meta.node.location.start} - {meta.node.location.end}`);
+console.log(`Time range: ${meta.node.location.start} - ${meta.node.location.end}`);
 ```
 
-</TabItem>
-</Tabs>
+:::
 
 ## 4. Using with AI Agents
 

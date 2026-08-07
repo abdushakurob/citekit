@@ -1,47 +1,56 @@
 ---
-title: CiteKit
-description: Multimodal Context SDK — Structural mapping and content extraction for AI agents.
+layout: home
+
+hero:
+  name: CiteKit
+  text: Multimodal Context SDK
+  tagline: Structural mapping and content extraction for AI agents.
+  actions:
+    - theme: brand
+      text: Documentation
+      link: /guide/
+    - theme: alt
+      text: MCP Setup
+      link: /integration/mcp
+
+features:
+  - title: Context Economics
+    details: Pay the "Token Tax" once. CiteKit maps your file via a pluggable mapper (Gemini by default) to create a structural index, then allows agents to resolve evidence 100% locally from then on.
+    link: /guide/concepts/resource-mapping
+  - title: High-Fidelity Extraction
+    details: Extract specific segments (video clips, audio ranges, PDF pages, image crops, code blocks) locally without relying on proprietary cloud services.
+  - title: Model Context Protocol
+    details: Includes a built-in MCP server for integration with Claude Desktop, Cline, and other compliant agents.
+  - title: Text Structure Analysis
+    details: Native support for codebases and docs (`.txt`, `.md`, `.py`). Maps classes/functions and resolves specific line ranges.
 ---
-
-# CiteKit
-
-> **Multimodal Context SDK** — Structural mapping and content extraction for AI agents.
 
 ## Quick Install
 
-<Tabs>
-<TabItem value="Python" label="Python">
+::: code-group
 
-```bash
+```bash [Python]
 pip install citekit
 ```
 
-</TabItem>
-<TabItem value="Node.js" label="Node.js">
-
-```bash
+```bash [Node.js]
 npm install citekit
 ```
 
-</TabItem>
-<TabItem value="MCP Server" label="MCP Server">
-
-```bash
+```bash [MCP Server]
 # Installs CLI tool for Claude/Cline
 pip install citekit
 ```
 
-</TabItem>
-</Tabs>
+:::
 
 ## Quick Usage
 
 CiteKit works the same way across all interfaces: **Ingest** to map, **Resolve** to extract.
 
-<Tabs>
-<TabItem value="Python" label="Python">
+::: code-group
 
-```python
+```python [Python]
 from citekit import CiteKitClient
 import asyncio
 
@@ -58,10 +67,7 @@ async def main():
 asyncio.run(main())
 ```
 
-</TabItem>
-<TabItem value="Node.js" label="Node.js">
-
-```typescript
+```typescript [Node.js]
 import { CiteKitClient } from 'citekit';
 
 // 1. Ingest (Map)
@@ -73,10 +79,7 @@ const evidence = await client.resolve(map.resource_id, 'intro_scene');
 console.log(evidence.output_path);
 ```
 
-</TabItem>
-<TabItem value="CLI" label="CLI">
-
-```bash
+```bash [CLI]
 # 1. Ingest
 python -m citekit.cli ingest lecture.mp4 --type video
 
@@ -84,10 +87,7 @@ python -m citekit.cli ingest lecture.mp4 --type video
 python -m citekit.cli resolve lecture intro_scene
 ```
 
-</TabItem>
-<TabItem value="MCP Config" label="MCP Config">
-
-```json
+```json [MCP Config]
 {
   "mcpServers": {
     "citekit": {
@@ -100,8 +100,8 @@ python -m citekit.cli resolve lecture intro_scene
 ```
 
 > If you use a custom mapper, `GEMINI_API_KEY` is not required.
-</TabItem>
-</Tabs>
+
+:::
 
 ## Overview
 
@@ -112,5 +112,3 @@ Instead of "fuzzy" context loading, CiteKit employs a **Semantic Indexing** stra
 1.  **Map**: Files are analyzed to discover their "Structural DNA" (Topics, Scenes, Charts).
 2.  **Orchestrate**: Agents use the Map to navigate and choose relevant logical units.
 3.  **Resolve**: CiteKit extracts exactly those high-fidelity segments (Physical or Virtual).
-
-
