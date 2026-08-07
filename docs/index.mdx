@@ -1,56 +1,47 @@
 ---
-layout: home
-
-hero:
-  name: CiteKit
-  text: Multimodal Context SDK
-  tagline: Structural mapping and content extraction for AI agents.
-  actions:
-    - theme: brand
-      text: Documentation
-      link: /guide/
-    - theme: alt
-      text: MCP Setup
-      link: /integration/mcp
-
-features:
-  - title: Context Economics
-    details: Pay the "Token Tax" once. CiteKit maps your file via a pluggable mapper (Gemini by default) to create a structural index, then allows agents to resolve evidence 100% locally from then on.
-    link: /guide/concepts/resource-mapping
-  - title: High-Fidelity Extraction
-    details: Extract specific segments (video clips, audio ranges, PDF pages, image crops, code blocks) locally without relying on proprietary cloud services.
-  - title: Model Context Protocol
-    details: Includes a built-in MCP server for integration with Claude Desktop, Cline, and other compliant agents.
-  - title: Text Structure Analysis
-    details: Native support for codebases and docs (`.txt`, `.md`, `.py`). Maps classes/functions and resolves specific line ranges.
+title: CiteKit
+description: Multimodal Context SDK — Structural mapping and content extraction for AI agents.
 ---
+
+# CiteKit
+
+> **Multimodal Context SDK** — Structural mapping and content extraction for AI agents.
 
 ## Quick Install
 
-::: code-group
+<Tabs>
+<TabItem value="Python" label="Python">
 
-```bash [Python]
+```bash
 pip install citekit
 ```
 
-```bash [Node.js]
+</TabItem>
+<TabItem value="Node.js" label="Node.js">
+
+```bash
 npm install citekit
 ```
 
-```bash [MCP Server]
+</TabItem>
+<TabItem value="MCP Server" label="MCP Server">
+
+```bash
 # Installs CLI tool for Claude/Cline
 pip install citekit
 ```
 
-:::
+</TabItem>
+</Tabs>
 
 ## Quick Usage
 
 CiteKit works the same way across all interfaces: **Ingest** to map, **Resolve** to extract.
 
-::: code-group
+<Tabs>
+<TabItem value="Python" label="Python">
 
-```python [Python]
+```python
 from citekit import CiteKitClient
 import asyncio
 
@@ -67,7 +58,10 @@ async def main():
 asyncio.run(main())
 ```
 
-```typescript [Node.js]
+</TabItem>
+<TabItem value="Node.js" label="Node.js">
+
+```typescript
 import { CiteKitClient } from 'citekit';
 
 // 1. Ingest (Map)
@@ -79,7 +73,10 @@ const evidence = await client.resolve(map.resource_id, 'intro_scene');
 console.log(evidence.output_path);
 ```
 
-```bash [CLI]
+</TabItem>
+<TabItem value="CLI" label="CLI">
+
+```bash
 # 1. Ingest
 python -m citekit.cli ingest lecture.mp4 --type video
 
@@ -87,7 +84,10 @@ python -m citekit.cli ingest lecture.mp4 --type video
 python -m citekit.cli resolve lecture intro_scene
 ```
 
-```json [MCP Config]
+</TabItem>
+<TabItem value="MCP Config" label="MCP Config">
+
+```json
 {
   "mcpServers": {
     "citekit": {
@@ -100,8 +100,8 @@ python -m citekit.cli resolve lecture intro_scene
 ```
 
 > If you use a custom mapper, `GEMINI_API_KEY` is not required.
-
-:::
+</TabItem>
+</Tabs>
 
 ## Overview
 

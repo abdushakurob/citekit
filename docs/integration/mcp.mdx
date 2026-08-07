@@ -32,9 +32,10 @@ Edit your configuration file:
 
 Add the following:
 
-::: code-group
+<Tabs>
+<TabItem value="Python" label="Python">
 
-```json [Python]
+```json
 {
   "mcpServers": {
     "citekit": {
@@ -48,7 +49,10 @@ Add the following:
 }
 ```
 
-```json [Node.js]
+</TabItem>
+<TabItem value="Node.js" label="Node.js">
+
+```json
 {
   "mcpServers": {
     "citekit": {
@@ -62,7 +66,8 @@ Add the following:
 }
 ```
 
-:::
+</TabItem>
+</Tabs>
 
 *Note: If `citekit` is not in your PATH, provide the full path to your python executable or use `uv run citekit serve`.*
 

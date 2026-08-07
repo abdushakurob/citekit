@@ -1,0 +1,138 @@
+{
+  "$schema": "https://docs.page/schema.json",
+  "name": "CiteKit",
+  "description": "Local-first AI resource mapping SDK for multimodal agents",
+  "theme": {
+    "primary": "#42b883"
+  },
+  "social": {
+    "github": "abdushakurob/citekit"
+  },
+  "header": {
+    "showName": true,
+    "showThemeToggle": true,
+    "showGitHubCard": true,
+    "links": [
+      { "title": "Experimental", "href": "/guide/requirements" }
+    ]
+  },
+  "tabs": [
+    { "id": "guide", "title": "Guide", "href": "/guide" },
+    { "id": "api", "title": "API", "href": "/api/python" },
+    { "id": "integration", "title": "MCP", "href": "/integration/mcp" }
+  ],
+  "sidebar": [
+    {
+      "group": "Introduction",
+      "tab": "guide",
+      "pages": [
+        { "title": "Overview", "href": "/guide" },
+        { "title": "The Modern Stack", "href": "/guide/modern-stack" },
+        { "title": "Quick Start", "href": "/guide/getting-started" }
+      ]
+    },
+    {
+      "group": "Usage Guide",
+      "tab": "guide",
+      "pages": [
+        { "title": "CLI", "href": "/guide/usage/cli" },
+        { "title": "Python SDK", "href": "/guide/usage/python" },
+        { "title": "Node.js SDK", "href": "/guide/usage/node" },
+        { "title": "MCP Agent", "href": "/guide/usage/mcp" }
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "tab": "guide",
+      "pages": [
+        { "title": "Architecture", "href": "/guide/concepts/architecture" },
+        { "title": "Ingestion Process", "href": "/guide/concepts/ingestion" },
+        { "title": "Resource Maps", "href": "/guide/concepts/resource-mapping" },
+        { "title": "Content Resolution", "href": "/guide/concepts/content-resolution" },
+        { "title": "Virtual Resolution", "href": "/guide/concepts/virtual-mode" },
+        { "title": "Map Adapters", "href": "/guide/adapters" },
+        { "title": "Custom Mappers", "href": "/guide/custom-mappers" },
+        { "title": "Technical Deep Dive", "href": "/guide/technical-deep-dive" }
+      ]
+    },
+    {
+      "group": "Deployment",
+      "tab": "guide",
+      "pages": [
+        { "title": "System Requirements", "href": "/guide/requirements" },
+        { "title": "Deployment Guide", "href": "/guide/deployment" },
+        { "title": "Troubleshooting", "href": "/guide/troubleshooting" },
+        { "title": "Changelog", "href": "/changelog" }
+      ]
+    },
+    {
+      "group": "Real-World Examples",
+      "tab": "guide",
+      "pages": [
+        { "title": "Research App", "href": "/guide/examples/research-app" },
+        { "title": "Video Search CLI", "href": "/guide/examples/video-search-cli" },
+        { "title": "Study Companion", "href": "/guide/examples/study-companion" },
+        { "title": "Hybrid RAG", "href": "/guide/examples/rag-fusion" }
+      ]
+    },
+    {
+      "group": "Python SDK",
+      "tab": "api",
+      "pages": [
+        { "title": "Introduction", "href": "/api/python" },
+        { "title": "CiteKitClient", "href": "/api/python/client" },
+        { "title": "Mappers", "href": "/api/python/mappers" },
+        { "title": "Resolvers & Adapters", "href": "/api/python/resolvers" },
+        { "title": "Data Models", "href": "/api/models" }
+      ]
+    },
+    {
+      "group": "JavaScript SDK",
+      "tab": "api",
+      "pages": [
+        { "title": "Introduction", "href": "/api/javascript" },
+        { "title": "CiteKitClient", "href": "/api/javascript/client" },
+        { "title": "Mappers", "href": "/api/javascript/mappers" },
+        { "title": "Resolvers", "href": "/api/javascript/resolvers" },
+        { "title": "Core Interfaces", "href": "/api/models" }
+      ]
+    },
+    {
+      "group": "CLI Reference",
+      "tab": "api",
+      "pages": [
+        { "title": "Overview", "href": "/api/cli" },
+        { "title": "ingest", "href": "/api/cli/ingest" },
+        { "title": "resolve & inspect", "href": "/api/cli/resolve" },
+        { "title": "Resource Management", "href": "/api/cli/manage" },
+        { "title": "Adapters", "href": "/api/cli/adapt" }
+      ]
+    },
+    {
+      "group": "MCP Protocol",
+      "tab": "api",
+      "pages": [
+        { "title": "Overview", "href": "/api/mcp" },
+        { "title": "Tool Reference", "href": "/api/mcp/tools" },
+        { "title": "Configuration", "href": "/api/mcp/config" }
+      ]
+    },
+    {
+      "group": "Global Reference",
+      "tab": "api",
+      "pages": [
+        { "title": "ResourceMap Schema", "href": "/api/models" },
+        { "title": "Virtual Address Format", "href": "/api/virtual" }
+      ]
+    },
+    {
+      "group": "Integration",
+      "tab": "integration",
+      "pages": [
+        { "title": "MCP (Claude/Cline)", "href": "/integration/mcp" },
+        { "title": "Agent Frameworks", "href": "/integration/agents" },
+        { "title": "Virtual Resolution", "href": "/guide/concepts/virtual-mode" }
+      ]
+    }
+  ]
+}
